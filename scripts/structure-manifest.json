@@ -1,5 +1,5 @@
 {
-  "phase": 1,
+  "phase": 2,
   "requiredDirs": [
     "apps/web",
     "apps/admin",
@@ -10,8 +10,12 @@
     "packages/api-types",
     ".claude/agents",
     ".claude/skills",
+    ".claude/skills/stack-patterns/references",
+    ".claude/skills/graphify/references",
     ".claude/commands",
     ".claude/rules",
+    ".claude/rules/common",
+    ".claude/rules/typescript",
     ".claude/hooks",
     ".claude/mcp",
     "docs/adr",
@@ -46,17 +50,77 @@
     ".claude/mcp/21st-dev-magic.example.json",
     ".claude/mcp/postgres.example.json",
     "prompts/README.md",
-    "scripts/verify-structure.mjs"
+    "scripts/verify-structure.mjs",
+    ".claude/rules/common/agents.md",
+    ".claude/rules/common/code-review.md",
+    ".claude/rules/common/coding-style.md",
+    ".claude/rules/common/development-workflow.md",
+    ".claude/rules/common/git-workflow.md",
+    ".claude/rules/common/hooks.md",
+    ".claude/rules/common/patterns.md",
+    ".claude/rules/common/performance.md",
+    ".claude/rules/common/security.md",
+    ".claude/rules/common/testing.md",
+    ".claude/rules/typescript/coding-style.md",
+    ".claude/rules/typescript/hooks.md",
+    ".claude/rules/typescript/patterns.md",
+    ".claude/rules/typescript/security.md",
+    ".claude/rules/typescript/testing.md",
+    ".claude/skills/stack-patterns/SKILL.md",
+    ".claude/skills/stack-patterns/references/springboot-patterns.md",
+    ".claude/skills/stack-patterns/references/springboot-security.md",
+    ".claude/skills/stack-patterns/references/springboot-tdd.md",
+    ".claude/skills/stack-patterns/references/jpa-patterns.md",
+    ".claude/skills/stack-patterns/references/postgres-patterns.md",
+    ".claude/skills/stack-patterns/references/api-design.md",
+    ".claude/skills/stack-patterns/references/database-migrations.md",
+    ".claude/skills/stack-patterns/references/frontend-patterns.md",
+    ".claude/skills/stack-patterns/references/e2e-testing.md",
+    ".claude/skills/graphify/SKILL.md",
+    ".claude/skills/graphify/references/query.md",
+    ".claude/skills/graphify/references/update.md",
+    ".claude/skills/graphify/references/exports.md",
+    ".claude/skills/graphify/references/hooks.md",
+    ".claude/skills/graphify/references/extraction-spec.md"
   ],
   "maxLines": {
-    "CLAUDE.md": 80
+    "CLAUDE.md": 80,
+    ".claude/rules/common/agents.md": 80,
+    ".claude/rules/common/code-review.md": 80,
+    ".claude/rules/common/coding-style.md": 80,
+    ".claude/rules/common/development-workflow.md": 80,
+    ".claude/rules/common/git-workflow.md": 80,
+    ".claude/rules/common/hooks.md": 80,
+    ".claude/rules/common/patterns.md": 80,
+    ".claude/rules/common/performance.md": 80,
+    ".claude/rules/common/security.md": 80,
+    ".claude/rules/common/testing.md": 80,
+    ".claude/rules/typescript/coding-style.md": 80,
+    ".claude/rules/typescript/hooks.md": 80,
+    ".claude/rules/typescript/patterns.md": 80,
+    ".claude/rules/typescript/security.md": 80,
+    ".claude/rules/typescript/testing.md": 80,
+    ".claude/skills/stack-patterns/SKILL.md": 100,
+    ".claude/skills/stack-patterns/references/springboot-patterns.md": 150,
+    ".claude/skills/stack-patterns/references/springboot-security.md": 150,
+    ".claude/skills/stack-patterns/references/springboot-tdd.md": 150,
+    ".claude/skills/stack-patterns/references/jpa-patterns.md": 150,
+    ".claude/skills/stack-patterns/references/postgres-patterns.md": 150,
+    ".claude/skills/stack-patterns/references/api-design.md": 150,
+    ".claude/skills/stack-patterns/references/database-migrations.md": 150,
+    ".claude/skills/stack-patterns/references/frontend-patterns.md": 150,
+    ".claude/skills/stack-patterns/references/e2e-testing.md": 150
   },
   "noBom": [
     ".gitignore",
     "CLAUDE.md",
     "package.json",
     "pnpm-workspace.yaml",
-    "turbo.json"
+    "turbo.json",
+    ".claude/skills/stack-patterns/SKILL.md",
+    ".claude/skills/graphify/SKILL.md",
+    ".claude/rules/common/agents.md",
+    ".claude/rules/typescript/coding-style.md"
   ],
   "validJson": [
     "package.json",
@@ -69,7 +133,35 @@
     "pnpm-workspace.yaml",
     "docs/api-contracts/openapi.yaml"
   ],
-  "frontmatter": [],
+  "frontmatter": [
+    {
+      "files": [
+        ".claude/rules/common/agents.md",
+        ".claude/rules/common/code-review.md",
+        ".claude/rules/common/coding-style.md",
+        ".claude/rules/common/development-workflow.md",
+        ".claude/rules/common/git-workflow.md",
+        ".claude/rules/common/hooks.md",
+        ".claude/rules/common/patterns.md",
+        ".claude/rules/common/performance.md",
+        ".claude/rules/common/security.md",
+        ".claude/rules/common/testing.md",
+        ".claude/rules/typescript/coding-style.md",
+        ".claude/rules/typescript/hooks.md",
+        ".claude/rules/typescript/patterns.md",
+        ".claude/rules/typescript/security.md",
+        ".claude/rules/typescript/testing.md"
+      ],
+      "requiredKeys": ["paths"]
+    },
+    {
+      "files": [
+        ".claude/skills/stack-patterns/SKILL.md",
+        ".claude/skills/graphify/SKILL.md"
+      ],
+      "requiredKeys": ["name", "description"]
+    }
+  ],
   "scanExcludeDirs": [
     ".git",
     "refs",
