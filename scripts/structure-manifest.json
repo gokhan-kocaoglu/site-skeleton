@@ -1,5 +1,5 @@
 {
-  "phase": 2,
+  "phase": 3,
   "requiredDirs": [
     "apps/web",
     "apps/admin",
@@ -28,6 +28,8 @@
     "docs/setup",
     "docs/source-briefs",
     "project-memory/ClaudeTeamMemory",
+    "project-memory/ClaudeTeamMemory/00_System",
+    "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE",
     "scripts/quality",
     "prompts"
   ],
@@ -81,7 +83,48 @@
     ".claude/skills/graphify/references/update.md",
     ".claude/skills/graphify/references/exports.md",
     ".claude/skills/graphify/references/hooks.md",
-    ".claude/skills/graphify/references/extraction-spec.md"
+    ".claude/skills/graphify/references/extraction-spec.md",
+    ".claude/agents/project-manager.md",
+    ".claude/agents/system-architect.md",
+    ".claude/agents/ux-ui-designer.md",
+    ".claude/agents/frontend-developer.md",
+    ".claude/agents/backend-developer.md",
+    ".claude/agents/seo-specialist.md",
+    ".claude/agents/qa-test-specialist.md",
+    ".claude/agents/code-reviewer.md",
+    ".claude/agents/memory-steward.md",
+    ".claude/skills/project-planning/SKILL.md",
+    ".claude/skills/memory-protocol/SKILL.md",
+    ".claude/skills/feature-workflow/SKILL.md",
+    ".claude/skills/adr-decision/SKILL.md",
+    ".claude/skills/qa-quality-gate/SKILL.md",
+    ".claude/skills/token-optimization/SKILL.md",
+    ".claude/skills/frontend-design-gate/SKILL.md",
+    ".claude/skills/frontend-style-audit/SKILL.md",
+    ".claude/commands/new-project.md",
+    ".claude/commands/start-feature.md",
+    ".claude/commands/create-adr.md",
+    ".claude/commands/quality-gate.md",
+    ".claude/commands/seo-audit.md",
+    ".claude/commands/update-memory.md",
+    ".claude/commands/finish-session.md",
+    "project-memory/ClaudeTeamMemory/_CLAUDE.md",
+    "project-memory/ClaudeTeamMemory/00_System/Current-Status-template.md",
+    "project-memory/ClaudeTeamMemory/00_System/Session-Log-template.md",
+    "project-memory/ClaudeTeamMemory/00_System/HANDOFF-template.md",
+    "project-memory/ClaudeTeamMemory/00_System/Task-Card-template.md",
+    "project-memory/ClaudeTeamMemory/00_System/naming-conventions.md",
+    "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/Project Brief.md",
+    "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/Current Status.md",
+    "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/Backlog.md",
+    "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/01_PM/.gitkeep",
+    "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/02_UX_UI/.gitkeep",
+    "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/03_Backend/.gitkeep",
+    "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/04_Frontend/.gitkeep",
+    "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/05_QA/.gitkeep",
+    "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/06_Decisions/.gitkeep",
+    "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/07_Patterns/.gitkeep",
+    "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/08_Session_Logs/.gitkeep"
   ],
   "maxLines": {
     "CLAUDE.md": 80,
@@ -109,7 +152,32 @@
     ".claude/skills/stack-patterns/references/api-design.md": 150,
     ".claude/skills/stack-patterns/references/database-migrations.md": 150,
     ".claude/skills/stack-patterns/references/frontend-patterns.md": 150,
-    ".claude/skills/stack-patterns/references/e2e-testing.md": 150
+    ".claude/skills/stack-patterns/references/e2e-testing.md": 150,
+    ".claude/agents/project-manager.md": 120,
+    ".claude/agents/system-architect.md": 120,
+    ".claude/agents/ux-ui-designer.md": 120,
+    ".claude/agents/frontend-developer.md": 120,
+    ".claude/agents/backend-developer.md": 120,
+    ".claude/agents/seo-specialist.md": 120,
+    ".claude/agents/qa-test-specialist.md": 120,
+    ".claude/agents/code-reviewer.md": 120,
+    ".claude/agents/memory-steward.md": 120,
+    ".claude/skills/project-planning/SKILL.md": 90,
+    ".claude/skills/memory-protocol/SKILL.md": 90,
+    ".claude/skills/feature-workflow/SKILL.md": 90,
+    ".claude/skills/adr-decision/SKILL.md": 90,
+    ".claude/skills/qa-quality-gate/SKILL.md": 90,
+    ".claude/skills/token-optimization/SKILL.md": 90,
+    ".claude/skills/frontend-design-gate/SKILL.md": 90,
+    ".claude/skills/frontend-style-audit/SKILL.md": 90,
+    ".claude/commands/new-project.md": 40,
+    ".claude/commands/start-feature.md": 40,
+    ".claude/commands/create-adr.md": 40,
+    ".claude/commands/quality-gate.md": 40,
+    ".claude/commands/seo-audit.md": 40,
+    ".claude/commands/update-memory.md": 40,
+    ".claude/commands/finish-session.md": 40,
+    "project-memory/ClaudeTeamMemory/_CLAUDE.md": 60
   },
   "noBom": [
     ".gitignore",
@@ -120,7 +188,11 @@
     ".claude/skills/stack-patterns/SKILL.md",
     ".claude/skills/graphify/SKILL.md",
     ".claude/rules/common/agents.md",
-    ".claude/rules/typescript/coding-style.md"
+    ".claude/rules/typescript/coding-style.md",
+    ".claude/agents/project-manager.md",
+    ".claude/agents/code-reviewer.md",
+    ".claude/commands/new-project.md",
+    "project-memory/ClaudeTeamMemory/_CLAUDE.md"
   ],
   "validJson": [
     "package.json",
@@ -157,9 +229,43 @@
     {
       "files": [
         ".claude/skills/stack-patterns/SKILL.md",
-        ".claude/skills/graphify/SKILL.md"
+        ".claude/skills/graphify/SKILL.md",
+        ".claude/skills/project-planning/SKILL.md",
+        ".claude/skills/memory-protocol/SKILL.md",
+        ".claude/skills/feature-workflow/SKILL.md",
+        ".claude/skills/adr-decision/SKILL.md",
+        ".claude/skills/qa-quality-gate/SKILL.md",
+        ".claude/skills/token-optimization/SKILL.md",
+        ".claude/skills/frontend-design-gate/SKILL.md",
+        ".claude/skills/frontend-style-audit/SKILL.md"
       ],
       "requiredKeys": ["name", "description"]
+    },
+    {
+      "files": [
+        ".claude/agents/project-manager.md",
+        ".claude/agents/system-architect.md",
+        ".claude/agents/ux-ui-designer.md",
+        ".claude/agents/frontend-developer.md",
+        ".claude/agents/backend-developer.md",
+        ".claude/agents/seo-specialist.md",
+        ".claude/agents/qa-test-specialist.md",
+        ".claude/agents/code-reviewer.md",
+        ".claude/agents/memory-steward.md"
+      ],
+      "requiredKeys": ["name", "description", "tools", "model"]
+    },
+    {
+      "files": [
+        ".claude/commands/new-project.md",
+        ".claude/commands/start-feature.md",
+        ".claude/commands/create-adr.md",
+        ".claude/commands/quality-gate.md",
+        ".claude/commands/seo-audit.md",
+        ".claude/commands/update-memory.md",
+        ".claude/commands/finish-session.md"
+      ],
+      "requiredKeys": ["description"]
     }
   ],
   "scanExcludeDirs": [
