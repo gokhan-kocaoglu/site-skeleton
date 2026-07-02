@@ -1,5 +1,5 @@
 {
-  "phase": 6,
+  "phase": 7,
   "requiredDirs": [
     "apps/web",
     "apps/web/app",
@@ -197,7 +197,19 @@
     "templates/admin-bff/README.md",
     "templates/admin-bff/package.json",
     "templates/admin-bff/server.mjs",
-    "docs/adr/ADR-0007-payment-provider.md"
+    "docs/adr/ADR-0007-payment-provider.md",
+    "scripts/quality/gate-typecheck.mjs",
+    "scripts/quality/gate-lint.mjs",
+    "scripts/quality/gate-test.mjs",
+    "scripts/quality/gate-audit.mjs",
+    "scripts/quality/run-gates.mjs",
+    "docs/setup/local-setup-windows.md",
+    "docs/adr/ADR-0001-model-routing.md",
+    "docs/adr/ADR-0002-memory-namespaces.md",
+    "docs/adr/ADR-0003-hook-lifecycle.md",
+    "docs/adr/ADR-0004-gate-witness-markers.md",
+    "docs/adr/ADR-0005-agent-frontmatter.md",
+    "docs/adr/ADR-0006-decision-log-convention.md"
   ],
   "maxLines": {
     "CLAUDE.md": 80,
@@ -261,7 +273,14 @@
     ".claude/hooks/graph-first-reminder.js": 120,
     ".claude/hooks/tests/run-tests.js": 200,
     "templates/admin-bff/server.mjs": 100,
-    "docs/adr/ADR-0007-payment-provider.md": 60
+    "docs/adr/ADR-0007-payment-provider.md": 60,
+    "docs/adr/ADR-0001-model-routing.md": 60,
+    "docs/adr/ADR-0002-memory-namespaces.md": 60,
+    "docs/adr/ADR-0003-hook-lifecycle.md": 60,
+    "docs/adr/ADR-0004-gate-witness-markers.md": 60,
+    "docs/adr/ADR-0005-agent-frontmatter.md": 60,
+    "docs/adr/ADR-0006-decision-log-convention.md": 60,
+    "scripts/quality/run-gates.mjs": 60
   },
   "noBom": [
     ".gitignore",
@@ -289,7 +308,13 @@
     "templates/db/coupons.sql",
     "templates/payments/PaymentProvider.java",
     "templates/admin-bff/server.mjs",
-    "docs/adr/ADR-0007-payment-provider.md"
+    "docs/adr/ADR-0007-payment-provider.md",
+    "scripts/quality/run-gates.mjs",
+    "scripts/quality/gate-audit.mjs",
+    "docs/setup/local-setup-windows.md",
+    "docs/adr/ADR-0001-model-routing.md",
+    "docs/operations/authority-map.md",
+    "README.md"
   ],
   "validJson": [
     "package.json",
