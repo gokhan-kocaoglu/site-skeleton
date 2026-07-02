@@ -1,0 +1,8 @@
+# Active only under `mvn verify -Pit-local` (Docker-less machines).
+# Requires a local PostgreSQL 16 with an existing database: CREATE DATABASE skeleton_it;
+# Flyway migrations are idempotent across reruns (already-applied versions are skipped).
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/skeleton_it
+    username: ${IT_DB_USER:postgres}
+    password: ${IT_DB_PASSWORD:postgres}

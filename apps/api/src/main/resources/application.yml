@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: skeleton-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/skeleton}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    # Immutable rule: schema changes go through Flyway only (V<n>__desc.sql).
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+server:
+  port: 8080

@@ -1,13 +1,15 @@
 {
-  "phase": 5,
+  "phase": 6,
   "requiredDirs": [
     "apps/web",
     "apps/web/app",
     "apps/admin",
     "apps/admin/src",
     "apps/api",
+    "apps/api/src/main/resources/db/migration",
     "templates/admin-bff",
     "templates/payments",
+    "templates/db",
     "packages/design-tokens",
     "packages/api-types",
     "packages/api-types/src",
@@ -176,7 +178,26 @@
     "apps/admin/eslint.config.mjs",
     "apps/admin/src/index.css",
     "apps/admin/src/main.tsx",
-    "apps/admin/src/App.tsx"
+    "apps/admin/src/App.tsx",
+    "apps/api/pom.xml",
+    "apps/api/src/main/java/com/skeleton/api/ApiApplication.java",
+    "apps/api/src/main/java/com/skeleton/api/health/HealthController.java",
+    "apps/api/src/main/resources/application.yml",
+    "apps/api/src/main/resources/db/migration/V1__baseline.sql",
+    "apps/api/src/test/java/com/skeleton/api/AbstractIntegrationTest.java",
+    "apps/api/src/test/java/com/skeleton/api/health/HealthEndpointIT.java",
+    "apps/api/src/test/resources/application-it-local.yml",
+    "templates/db/README.md",
+    "templates/db/categories.sql",
+    "templates/db/coupons.sql",
+    "templates/payments/README.md",
+    "templates/payments/PaymentProvider.java",
+    "templates/payments/IyzicoPaymentProvider.java",
+    "templates/payments/StripePaymentProvider.java",
+    "templates/admin-bff/README.md",
+    "templates/admin-bff/package.json",
+    "templates/admin-bff/server.mjs",
+    "docs/adr/ADR-0007-payment-provider.md"
   ],
   "maxLines": {
     "CLAUDE.md": 80,
@@ -238,7 +259,9 @@
     ".claude/hooks/task-card-validator.js": 120,
     ".claude/hooks/session-close-validator.js": 130,
     ".claude/hooks/graph-first-reminder.js": 120,
-    ".claude/hooks/tests/run-tests.js": 200
+    ".claude/hooks/tests/run-tests.js": 200,
+    "templates/admin-bff/server.mjs": 100,
+    "docs/adr/ADR-0007-payment-provider.md": 60
   },
   "noBom": [
     ".gitignore",
@@ -260,7 +283,13 @@
     "packages/design-tokens/tokens.css",
     "apps/web/app/globals.css",
     "apps/web/app/layout.tsx",
-    "apps/admin/src/App.tsx"
+    "apps/admin/src/App.tsx",
+    "apps/api/pom.xml",
+    "apps/api/src/main/resources/db/migration/V1__baseline.sql",
+    "templates/db/coupons.sql",
+    "templates/payments/PaymentProvider.java",
+    "templates/admin-bff/server.mjs",
+    "docs/adr/ADR-0007-payment-provider.md"
   ],
   "validJson": [
     "package.json",
@@ -276,7 +305,8 @@
     "apps/web/package.json",
     "apps/web/tsconfig.json",
     "apps/admin/package.json",
-    "apps/admin/tsconfig.json"
+    "apps/admin/tsconfig.json",
+    "templates/admin-bff/package.json"
   ],
   "yamlLite": [
     "pnpm-workspace.yaml",

@@ -1,0 +1,10 @@
+{
+  "name": "admin-bff-template",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "HttpOnly refresh-cookie bridge for the admin SPA (template — not in the pnpm workspace)",
+  "scripts": {
+    "start": "node server.mjs"
+  }
+}
