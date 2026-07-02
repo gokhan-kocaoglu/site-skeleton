@@ -1,0 +1,9 @@
+{
+  "hook": "memory-writer-guard.js",
+  "name": "garbage stdin fails open",
+  "stdinRaw": "[[[",
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "hook": "graph-first-reminder.js",
+  "name": "Grep with graph export reminds",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Grep",
+    "cwd": ".claude/hooks/tests/fixtures/graph-present",
+    "tool_input": {
+      "pattern": "TODO"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "additionalContextIncludes": "graphify query"
+  }
+}

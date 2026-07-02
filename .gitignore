@@ -11,8 +11,12 @@ target/
 .turbo/
 coverage/
 
-# Graphify output
+# Graphify output (hook test fixture is the one committed exception)
 graphify-out/
+!.claude/hooks/tests/fixtures/graph-present/graphify-out/
+
+# Session close flag (armed by /finish-session, consumed by the Stop hook)
+.claude/hooks/.session-close-pending
 
 # Environment / secrets
 .env

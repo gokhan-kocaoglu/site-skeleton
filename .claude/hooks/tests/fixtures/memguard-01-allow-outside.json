@@ -1,0 +1,16 @@
+{
+  "hook": "memory-writer-guard.js",
+  "name": "writes outside vault pass silently",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": "docs/adr/ADR-0001-example.md",
+      "content": "# ADR"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

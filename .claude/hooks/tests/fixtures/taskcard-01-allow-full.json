@@ -1,0 +1,16 @@
+{
+  "hook": "task-card-validator.js",
+  "name": "complete card passes silently",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "TaskCreate",
+    "tool_input": {
+      "subject": "Health endpoint dokümantasyonu",
+      "description": "contract-impact: GET /api/health yanıt şeması değişmiyor\nrace-condition: N/A — tek yazarlı statik doküman işi\nauth-boundary: Yok, public endpoint\nrollback-plani: git revert yeterli"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

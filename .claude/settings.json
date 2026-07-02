@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm install:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm type-check:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm gate:*)",
+      "Bash(node scripts/:*)",
+      "Bash(node .claude/hooks/:*)",
+      "Bash(mvn verify:*)",
+      "Bash(mvn test:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git reset:*)",
+      "Bash(git checkout:*)",
+      "Bash(git clean:*)",
+      "Bash(pnpm add:*)",
+      "Bash(rm -rf:*)",
+      "Bash(Remove-Item:*)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(**/.env)",
+      "Read(**/*.pem)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/pre-write-secret-scan.js" },
+          { "type": "command", "command": "node .claude/hooks/memory-writer-guard.js" }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/pre-bash-git-guard.js" },
+          { "type": "command", "command": "node .claude/hooks/graph-first-reminder.js" }
+        ]
+      },
+      {
+        "matcher": "Grep",
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/graph-first-reminder.js" }
+        ]
+      },
+      {
+        "matcher": "TaskCreate",
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/task-card-validator.js" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/post-edit-style-guard.js" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/session-close-validator.js" }
+        ]
+      }
+    ]
+  }
+}

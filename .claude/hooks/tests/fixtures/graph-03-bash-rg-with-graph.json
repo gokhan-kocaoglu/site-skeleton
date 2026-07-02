@@ -1,0 +1,16 @@
+{
+  "hook": "graph-first-reminder.js",
+  "name": "Bash rg with graph export reminds",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "cwd": ".claude/hooks/tests/fixtures/graph-present",
+    "tool_input": {
+      "command": "rg TODO src/"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "additionalContextIncludes": "graphify"
+  }
+}

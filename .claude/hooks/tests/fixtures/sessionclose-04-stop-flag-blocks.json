@@ -1,0 +1,16 @@
+{
+  "hook": "session-close-validator.js",
+  "name": "armed flag + invalid status blocks the stop",
+  "stdin": {
+    "hook_event_name": "Stop",
+    "stop_hook_active": false
+  },
+  "env": {
+    "SESSION_CLOSE_FLAG": ".claude/hooks/tests/fixtures/flags/pending-template.txt"
+  },
+  "expect": {
+    "exitCode": 0,
+    "stopDecision": "block",
+    "stopReasonIncludes": "_TEMPLATE"
+  }
+}

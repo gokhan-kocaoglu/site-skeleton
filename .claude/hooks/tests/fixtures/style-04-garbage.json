@@ -1,0 +1,9 @@
+{
+  "hook": "post-edit-style-guard.js",
+  "name": "garbage stdin fails open",
+  "stdinRaw": "not-json",
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

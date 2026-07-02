@@ -1,0 +1,16 @@
+{
+  "hook": "post-edit-style-guard.js",
+  "name": "hex + inline style + framer import warn",
+  "stdin": {
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": "apps/admin/src/App.tsx",
+      "content": "import { motion } from 'framer-motion'\nexport const A = () => <div style={{ color: '#ff0000' }} />\n"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "additionalContextIncludes": "inline style"
+  }
+}

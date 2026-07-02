@@ -1,0 +1,14 @@
+{
+  "hook": "session-close-validator.js",
+  "name": "CLI mode passes a valid status file",
+  "args": [
+    "--file",
+    "fixtures/status/good-status.md"
+  ],
+  "cwd": ".claude/hooks/tests",
+  "stdinRaw": "",
+  "expect": {
+    "exitCode": 0,
+    "stdoutIncludes": "PASS"
+  }
+}

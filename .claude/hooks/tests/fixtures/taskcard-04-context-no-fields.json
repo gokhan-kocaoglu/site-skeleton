@@ -1,0 +1,16 @@
+{
+  "hook": "task-card-validator.js",
+  "name": "micro-todo gets reminder only",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "TaskCreate",
+    "tool_input": {
+      "subject": "README yazım hatası düzelt",
+      "description": "Kısa düzeltme."
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "additionalContextIncludes": "Task-Card"
+  }
+}

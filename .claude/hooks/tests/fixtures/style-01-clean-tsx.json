@@ -1,0 +1,16 @@
+{
+  "hook": "post-edit-style-guard.js",
+  "name": "token-based tsx passes silently",
+  "stdin": {
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": "apps/web/app/page.tsx",
+      "content": "export default function Page() {\n  return <main className=\"bg-surface text-primary\" />\n}\n"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

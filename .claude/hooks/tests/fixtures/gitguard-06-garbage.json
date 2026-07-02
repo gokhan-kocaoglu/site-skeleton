@@ -1,0 +1,9 @@
+{
+  "hook": "pre-bash-git-guard.js",
+  "name": "garbage stdin fails open",
+  "stdinRaw": "%%% broken",
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

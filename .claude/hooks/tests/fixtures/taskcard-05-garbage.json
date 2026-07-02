@@ -1,0 +1,9 @@
+{
+  "hook": "task-card-validator.js",
+  "name": "garbage stdin fails open",
+  "stdinRaw": "<<<>>>",
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

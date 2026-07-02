@@ -1,0 +1,14 @@
+{
+  "hook": "session-close-validator.js",
+  "name": "CLI mode rejects missing heading + missing commit hash",
+  "args": [
+    "--file",
+    "fixtures/status/bad-status.md"
+  ],
+  "cwd": ".claude/hooks/tests",
+  "stdinRaw": "",
+  "expect": {
+    "exitCode": 1,
+    "stdoutIncludes": "Aktif Görev"
+  }
+}

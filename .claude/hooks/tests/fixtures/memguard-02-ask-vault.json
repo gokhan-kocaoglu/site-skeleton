@@ -1,0 +1,17 @@
+{
+  "hook": "memory-writer-guard.js",
+  "name": "unproven writer into vault asks",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": "project-memory/ClaudeTeamMemory/01_Projects/Demo/Current Status.md",
+      "content": "## Aşama"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "permissionDecision": "ask",
+    "reasonIncludes": "memory-steward"
+  }
+}

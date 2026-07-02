@@ -1,0 +1,12 @@
+{
+  "hook": "session-close-validator.js",
+  "name": "garbage stdin fails open",
+  "stdinRaw": "garbage",
+  "env": {
+    "SESSION_CLOSE_FLAG": ".claude/hooks/tests/fixtures/flags/no-such-flag.txt"
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

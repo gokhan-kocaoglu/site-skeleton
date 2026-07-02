@@ -1,5 +1,5 @@
 {
-  "phase": 3,
+  "phase": 4,
   "requiredDirs": [
     "apps/web",
     "apps/admin",
@@ -17,6 +17,8 @@
     ".claude/rules/common",
     ".claude/rules/typescript",
     ".claude/hooks",
+    ".claude/hooks/lib",
+    ".claude/hooks/tests/fixtures",
     ".claude/mcp",
     "docs/adr",
     "docs/architecture",
@@ -124,7 +126,28 @@
     "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/05_QA/.gitkeep",
     "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/06_Decisions/.gitkeep",
     "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/07_Patterns/.gitkeep",
-    "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/08_Session_Logs/.gitkeep"
+    "project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/08_Session_Logs/.gitkeep",
+    ".claude/settings.json",
+    ".claude/hooks/lib/common.js",
+    ".claude/hooks/pre-write-secret-scan.js",
+    ".claude/hooks/pre-bash-git-guard.js",
+    ".claude/hooks/post-edit-style-guard.js",
+    ".claude/hooks/memory-writer-guard.js",
+    ".claude/hooks/task-card-validator.js",
+    ".claude/hooks/session-close-validator.js",
+    ".claude/hooks/graph-first-reminder.js",
+    ".claude/hooks/tests/run-tests.js",
+    ".claude/hooks/tests/fixtures/secret-05-garbage-stdin.json",
+    ".claude/hooks/tests/fixtures/gitguard-06-garbage.json",
+    ".claude/hooks/tests/fixtures/style-04-garbage.json",
+    ".claude/hooks/tests/fixtures/memguard-03-garbage.json",
+    ".claude/hooks/tests/fixtures/taskcard-05-garbage.json",
+    ".claude/hooks/tests/fixtures/sessionclose-05-garbage.json",
+    ".claude/hooks/tests/fixtures/graph-04-garbage.json",
+    ".claude/hooks/tests/fixtures/status/good-status.md",
+    ".claude/hooks/tests/fixtures/status/bad-status.md",
+    ".claude/hooks/tests/fixtures/flags/pending-template.txt",
+    ".claude/hooks/tests/fixtures/graph-present/graphify-out/graph.json"
   ],
   "maxLines": {
     "CLAUDE.md": 80,
@@ -177,7 +200,16 @@
     ".claude/commands/seo-audit.md": 40,
     ".claude/commands/update-memory.md": 40,
     ".claude/commands/finish-session.md": 40,
-    "project-memory/ClaudeTeamMemory/_CLAUDE.md": 60
+    "project-memory/ClaudeTeamMemory/_CLAUDE.md": 60,
+    ".claude/hooks/lib/common.js": 140,
+    ".claude/hooks/pre-write-secret-scan.js": 120,
+    ".claude/hooks/pre-bash-git-guard.js": 120,
+    ".claude/hooks/post-edit-style-guard.js": 120,
+    ".claude/hooks/memory-writer-guard.js": 120,
+    ".claude/hooks/task-card-validator.js": 120,
+    ".claude/hooks/session-close-validator.js": 130,
+    ".claude/hooks/graph-first-reminder.js": 120,
+    ".claude/hooks/tests/run-tests.js": 200
   },
   "noBom": [
     ".gitignore",
@@ -192,14 +224,19 @@
     ".claude/agents/project-manager.md",
     ".claude/agents/code-reviewer.md",
     ".claude/commands/new-project.md",
-    "project-memory/ClaudeTeamMemory/_CLAUDE.md"
+    "project-memory/ClaudeTeamMemory/_CLAUDE.md",
+    ".claude/settings.json",
+    ".claude/hooks/lib/common.js",
+    ".claude/hooks/tests/run-tests.js"
   ],
   "validJson": [
     "package.json",
     "turbo.json",
     ".claude/mcp/21st-dev-magic.example.json",
     ".claude/mcp/postgres.example.json",
-    "scripts/structure-manifest.json"
+    "scripts/structure-manifest.json",
+    ".claude/settings.json",
+    ".claude/hooks/tests/fixtures/graph-present/graphify-out/graph.json"
   ],
   "yamlLite": [
     "pnpm-workspace.yaml",
@@ -289,7 +326,11 @@
     {
       "pattern": "framer-motion",
       "extensions": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".css"],
-      "excludePaths": ["scripts/structure-manifest.json", "pnpm-lock.yaml"]
+      "excludePaths": [
+        "scripts/structure-manifest.json",
+        "pnpm-lock.yaml",
+        ".claude/hooks/post-edit-style-guard.js"
+      ]
     }
   ]
 }

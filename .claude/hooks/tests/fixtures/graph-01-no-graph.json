@@ -1,0 +1,16 @@
+{
+  "hook": "graph-first-reminder.js",
+  "name": "no graph export: silent",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Grep",
+    "cwd": ".claude/hooks/tests/fixtures/graph-absent",
+    "tool_input": {
+      "pattern": "TODO"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

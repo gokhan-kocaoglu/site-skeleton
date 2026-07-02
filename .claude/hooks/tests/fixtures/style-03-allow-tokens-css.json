@@ -1,0 +1,16 @@
+{
+  "hook": "post-edit-style-guard.js",
+  "name": "hex is legal in design-tokens",
+  "stdin": {
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "packages/design-tokens/tokens.css",
+      "new_string": "@theme {\n  --color-primary: #3b82f6;\n}\n"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

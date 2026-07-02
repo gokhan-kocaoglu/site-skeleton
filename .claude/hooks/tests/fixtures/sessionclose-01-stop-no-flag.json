@@ -1,0 +1,14 @@
+{
+  "hook": "session-close-validator.js",
+  "name": "no pending flag: stop passes",
+  "stdin": {
+    "hook_event_name": "Stop"
+  },
+  "env": {
+    "SESSION_CLOSE_FLAG": ".claude/hooks/tests/fixtures/flags/no-such-flag.txt"
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

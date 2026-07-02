@@ -1,0 +1,15 @@
+{
+  "hook": "pre-bash-git-guard.js",
+  "name": "read-only git passes silently",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git status --short"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

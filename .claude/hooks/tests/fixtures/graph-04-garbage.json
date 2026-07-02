@@ -1,0 +1,9 @@
+{
+  "hook": "graph-first-reminder.js",
+  "name": "garbage stdin fails open",
+  "stdinRaw": "{{{",
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

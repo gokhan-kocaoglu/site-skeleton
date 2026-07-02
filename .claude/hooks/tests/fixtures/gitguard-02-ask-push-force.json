@@ -1,0 +1,16 @@
+{
+  "hook": "pre-bash-git-guard.js",
+  "name": "push --force asks",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git push --force origin main"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "permissionDecision": "ask",
+    "reasonIncludes": "push --force"
+  }
+}
