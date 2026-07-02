@@ -1,0 +1,9 @@
+{
+  "name": "@skeleton/design-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Design tokens as Tailwind v4 @theme variables. The only file in the repo where raw hex values are legal is tokens.css.",
+  "exports": {
+    "./tokens.css": "./tokens.css"
+  }
+}

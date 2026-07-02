@@ -1,0 +1,20 @@
+{
+  "name": "@skeleton/api-types",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TypeScript types generated from docs/api-contracts/openapi.yaml. src/index.d.ts is committed on purpose: builds never depend on generation.",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts"
+    }
+  },
+  "scripts": {
+    "generate": "openapi-typescript ../../docs/api-contracts/openapi.yaml -o src/index.d.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.6.0",
+    "typescript": "~5.8.3"
+  }
+}

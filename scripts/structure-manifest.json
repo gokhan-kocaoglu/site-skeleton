@@ -1,13 +1,16 @@
 {
-  "phase": 4,
+  "phase": 5,
   "requiredDirs": [
     "apps/web",
+    "apps/web/app",
     "apps/admin",
+    "apps/admin/src",
     "apps/api",
     "templates/admin-bff",
     "templates/payments",
     "packages/design-tokens",
     "packages/api-types",
+    "packages/api-types/src",
     ".claude/agents",
     ".claude/skills",
     ".claude/skills/stack-patterns/references",
@@ -147,7 +150,33 @@
     ".claude/hooks/tests/fixtures/status/good-status.md",
     ".claude/hooks/tests/fixtures/status/bad-status.md",
     ".claude/hooks/tests/fixtures/flags/pending-template.txt",
-    ".claude/hooks/tests/fixtures/graph-present/graphify-out/graph.json"
+    ".claude/hooks/tests/fixtures/graph-present/graphify-out/graph.json",
+    "pnpm-lock.yaml",
+    "packages/design-tokens/package.json",
+    "packages/design-tokens/tokens.css",
+    "packages/design-tokens/README.md",
+    "packages/api-types/package.json",
+    "packages/api-types/tsconfig.json",
+    "packages/api-types/src/index.d.ts",
+    "apps/web/package.json",
+    "apps/web/next.config.ts",
+    "apps/web/tsconfig.json",
+    "apps/web/next-env.d.ts",
+    "apps/web/postcss.config.mjs",
+    "apps/web/eslint.config.mjs",
+    "apps/web/app/layout.tsx",
+    "apps/web/app/page.tsx",
+    "apps/web/app/globals.css",
+    "apps/web/app/robots.ts",
+    "apps/web/app/sitemap.ts",
+    "apps/admin/package.json",
+    "apps/admin/index.html",
+    "apps/admin/vite.config.ts",
+    "apps/admin/tsconfig.json",
+    "apps/admin/eslint.config.mjs",
+    "apps/admin/src/index.css",
+    "apps/admin/src/main.tsx",
+    "apps/admin/src/App.tsx"
   ],
   "maxLines": {
     "CLAUDE.md": 80,
@@ -227,7 +256,11 @@
     "project-memory/ClaudeTeamMemory/_CLAUDE.md",
     ".claude/settings.json",
     ".claude/hooks/lib/common.js",
-    ".claude/hooks/tests/run-tests.js"
+    ".claude/hooks/tests/run-tests.js",
+    "packages/design-tokens/tokens.css",
+    "apps/web/app/globals.css",
+    "apps/web/app/layout.tsx",
+    "apps/admin/src/App.tsx"
   ],
   "validJson": [
     "package.json",
@@ -236,7 +269,14 @@
     ".claude/mcp/postgres.example.json",
     "scripts/structure-manifest.json",
     ".claude/settings.json",
-    ".claude/hooks/tests/fixtures/graph-present/graphify-out/graph.json"
+    ".claude/hooks/tests/fixtures/graph-present/graphify-out/graph.json",
+    "packages/design-tokens/package.json",
+    "packages/api-types/package.json",
+    "packages/api-types/tsconfig.json",
+    "apps/web/package.json",
+    "apps/web/tsconfig.json",
+    "apps/admin/package.json",
+    "apps/admin/tsconfig.json"
   ],
   "yamlLite": [
     "pnpm-workspace.yaml",
@@ -331,6 +371,11 @@
         "pnpm-lock.yaml",
         ".claude/hooks/post-edit-style-guard.js"
       ]
+    },
+    {
+      "pattern": "#[0-9a-fA-F]{3,8}\\b",
+      "extensions": [".ts", ".tsx", ".jsx", ".css"],
+      "excludePaths": ["packages/design-tokens/tokens.css"]
     }
   ]
 }
