@@ -1,0 +1,28 @@
+# Reference repos (cloned locally for study, never committed)
+refs/
+
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+dist/
+target/
+.turbo/
+coverage/
+
+# Graphify output
+graphify-out/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Local machine settings
+.claude/settings.local.json
+
+# Logs / OS noise
+*.log
+.DS_Store
+Thumbs.db

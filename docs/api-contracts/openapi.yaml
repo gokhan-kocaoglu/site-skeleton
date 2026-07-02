@@ -1,0 +1,27 @@
+openapi: 3.0.3
+info:
+  title: Site Skeleton API
+  version: 0.1.0
+  description: >
+    Canonical API contract. TypeScript types in packages/api-types are generated
+    from this file (openapi-typescript). Keep this file the single source of truth.
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      operationId: getHealth
+      tags: [system]
+      responses:
+        "200":
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    example: UP

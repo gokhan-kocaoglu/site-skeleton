@@ -1,0 +1,97 @@
+{
+  "phase": 1,
+  "requiredDirs": [
+    "apps/web",
+    "apps/admin",
+    "apps/api",
+    "templates/admin-bff",
+    "templates/payments",
+    "packages/design-tokens",
+    "packages/api-types",
+    ".claude/agents",
+    ".claude/skills",
+    ".claude/commands",
+    ".claude/rules",
+    ".claude/hooks",
+    ".claude/mcp",
+    "docs/adr",
+    "docs/architecture",
+    "docs/api-contracts",
+    "docs/ux",
+    "docs/test-reports",
+    "docs/audits/seo",
+    "docs/operations",
+    "docs/setup",
+    "docs/source-briefs",
+    "project-memory/ClaudeTeamMemory",
+    "scripts/quality",
+    "prompts"
+  ],
+  "requiredFiles": [
+    ".gitignore",
+    ".gitattributes",
+    ".editorconfig",
+    "package.json",
+    "pnpm-workspace.yaml",
+    "turbo.json",
+    "CLAUDE.md",
+    "README.md",
+    "docs/adr/ADR-0000-template.md",
+    "docs/api-contracts/openapi.yaml",
+    "docs/operations/authority-map.md",
+    "docs/operations/ci.md",
+    "docs/operations/deployment.md",
+    "docs/source-briefs/skeleton-brief.md",
+    ".claude/mcp/README.md",
+    ".claude/mcp/21st-dev-magic.example.json",
+    ".claude/mcp/postgres.example.json",
+    "prompts/README.md",
+    "scripts/verify-structure.mjs"
+  ],
+  "maxLines": {
+    "CLAUDE.md": 80
+  },
+  "noBom": [
+    ".gitignore",
+    "CLAUDE.md",
+    "package.json",
+    "pnpm-workspace.yaml",
+    "turbo.json"
+  ],
+  "validJson": [
+    "package.json",
+    "turbo.json",
+    ".claude/mcp/21st-dev-magic.example.json",
+    ".claude/mcp/postgres.example.json",
+    "scripts/structure-manifest.json"
+  ],
+  "yamlLite": [
+    "pnpm-workspace.yaml",
+    "docs/api-contracts/openapi.yaml"
+  ],
+  "frontmatter": [],
+  "scanExcludeDirs": [
+    ".git",
+    "refs",
+    "node_modules",
+    ".turbo",
+    ".next",
+    "dist",
+    "target",
+    "coverage",
+    "graphify-out",
+    "docs/source-briefs"
+  ],
+  "forbiddenPatterns": [
+    {
+      "pattern": "cicekci|çiçek",
+      "flags": "i",
+      "excludePaths": ["scripts/structure-manifest.json", "pnpm-lock.yaml"]
+    },
+    {
+      "pattern": "framer-motion",
+      "extensions": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".css"],
+      "excludePaths": ["scripts/structure-manifest.json", "pnpm-lock.yaml"]
+    }
+  ]
+}

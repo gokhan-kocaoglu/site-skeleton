@@ -1,0 +1,137 @@
+#!/usr/bin/env node
+/**
+ * Cumulative structure checker for the site-skeleton repo.
+ * Manifest-driven: scripts/structure-manifest.json grows with each build phase.
+ * Node stdlib only. Exit 0 = PASS, exit 1 = FAIL.
+ */
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const MANIFEST_PATH = path.join(ROOT, 'scripts', 'structure-manifest.json');
+const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));
+
+const failures = [];
+let checks = 0;
+
+function check(condition, label) {
+  checks++;
+  if (!condition) failures.push(label);
+}
+
+const p = (rel) => path.join(ROOT, rel);
+
+// 1. Required directories
+for (const dir of manifest.requiredDirs ?? []) {
+  check(existsSync(p(dir)) && statSync(p(dir)).isDirectory(), `missing directory: ${dir}`);
+}
+
+// 2. Required files
+for (const file of manifest.requiredFiles ?? []) {
+  check(existsSync(p(file)) && statSync(p(file)).isFile(), `missing file: ${file}`);
+}
+
+// 3. Line budgets
+for (const [file, max] of Object.entries(manifest.maxLines ?? {})) {
+  if (!existsSync(p(file))) {
+    check(false, `maxLines target missing: ${file}`);
+    continue;
+  }
+  const lines = readFileSync(p(file), 'utf8').split('\n').length;
+  check(lines <= max, `${file}: ${lines} lines (max ${max})`);
+}
+
+// 4. No UTF-8 BOM
+for (const file of manifest.noBom ?? []) {
+  if (!existsSync(p(file))) {
+    check(false, `noBom target missing: ${file}`);
+    continue;
+  }
+  const buf = readFileSync(p(file));
+  const hasBom = buf.length >= 3 && buf[0] === 0xef && buf[1] === 0xbb && buf[2] === 0xbf;
+  check(!hasBom, `${file}: has UTF-8 BOM`);
+}
+
+// 5. Valid JSON
+for (const file of manifest.validJson ?? []) {
+  checks++;
+  try {
+    JSON.parse(readFileSync(p(file), 'utf8'));
+  } catch (e) {
+    failures.push(`${file}: invalid JSON (${e.message})`);
+  }
+}
+
+// 6. YAML lite check (exists, non-empty, no tab indentation)
+for (const file of manifest.yamlLite ?? []) {
+  if (!existsSync(p(file))) {
+    check(false, `yaml target missing: ${file}`);
+    continue;
+  }
+  const text = readFileSync(p(file), 'utf8');
+  check(text.trim().length > 0, `${file}: empty YAML`);
+  check(!/^\t/m.test(text), `${file}: tab indentation in YAML`);
+}
+
+// 7. Frontmatter checks (markdown files with YAML frontmatter)
+for (const rule of manifest.frontmatter ?? []) {
+  for (const file of rule.files) {
+    if (!existsSync(p(file))) {
+      check(false, `frontmatter target missing: ${file}`);
+      continue;
+    }
+    const text = readFileSync(p(file), 'utf8');
+    const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!m) {
+      check(false, `${file}: no YAML frontmatter`);
+      continue;
+    }
+    for (const key of rule.requiredKeys) {
+      check(
+        new RegExp(`^${key}\\s*:`, 'm').test(m[1]),
+        `${file}: frontmatter missing key "${key}"`
+      );
+    }
+  }
+}
+
+// 8. Forbidden patterns (repo-wide scan of text files)
+const EXCLUDE_DIRS = new Set(manifest.scanExcludeDirs ?? []);
+
+function* walk(dir) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const abs = path.join(dir, entry.name);
+    const rel = path.relative(ROOT, abs).split(path.sep).join('/');
+    if (entry.isDirectory()) {
+      if (EXCLUDE_DIRS.has(entry.name) || EXCLUDE_DIRS.has(rel)) continue;
+      yield* walk(abs);
+    } else if (entry.isFile()) {
+      yield rel;
+    }
+  }
+}
+
+const allFiles = [...walk(ROOT)];
+for (const rule of manifest.forbiddenPatterns ?? []) {
+  const re = new RegExp(rule.pattern, rule.flags ?? '');
+  for (const rel of allFiles) {
+    if (rule.excludePaths?.some((ex) => rel === ex || rel.startsWith(ex))) continue;
+    if (rule.extensions && !rule.extensions.some((ext) => rel.endsWith(ext))) continue;
+    const buf = readFileSync(p(rel));
+    if (buf.includes(0)) continue; // binary
+    checks++;
+    if (re.test(buf.toString('utf8'))) {
+      failures.push(`forbidden pattern /${rule.pattern}/ in ${rel}`);
+    }
+  }
+}
+
+// Report
+if (failures.length) {
+  console.error(`FAIL — ${failures.length} problem(s) out of ${checks} checks:`);
+  for (const f of failures) console.error(`  x ${f}`);
+  process.exit(1);
+} else {
+  console.log(`PASS — ${checks} checks OK (manifest: scripts/structure-manifest.json)`);
+}
