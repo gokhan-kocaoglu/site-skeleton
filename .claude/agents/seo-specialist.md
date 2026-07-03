@@ -7,6 +7,7 @@ description: >
   olan her quality-gate'te çağrılmalıdır.
 tools: Read, Grep, Glob, Bash, WebSearch
 model: sonnet
+skills: []
 ---
 
 # SEO Specialist

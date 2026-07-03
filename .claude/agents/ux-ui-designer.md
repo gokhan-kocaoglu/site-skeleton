@@ -6,6 +6,8 @@ description: >
   ÖNCESİ çağrılır. Kod yazmaz.
 tools: Read, Grep, Glob
 model: sonnet
+skills:
+  - frontend-design-gate
 ---
 
 # UX/UI Designer

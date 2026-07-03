@@ -1,5 +1,5 @@
 {
-  "phase": 7,
+  "phase": 8,
   "requiredDirs": [
     "apps/web",
     "apps/web/app",
@@ -198,10 +198,13 @@
     "templates/admin-bff/package.json",
     "templates/admin-bff/server.mjs",
     "docs/adr/ADR-0007-payment-provider.md",
+    "scripts/quality/gate-build.mjs",
     "scripts/quality/gate-typecheck.mjs",
     "scripts/quality/gate-lint.mjs",
     "scripts/quality/gate-test.mjs",
     "scripts/quality/gate-audit.mjs",
+    "scripts/quality/gate-structure.mjs",
+    "scripts/quality/gate-contract-drift.mjs",
     "scripts/quality/run-gates.mjs",
     "docs/setup/local-setup-windows.md",
     "docs/adr/ADR-0001-model-routing.md",
@@ -209,7 +212,12 @@
     "docs/adr/ADR-0003-hook-lifecycle.md",
     "docs/adr/ADR-0004-gate-witness-markers.md",
     "docs/adr/ADR-0005-agent-frontmatter.md",
-    "docs/adr/ADR-0006-decision-log-convention.md"
+    "docs/adr/ADR-0006-decision-log-convention.md",
+    "docs/adr/ADR-0008-category-depth-limit.md",
+    "docs/test-reports/2026-07-02-faz8-quality-gate.md",
+    "docs/audits/seo/2026-07-02-web-home.md",
+    "project-memory/ClaudeTeamMemory/01_Projects/SiteSkeleton/Current Status.md",
+    "project-memory/ClaudeTeamMemory/01_Projects/SiteSkeleton/08_Session_Logs/2026-07-02-session-01.md"
   ],
   "maxLines": {
     "CLAUDE.md": 80,
@@ -263,7 +271,7 @@
     ".claude/commands/update-memory.md": 40,
     ".claude/commands/finish-session.md": 40,
     "project-memory/ClaudeTeamMemory/_CLAUDE.md": 60,
-    ".claude/hooks/lib/common.js": 140,
+    ".claude/hooks/lib/common.js": 160,
     ".claude/hooks/pre-write-secret-scan.js": 120,
     ".claude/hooks/pre-bash-git-guard.js": 120,
     ".claude/hooks/post-edit-style-guard.js": 120,
@@ -271,7 +279,7 @@
     ".claude/hooks/task-card-validator.js": 120,
     ".claude/hooks/session-close-validator.js": 130,
     ".claude/hooks/graph-first-reminder.js": 120,
-    ".claude/hooks/tests/run-tests.js": 200,
+    ".claude/hooks/tests/run-tests.js": 240,
     "templates/admin-bff/server.mjs": 100,
     "docs/adr/ADR-0007-payment-provider.md": 60,
     "docs/adr/ADR-0001-model-routing.md": 60,
@@ -385,7 +393,7 @@
         ".claude/agents/code-reviewer.md",
         ".claude/agents/memory-steward.md"
       ],
-      "requiredKeys": ["name", "description", "tools", "model"]
+      "requiredKeys": ["name", "description", "tools", "model", "skills"]
     },
     {
       "files": [
@@ -400,6 +408,10 @@
       "requiredKeys": ["description"]
     }
   ],
+  "agentSkills": {
+    "agentsDir": ".claude/agents",
+    "skillsDir": ".claude/skills"
+  },
   "scanExcludeDirs": [
     ".git",
     "refs",

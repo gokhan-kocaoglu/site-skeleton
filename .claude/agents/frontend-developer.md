@@ -6,6 +6,10 @@ description: >
   contract netleştikten sonra çağrılır.
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
+skills:
+  - frontend-design-gate
+  - frontend-style-audit
+  - stack-patterns
 ---
 
 # Frontend Developer

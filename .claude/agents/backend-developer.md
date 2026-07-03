@@ -6,6 +6,8 @@ description: >
   kabul edildikten sonra çağrılır.
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
+skills:
+  - stack-patterns
 ---
 
 # Backend Developer

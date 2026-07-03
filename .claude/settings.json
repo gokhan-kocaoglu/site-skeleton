@@ -37,27 +37,28 @@
       {
         "matcher": "Write|Edit",
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/pre-write-secret-scan.js" },
-          { "type": "command", "command": "node .claude/hooks/memory-writer-guard.js" }
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-write-secret-scan.js\"" },
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/memory-writer-guard.js\"" }
         ]
       },
       {
         "matcher": "Bash|PowerShell",
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/pre-bash-git-guard.js" },
-          { "type": "command", "command": "node .claude/hooks/graph-first-reminder.js" }
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-bash-git-guard.js\"" },
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/graph-first-reminder.js\"" }
         ]
       },
       {
         "matcher": "Grep",
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/graph-first-reminder.js" }
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/graph-first-reminder.js\"" }
         ]
-      },
+      }
+    ],
+    "TaskCreated": [
       {
-        "matcher": "TaskCreate",
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/task-card-validator.js" }
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/task-card-validator.js\"" }
         ]
       }
     ],
@@ -65,14 +66,14 @@
       {
         "matcher": "Write|Edit",
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/post-edit-style-guard.js" }
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-edit-style-guard.js\"" }
         ]
       }
     ],
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/session-close-validator.js" }
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-close-validator.js\"" }
         ]
       }
     ]

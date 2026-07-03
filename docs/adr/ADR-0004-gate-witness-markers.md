@@ -45,3 +45,12 @@ yasak desen, satır bütçesi) ama düzeltme-bazlı marker kavramı yoktur.
   Reddedildi — tek-repo iskelette git commit geçmişi aynı izlenebilirliği verir.
 - **Yalnız CI testlerine güvenmek**: Reddedildi — ADR-102'nin gösterdiği sınıf
   (çağrı-yolu regresyonları) birim testlerden kaçar; marker ucuz bir ikinci hattır.
+
+## Ek — Faz 8.1 (2026-07-03)
+
+Gate zinciri 7 adıma çıkarıldı: `build → typecheck → lint → test → audit →
+structure → contract-drift`. audit üç-durumludur: PASS / FAIL (high+critical>0) /
+INCONCLUSIVE (tarama koşamadı — lokalde uyarı, CI'da merge engeli).
+contract-drift, openapi.yaml'ı **@seriousme/openapi-schema-validator** ile
+doğrular (redocly'ye tercih gerekçesi: bağımlılık ağacı küçük, programatik API,
+telemetrisiz) ve `generate` sonrası committed tiplerin drift'ini git diff ile yakalar.

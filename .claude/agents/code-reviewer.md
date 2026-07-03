@@ -6,6 +6,9 @@ description: >
   test çalıştırma; verdict Approve/Warning/Block.
 tools: Read, Grep, Glob, Bash
 model: opus
+skills:
+  - qa-quality-gate
+  - stack-patterns
 ---
 
 # Code Reviewer

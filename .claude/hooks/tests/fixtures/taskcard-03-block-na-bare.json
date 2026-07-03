@@ -1,0 +1,21 @@
+{
+  "hook": "task-card-validator.js",
+  "name": "bare N/A without reason blocks with exit 2",
+  "stdin": {
+    "session_id": "abc123",
+    "cwd": ".",
+    "permission_mode": "default",
+    "hook_event_name": "TaskCreated",
+    "tool_name": "TaskCreate",
+    "tool_input": {
+      "title": "Login formu",
+      "description": "contract-impact: yok\nrace-condition: çift submit debounce ile engelli\nauth-boundary: login akışına dokunur, code-reviewer zorunlu\nrollback-plani: N/A",
+      "status": "pending"
+    }
+  },
+  "expect": {
+    "exitCode": 2,
+    "noStdout": true,
+    "stderrIncludes": "rollback-plani"
+  }
+}

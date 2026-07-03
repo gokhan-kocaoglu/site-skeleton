@@ -1,6 +1,10 @@
-// Quality gate: audit — `pnpm audit --prod`. FAIL only on high/critical findings;
-// lower severities are WARN. Audit infrastructure errors (offline registry, parse
-// failure) also degrade to WARN so the gate never fails for reasons outside the code.
+// Quality gate: audit — `pnpm audit --prod`. Three-state (Faz 8.1, audit #4):
+//   PASS         no high/critical findings (moderate/low -> WARN, still pass)
+//   FAIL         high+critical > 0
+//   INCONCLUSIVE the scan could not run or be parsed (offline registry, parse
+//                error). Locally a warning (exit 0) so the gate never blocks on
+//                infrastructure; in CI (CI env var set) a merge blocker (exit 1)
+//                because "could not scan" must never read as "scanned clean".
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -17,9 +21,13 @@ let counts;
 try {
   counts = JSON.parse(result.stdout).metadata.vulnerabilities;
 } catch {
-  console.log('[gate-audit] WARN: could not parse audit output (registry unreachable?) - gate not failed');
+  const inCi = !!process.env.CI;
+  console.log(
+    `[gate-audit] INCONCLUSIVE: could not run/parse the audit (registry unreachable?) - ` +
+      (inCi ? 'CI treats this as FAIL' : 'local warning only'),
+  );
   if (result.stderr) console.log(result.stderr.slice(0, 1000));
-  process.exit(0);
+  process.exit(inCi ? 1 : 0);
 }
 
 const { info = 0, low = 0, moderate = 0, high = 0, critical = 0 } = counts;
@@ -34,4 +42,5 @@ if (high + critical > 0) {
 if (moderate + low > 0) {
   console.log('[gate-audit] WARN: lower-severity findings - review when convenient');
 }
+console.log('[gate-audit] PASS');
 process.exit(0);

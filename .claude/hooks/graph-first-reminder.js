@@ -8,9 +8,9 @@
  */
 const fs = require('node:fs');
 const path = require('node:path');
-const { readStdinJson, safeRun, preToolContext } = require('./lib/common');
+const { readStdinJson, safeRun, preToolContext, projectRoot } = require('./lib/common');
 
-const ROOT = path.resolve(__dirname, '..', '..');
+const ROOT = projectRoot();
 
 safeRun('graph-first-reminder', async () => {
   const input = await readStdinJson();

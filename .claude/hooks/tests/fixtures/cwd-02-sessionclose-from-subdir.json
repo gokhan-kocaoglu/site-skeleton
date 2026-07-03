@@ -1,0 +1,18 @@
+{
+  "hook": "session-close-validator.js",
+  "name": "stop-hook flag path resolves via CLAUDE_PROJECT_DIR when run from apps/api",
+  "cwd": "apps/api",
+  "env": {
+    "CLAUDE_PROJECT_DIR": "<ROOT>",
+    "SESSION_CLOSE_FLAG": ".claude/hooks/tests/fixtures/flags/pending-template.txt"
+  },
+  "stdin": {
+    "hook_event_name": "Stop",
+    "stop_hook_active": false
+  },
+  "expect": {
+    "exitCode": 0,
+    "stopDecision": "block",
+    "stopReasonIncludes": "_TEMPLATE"
+  }
+}

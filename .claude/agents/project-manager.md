@@ -6,6 +6,9 @@ description: >
   bu ajan çağrılır. Kod yazmaz; project-memory'ye dokunmaz.
 tools: Read, Grep, Glob
 model: opus
+skills:
+  - project-planning
+  - feature-workflow
 ---
 
 # Project Manager

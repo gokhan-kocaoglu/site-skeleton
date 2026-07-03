@@ -96,6 +96,42 @@ for (const rule of manifest.frontmatter ?? []) {
   }
 }
 
+// 7b. Agent skills preload (Faz 8.1, audit #3): every agent frontmatter must
+// declare a skills key (enforced via frontmatter rules above) AND every listed
+// skill must actually exist as .claude/skills/<name>/SKILL.md.
+if (manifest.agentSkills) {
+  const { agentsDir, skillsDir } = manifest.agentSkills;
+  for (const entry of readdirSync(p(agentsDir))) {
+    if (!entry.endsWith('.md')) continue;
+    const rel = `${agentsDir}/${entry}`;
+    const text = readFileSync(p(rel), 'utf8');
+    const fm = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!fm) continue; // frontmatter presence is asserted by section 7
+    const skillsMatch = fm[1].match(/^skills\s*:(.*)$((?:\r?\n[ \t]+-[ \t]*\S+.*$)*)/m);
+    if (!skillsMatch) {
+      check(false, `${rel}: no parseable skills field`);
+      continue;
+    }
+    const inline = skillsMatch[1].trim();
+    const names = [];
+    if (inline && inline !== '[]') {
+      for (const s of inline.replace(/^\[|\]$/g, '').split(',')) {
+        if (s.trim()) names.push(s.trim());
+      }
+    }
+    for (const line of (skillsMatch[2] || '').split(/\r?\n/)) {
+      const item = line.match(/^[ \t]+-[ \t]*(\S+)/);
+      if (item) names.push(item[1]);
+    }
+    for (const name of names) {
+      check(
+        existsSync(p(`${skillsDir}/${name}/SKILL.md`)),
+        `${rel}: preloaded skill does not exist: ${name}`
+      );
+    }
+  }
+}
+
 // 8. Forbidden patterns (repo-wide scan of text files)
 const EXCLUDE_DIRS = new Set(manifest.scanExcludeDirs ?? []);
 

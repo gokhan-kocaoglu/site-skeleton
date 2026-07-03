@@ -11,10 +11,17 @@
  *                 "permissionDecision": "deny|ask", "reasonIncludes": "...",
  *                 "additionalContextIncludes": "...",
  *                 "stopDecision": "block", "stopReasonIncludes": "...",
- *                 "stdoutIncludes": "..." } }
+ *                 "stdoutIncludes": "...", "stderrIncludes": "..." } }
  *
- * Also asserts that every hook bound in .claude/settings.json exists on disk
- * and that all 7 repo hooks are actually bound.
+ * The literal "<ROOT>" inside env values is replaced with the absolute repo
+ * root at runtime, so fixtures can set CLAUDE_PROJECT_DIR portably. Fixtures
+ * with a "cwd" outside the repo root simulate Claude Code invoking hooks from
+ * a subdirectory (Faz 8.1 / audit #7).
+ *
+ * Also asserts settings.json bindings: every hook command uses the
+ * node "$CLAUDE_PROJECT_DIR/.claude/hooks/<x>.js" form, the file exists on
+ * disk, all repo hooks are bound, task-card-validator is bound under the
+ * top-level TaskCreated event (matcher-less) and NOT under PreToolUse.
  * Exit 0 = all assertions pass, exit 1 otherwise.
  */
 const { spawnSync } = require('node:child_process');
@@ -47,10 +54,14 @@ function runFixture(fixture, fileName) {
         ? JSON.stringify(fixture.stdin)
         : '';
   const cwd = fixture.cwd ? path.resolve(ROOT, fixture.cwd) : ROOT;
+  const fixtureEnv = {};
+  for (const [k, v] of Object.entries(fixture.env || {})) {
+    fixtureEnv[k] = typeof v === 'string' ? v.replace(/<ROOT>/g, ROOT) : v;
+  }
   const result = spawnSync('node', [hookPath, ...(fixture.args || [])], {
     input: stdin,
     cwd,
-    env: { ...process.env, ...(fixture.env || {}) },
+    env: { ...process.env, ...fixtureEnv },
     encoding: 'utf8',
     timeout: 15000,
   });
@@ -69,6 +80,12 @@ function runFixture(fixture, fileName) {
   }
   if (exp.stdoutIncludes) {
     assert(stdout.includes(exp.stdoutIncludes), `${id}: stdout missing "${exp.stdoutIncludes}"`);
+  }
+  if (exp.stderrIncludes) {
+    assert(
+      (result.stderr || '').includes(exp.stderrIncludes),
+      `${id}: stderr missing "${exp.stderrIncludes}" [stderr: ${(result.stderr || '').trim().slice(0, 120)}]`
+    );
   }
 
   const needsJson =
@@ -155,9 +172,11 @@ if (settings) {
       }
     }
   }
+  // Faz 8.1 (audit #7): every command must use the CWD-safe quoted form
+  //   node "$CLAUDE_PROJECT_DIR/<repo-relative>.js"
   for (const cmd of commands) {
-    const m = cmd.match(/node\s+(.+\.js)/);
-    assert(!!m, `hook command is not "node <file>.js": ${cmd}`);
+    const m = cmd.match(/^node "\$CLAUDE_PROJECT_DIR\/(.+\.js)"$/);
+    assert(!!m, `hook command is not node "$CLAUDE_PROJECT_DIR/<file>.js": ${cmd}`);
     if (m) assert(fs.existsSync(path.join(ROOT, m[1])), `bound hook file missing: ${m[1]}`);
   }
   for (const hook of EXPECTED_HOOKS) {
@@ -166,6 +185,25 @@ if (settings) {
       `hook not bound in settings.json: ${hook}`
     );
   }
+
+  // Faz 8.1 (audit #2): task-card-validator lives under the top-level
+  // TaskCreated event (matcher-less, per official docs) — not PreToolUse.
+  const taskCreated = settings.hooks && settings.hooks.TaskCreated;
+  assert(Array.isArray(taskCreated) && taskCreated.length > 0, 'TaskCreated event not bound in settings.json');
+  if (Array.isArray(taskCreated)) {
+    for (const rule of taskCreated) {
+      assert(rule.matcher === undefined, `TaskCreated rule must not carry a matcher (unsupported): ${rule.matcher}`);
+    }
+    assert(
+      taskCreated.some((rule) => (rule.hooks || []).some((h) => (h.command || '').includes('task-card-validator.js'))),
+      'task-card-validator.js not bound under TaskCreated'
+    );
+  }
+  const preToolUse = (settings.hooks && settings.hooks.PreToolUse) || [];
+  assert(
+    !preToolUse.some((rule) => (rule.hooks || []).some((h) => (h.command || '').includes('task-card-validator.js'))),
+    'task-card-validator.js must no longer be bound under PreToolUse (legacy TaskCreate matcher)'
+  );
 }
 
 // Report

@@ -6,6 +6,8 @@ description: >
   işlerinde çağrılır. Final Gate Mode'da salt-okunurdur.
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
+skills:
+  - qa-quality-gate
 ---
 
 # QA / Test Specialist

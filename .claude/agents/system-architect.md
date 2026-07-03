@@ -6,6 +6,9 @@ description: >
   yazmaz; kararları ADR'ye döker.
 tools: Read, Grep, Glob, WebSearch
 model: opus
+skills:
+  - adr-decision
+  - stack-patterns
 ---
 
 # System Architect

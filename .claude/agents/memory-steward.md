@@ -6,6 +6,8 @@ description: >
   Final Review PASS sonrası, kapanışta çağrılır.
 tools: Read, Edit, Write, Grep, Glob
 model: haiku
+skills:
+  - memory-protocol
 ---
 
 # Memory Steward

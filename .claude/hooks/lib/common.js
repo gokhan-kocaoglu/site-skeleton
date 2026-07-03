@@ -8,6 +8,7 @@
  *  - Garbage / missing stdin resolves to null instead of throwing.
  *  - Node stdlib only. No dependencies.
  */
+const path = require('node:path');
 
 /** Read the hook payload from stdin. Returns parsed JSON or null. */
 function readStdinJson(timeoutMs = 5000) {
@@ -112,6 +113,18 @@ function normPath(p) {
   return typeof p === 'string' ? p.replace(/\\/g, '/') : '';
 }
 
+/**
+ * Project root for repo-relative lookups. Prefers $CLAUDE_PROJECT_DIR (set by
+ * Claude Code for every hook invocation, correct even when the process CWD is
+ * a subdirectory); falls back to this file's location (lib -> hooks -> .claude
+ * -> root) so CLI/manual runs keep working.
+ */
+function projectRoot() {
+  const env = process.env.CLAUDE_PROJECT_DIR;
+  if (typeof env === 'string' && env.trim()) return path.resolve(env.trim());
+  return path.resolve(__dirname, '..', '..', '..');
+}
+
 module.exports = {
   readStdinJson,
   safeRun,
@@ -122,4 +135,5 @@ module.exports = {
   stopBlock,
   writeTexts,
   normPath,
+  projectRoot,
 };

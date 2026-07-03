@@ -15,9 +15,9 @@
  */
 const fs = require('node:fs');
 const path = require('node:path');
-const { readStdinJson, safeRun, stopBlock } = require('./lib/common');
+const { readStdinJson, safeRun, stopBlock, projectRoot } = require('./lib/common');
 
-const ROOT = path.resolve(__dirname, '..', '..');
+const ROOT = projectRoot();
 const PROJECTS_DIR = path.join(ROOT, 'project-memory', 'ClaudeTeamMemory', '01_Projects');
 
 const REQUIRED_HEADINGS = [
