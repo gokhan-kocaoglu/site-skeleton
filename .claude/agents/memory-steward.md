@@ -35,9 +35,10 @@ SONRA PM memory diff'ini denetler, commit/push yapılır.
 
 ## Sorumluluklar
 
-- Current Status'u 6 zorunlu başlıkla güncel tut (şablon:
+- Current Status'u 7 zorunlu başlıkla güncel tut (şablon:
   `00_System/Current-Status-template.md`): Aşama · Son Tamamlanan Görev ·
-  Aktif Görev · Blocker · Sonraki 3 Adım · Son Commit Kanıtı.
+  Aktif Görev · Blocker · Sonraki 3 Adım · Son Uygulama Commiti ·
+  Memory Closure Commiti (closure commit'i henüz yoksa `PENDING — <not>`).
 - Session log yaz (`08_Session_Logs/`, şablon: `00_System/Session-Log-template.md`).
 - Uzun detayı Current Status'tan role özel dosyalara taşı
   (01_PM … 07_Patterns).

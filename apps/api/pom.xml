@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.3.13</version>
+    <version>3.5.16</version>
     <relativePath/>
   </parent>
 
@@ -19,9 +19,10 @@
 
   <properties>
     <java.version>21</java.version>
-    <!-- Boot 3.3 manages Testcontainers 1.19.x, which cannot talk to Docker
-         Engine 29+ (min API 1.44 → npipe 400). 1.21.4 is the first 1.x fix. -->
-    <testcontainers.version>1.21.4</testcontainers.version>
+    <!-- Docker Engine 29+ requires Testcontainers >= 1.21.4 (min API 1.44 →
+         npipe 400). Boot 3.5.16 BOM manages exactly 1.21.4, so the explicit
+         pin was dropped (Faz 8.1 Sprint 3); if a future BOM downgrade ever
+         lands below 1.21.4, re-pin here. -->
   </properties>
 
   <dependencies>

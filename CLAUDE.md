@@ -1,11 +1,24 @@
 # Site Skeleton — Çalışma Anayasası
 
-## Kimlik
+## Kimlik — Üç Liste (drift kontrolü: verify-structure `installedBaseline`)
 Monorepo: pnpm 9 + Turborepo + Node 22.
-- apps/web: Next.js 15, React 19, TS strict, Tailwind v4 (CSS-first), TanStack Query, RHF+Zod, motion.
-- apps/admin: Vite 5, React 19, React Router v7, Zustand.
-- apps/api: Java 21, Spring Boot 3.3, Spring Security 6, JPA+Hibernate, PostgreSQL 16, Flyway, JJWT, Bucket4j, springdoc.
-- Test: Vitest/Testing Library/MSW + JUnit5/Testcontainers.
+
+**Installed baseline** (package dosyalarında gerçekten var):
+- apps/web: Next.js 15, React 19, TS strict, Tailwind v4 (CSS-first);
+  test: Vitest + Testing Library + MSW.
+- apps/admin: Vite 5, React 19, TS; test: Vitest + Testing Library + axe-core.
+- apps/api: Java 21, Spring Boot 3.5, JPA+Hibernate, PostgreSQL 16, Flyway;
+  test: JUnit5 + Testcontainers. (Sürüm politikası: ADR-0009.)
+
+**Approved defaults** (kurulu DEĞİL; ilk ihtiyaçta bunlar kurulur, seçim tartışması yeniden açılmaz):
+- web: TanStack Query, RHF+Zod, motion (motion/react).
+- admin: React Router v7, Zustand.
+- api: Spring Security 6, JJWT, Bucket4j, springdoc.
+Kurulunca ilgili paket bu listeden Installed baseline'a taşınır (manifest'i de güncelle).
+
+**Optional activation** (templates/, kopyala-etkinleştir; build'e dahil değil):
+payments (Iyzico/Stripe portu) · admin-bff (HttpOnly refresh köprüsü) ·
+e2e (Playwright) · db (kategori/kupon SQL).
 
 ## Mutlak Kurallar
 - Hibernate DDL: validate. Şema değişikliği YALNIZ Flyway `V<n>__desc.sql`.

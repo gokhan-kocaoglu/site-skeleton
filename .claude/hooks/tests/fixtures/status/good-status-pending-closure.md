@@ -28,4 +28,4 @@ a1b2c3d feat: add health endpoint
 
 ## Memory Closure Commiti
 
-e4f5a6b chore(memory): close session 2026-07-02
+PENDING — bu kapanışın commiti bu dosya yazıldıktan sonra atılır.

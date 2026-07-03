@@ -1,0 +1,14 @@
+{
+  "hook": "session-close-validator.js",
+  "name": "CLI mode accepts PENDING in Memory Closure Commiti (closure commit lands after write)",
+  "args": [
+    "--file",
+    "fixtures/status/good-status-pending-closure.md"
+  ],
+  "cwd": ".claude/hooks/tests",
+  "stdinRaw": "",
+  "expect": {
+    "exitCode": 0,
+    "stdoutIncludes": "PASS"
+  }
+}

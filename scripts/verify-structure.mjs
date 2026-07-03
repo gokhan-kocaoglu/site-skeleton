@@ -132,7 +132,52 @@ if (manifest.agentSkills) {
   }
 }
 
-// 8. Forbidden patterns (repo-wide scan of text files)
+// 7c. Installed-baseline drift (Faz 8.1, audit #14): every package CLAUDE.md
+// lists as installed must exist in its package file; approved defaults must
+// NOT be installed until promoted into the baseline list.
+for (const entry of manifest.installedBaseline ?? []) {
+  if (!existsSync(p(entry.file))) {
+    check(false, `installedBaseline target missing: ${entry.file}`);
+    continue;
+  }
+  const text = readFileSync(p(entry.file), 'utf8');
+  if (entry.type === 'npm') {
+    let pkg;
+    try {
+      pkg = JSON.parse(text);
+    } catch {
+      check(false, `${entry.file}: invalid JSON for installedBaseline`);
+      continue;
+    }
+    const deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
+    for (const name of entry.packages ?? []) {
+      check(name in deps, `${entry.file}: installed-baseline package missing: ${name}`);
+    }
+    for (const name of entry.mustBeAbsent ?? []) {
+      check(
+        !(name in deps),
+        `${entry.file}: approved-default "${name}" is installed — CLAUDE.md baseline listesine taşı`
+      );
+    }
+  } else if (entry.type === 'maven') {
+    for (const a of entry.artifacts ?? []) {
+      check(
+        text.includes(`<artifactId>${a}</artifactId>`),
+        `${entry.file}: installed-baseline artifact missing: ${a}`
+      );
+    }
+    for (const a of entry.mustBeAbsent ?? []) {
+      check(
+        !text.includes(`<artifactId>${a}`),
+        `${entry.file}: approved-default "${a}" is installed — CLAUDE.md baseline listesine taşı`
+      );
+    }
+  }
+}
+
+// 8. Forbidden patterns (repo-wide scan of text files). A rule with a
+// "modes" array only runs when manifest.mode matches (Faz 8.1, audit #11:
+// the skeleton-dev guard patterns must not fire in bootstrapped projects).
 const EXCLUDE_DIRS = new Set(manifest.scanExcludeDirs ?? []);
 
 function* walk(dir) {
@@ -149,7 +194,9 @@ function* walk(dir) {
 }
 
 const allFiles = [...walk(ROOT)];
+const MODE = manifest.mode ?? 'skeleton-dev';
 for (const rule of manifest.forbiddenPatterns ?? []) {
+  if (rule.modes && !rule.modes.includes(MODE)) continue;
   const re = new RegExp(rule.pattern, rule.flags ?? '');
   for (const rel of allFiles) {
     if (rule.excludePaths?.some((ex) => rel === ex || rel.startsWith(ex))) continue;

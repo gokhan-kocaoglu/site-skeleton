@@ -1,5 +1,6 @@
 {
   "phase": 8,
+  "mode": "skeleton-dev",
   "requiredDirs": [
     "apps/web",
     "apps/web/app",
@@ -160,6 +161,10 @@
     ".claude/hooks/tests/fixtures/secret-11-allow-postgres-placeholder.json",
     ".claude/hooks/tests/fixtures/status/good-status.md",
     ".claude/hooks/tests/fixtures/status/bad-status.md",
+    ".claude/hooks/tests/fixtures/status/good-status-pending-closure.md",
+    ".claude/hooks/tests/fixtures/sessionclose-06-cli-legacy-heading-fails.json",
+    ".claude/hooks/tests/fixtures/sessionclose-07-cli-pending-closure-passes.json",
+    ".claude/hooks/tests/fixtures/sessionclose-08-cli-unknown-project-lists-valid.json",
     ".claude/hooks/tests/fixtures/flags/pending-template.txt",
     ".claude/hooks/tests/fixtures/graph-present/graphify-out/graph.json",
     "pnpm-lock.yaml",
@@ -170,6 +175,11 @@
     "packages/api-types/tsconfig.json",
     "packages/api-types/src/index.d.ts",
     "apps/web/package.json",
+    "apps/web/.env.example",
+    "apps/web/lib/site-url.ts",
+    "apps/web/app/opengraph-image.tsx",
+    "apps/web/app/twitter-image.tsx",
+    "apps/web/test/site-url.test.ts",
     "apps/web/next.config.ts",
     "apps/web/tsconfig.json",
     "apps/web/next-env.d.ts",
@@ -220,8 +230,12 @@
     "templates/e2e/playwright.config.ts",
     "templates/e2e/tests/home.spec.ts",
     ".github/workflows/ci.yml",
+    ".github/dependabot.yml",
     ".gitleaks.toml",
     "docs/adr/ADR-0007-payment-provider.md",
+    "docs/adr/ADR-0009-framework-support-policy.md",
+    "docs/adr/ADR-0010-spring-boot-4-migration.md",
+    "scripts/bootstrap-project.mjs",
     "scripts/quality/gate-build.mjs",
     "scripts/quality/gate-typecheck.mjs",
     "scripts/quality/gate-lint.mjs",
@@ -240,6 +254,7 @@
     "docs/adr/ADR-0008-category-depth-limit.md",
     "docs/test-reports/2026-07-02-faz8-quality-gate.md",
     "docs/audits/seo/2026-07-02-web-home.md",
+    "docs/audits/seo/2026-07-03-web-home-remediation.md",
     "project-memory/ClaudeTeamMemory/01_Projects/SiteSkeleton/Current Status.md",
     "project-memory/ClaudeTeamMemory/01_Projects/SiteSkeleton/08_Session_Logs/2026-07-02-session-01.md"
   ],
@@ -304,7 +319,7 @@
     ".claude/hooks/post-edit-style-guard.js": 120,
     ".claude/hooks/memory-writer-guard.js": 120,
     ".claude/hooks/task-card-validator.js": 120,
-    ".claude/hooks/session-close-validator.js": 130,
+    ".claude/hooks/session-close-validator.js": 170,
     ".claude/hooks/graph-first-reminder.js": 120,
     ".claude/hooks/tests/run-tests.js": 240,
     "templates/admin-bff/server.mjs": 100,
@@ -315,6 +330,8 @@
     "docs/adr/ADR-0004-gate-witness-markers.md": 60,
     "docs/adr/ADR-0005-agent-frontmatter.md": 60,
     "docs/adr/ADR-0006-decision-log-convention.md": 60,
+    "docs/adr/ADR-0009-framework-support-policy.md": 60,
+    "docs/adr/ADR-0010-spring-boot-4-migration.md": 60,
     "scripts/quality/run-gates.mjs": 60
   },
   "noBom": [
@@ -370,7 +387,28 @@
   ],
   "yamlLite": [
     "pnpm-workspace.yaml",
-    "docs/api-contracts/openapi.yaml"
+    "docs/api-contracts/openapi.yaml",
+    ".github/dependabot.yml"
+  ],
+  "installedBaseline": [
+    {
+      "file": "apps/web/package.json",
+      "type": "npm",
+      "packages": ["next", "react", "react-dom", "tailwindcss", "typescript", "vitest", "@testing-library/react", "msw"],
+      "mustBeAbsent": ["@tanstack/react-query", "react-hook-form", "zod", "motion"]
+    },
+    {
+      "file": "apps/admin/package.json",
+      "type": "npm",
+      "packages": ["vite", "react", "react-dom", "tailwindcss", "typescript", "vitest", "@testing-library/react", "axe-core"],
+      "mustBeAbsent": ["react-router", "react-router-dom", "zustand", "@tanstack/react-query"]
+    },
+    {
+      "file": "apps/api/pom.xml",
+      "type": "maven",
+      "artifacts": ["spring-boot-starter-web", "spring-boot-starter-data-jpa", "flyway-core", "flyway-database-postgresql", "postgresql", "spring-boot-starter-test", "junit-jupiter"],
+      "mustBeAbsent": ["spring-boot-starter-security", "jjwt", "bucket4j", "springdoc"]
+    }
   ],
   "frontmatter": [
     {
@@ -456,6 +494,7 @@
     {
       "pattern": "cicekci|çiçek",
       "flags": "i",
+      "modes": ["skeleton-dev"],
       "excludePaths": ["scripts/structure-manifest.json", "pnpm-lock.yaml"]
     },
     {

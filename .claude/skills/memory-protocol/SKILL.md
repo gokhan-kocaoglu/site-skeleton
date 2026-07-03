@@ -46,11 +46,18 @@ güvenli kapanış mümkün değilse güncelleme **PENDING** bırakılır.
 
 ## Current Status Disiplini
 
-6 zorunlu başlık (hook doğrular — eksikse kapanış reddedilir):
+7 zorunlu başlık (hook doğrular — eksikse kapanış reddedilir):
 `## Aşama` · `## Son Tamamlanan Görev` · `## Aktif Görev` · `## Blocker` ·
-`## Sonraki 3 Adım` · `## Son Commit Kanıtı`
+`## Sonraki 3 Adım` · `## Son Uygulama Commiti` · `## Memory Closure Commiti`
+(closure commit'i yazım anında henüz yoksa `PENDING — <not>`).
 
 Kısa tutulur; detay rol dosyalarına gider.
+
+## Kanıt Yeniden-Üretilebilirliği (bağlayıcı)
+
+Her kanıt dosyası (test raporu, audit, gate çıktısı) üretildiği koşunun
+**commit hash'ini** içerir. Commit'lenmemiş kodla üretilen kanıt geçersizdir;
+rapor, koşulan working-tree'nin hash'ini `git log --oneline -1` ile kaydeder.
 
 ## Yazılmayacaklar (hook da tarar)
 

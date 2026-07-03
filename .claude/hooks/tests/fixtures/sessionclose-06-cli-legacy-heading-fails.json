@@ -1,0 +1,14 @@
+{
+  "hook": "session-close-validator.js",
+  "name": "CLI mode rejects legacy 'Son Commit Kanıtı' heading (closure-cycle split, audit #9)",
+  "args": [
+    "--file",
+    "fixtures/status/bad-status.md"
+  ],
+  "cwd": ".claude/hooks/tests",
+  "stdinRaw": "",
+  "expect": {
+    "exitCode": 1,
+    "stdoutIncludes": "Memory Closure Commiti"
+  }
+}

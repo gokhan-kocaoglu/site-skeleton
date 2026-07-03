@@ -1,26 +1,34 @@
 ---
 description: >
-  Oturum kapanışı: Current Status'u 6 zorunlu başlıkla günceller, session log
-  yazar, kapanış özeti üretir. session-close-validator hook'u eksik başlık
-  veya commit kanıtı yoksa kapanışı reddeder.
+  Oturum kapanışı: Current Status'u 7 zorunlu başlıkla günceller, session log
+  yazar, ayrı memory-closure commit'i atar. session-close-validator hook'u
+  eksik başlık veya commit kanıtı yoksa kapanışı reddeder.
 ---
 
 # /finish-session
 
+Kapanış İKİ ayrı commit'ten oluşur (Faz 8.1, audit #9): önce uygulama
+commit'i, sonra memory yazımı, en sonda ayrı memory-closure commit'i.
+
 1. `memory-protocol` skill'ini yükle.
-2. Kapanış bayrağını kur: `.claude/hooks/.session-close-pending` dosyasına
+2. **Uygulama commit'i tamamlanmış olmalı** — oturumun kod/doc değişiklikleri
+   commit'li değilse önce onları commit'le (insan onayıyla). Hash'i not al.
+3. Kapanış bayrağını kur: `.claude/hooks/.session-close-pending` dosyasına
    proje adını yaz (tek satır). Stop hook'u yalnız bu bayrak varken doğrulama
    yapar; doğrulama geçince bayrağı kendisi siler.
-3. **memory-steward** üzerinden `Current Status.md`'yi güncelle — 6 zorunlu
+4. **memory-steward** üzerinden `Current Status.md`'yi güncelle — 7 zorunlu
    başlık dolu olmalı: `## Aşama` · `## Son Tamamlanan Görev` ·
    `## Aktif Görev` · `## Blocker` (yoksa "Yok") · `## Sonraki 3 Adım` ·
-   `## Son Commit Kanıtı` (hash + mesaj; `git log --oneline -1` çıktısı).
-4. Session log yaz: `08_Session_Logs/YYYY-MM-DD-session-<NN>.md`
-   (şablon: `00_System/Session-Log-template.md` — özet, değişen dosyalar,
-   tamamlanan iş, kararlar, açık riskler/sorular, sonraki 3 adım,
-   sonraki oturum başlangıç noktası).
-5. Doğrulama: `session-close-validator` hook'u başlıkları ve commit kanıtını
-   kontrol eder; eksikse kapanış REDDEDİLİR — eksiği tamamla, yeniden dene.
-   (Manuel çalıştırma: `node .claude/hooks/session-close-validator.js
-   --project <ProjeAdi>`.)
-6. Kullanıcıya kapanış özeti ver: yapılanlar · commit durumu · sonraki adımlar.
+   `## Son Uygulama Commiti` (adım 2'deki hash + mesaj) ·
+   `## Memory Closure Commiti` (bu kapanışın commiti henüz atılmadığı için
+   `PENDING — <not>` yazılır; bir önceki kapanış hash'i biliniyorsa o da eklenir).
+5. Session log yaz: `08_Session_Logs/YYYY-MM-DD-session-<NN>.md`
+   (şablon: `00_System/Session-Log-template.md`).
+6. Doğrulama: `session-close-validator` başlıkları ve commit kanıtını
+   kontrol eder; eksikse kapanış REDDEDİLİR. (Manuel:
+   `node .claude/hooks/session-close-validator.js --project <ProjeAdi>`.)
+7. **Memory closure commit'i:** yalnız `project-memory/**` (+ varsa memory
+   kanıt dosyaları) kapsayan ayrı commit — mesaj formatı:
+   `chore(memory): close session <YYYY-MM-DD>` (insan onayıyla push).
+8. Kullanıcıya kapanış özeti ver: yapılanlar · iki commit'in hash'leri ·
+   sonraki adımlar.

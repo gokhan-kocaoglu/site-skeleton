@@ -1,0 +1,28 @@
+# Bağımlılık güncelleme stratejisi: ADR-0009 (framework support policy).
+# Haftalık toplu PR'lar; her PR normal CI zincirinden (quality-gate, api-verify,
+# hooks-windows, gitleaks) geçmek zorundadır — yeşil CI olmadan merge yok.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      npm-minor-patch:
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: maven
+    directory: "/apps/api"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      maven-minor-patch:
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3

@@ -1,6 +1,6 @@
 # Current Status — <Proje Adı>
 
-> 6 başlık zorunludur; `session-close-validator` hook'u eksik başlıkta
+> 7 başlık zorunludur; `session-close-validator` hook'u eksik başlıkta
 > kapanışı reddeder. Kısa tut — detay rol dosyalarına gider.
 
 ## Aşama
@@ -25,6 +25,10 @@
 2. <adım>
 3. <adım>
 
-## Son Commit Kanıtı
+## Son Uygulama Commiti
 
-<`git log --oneline -1` çıktısı — hash + mesaj>
+<oturumun uygulama commit'i — `git log --oneline -1` çıktısı: hash + mesaj>
+
+## Memory Closure Commiti
+
+<bu kapanışın commit'i — yazım anında henüz atılmadıysa "PENDING — <not>"; bir önceki kapanış hash'i biliniyorsa ekle>

@@ -1,6 +1,6 @@
 # Current Status — <Proje Adı>
 
-> Şablon: `00_System/Current-Status-template.md`. 6 başlık zorunludur;
+> Şablon: `00_System/Current-Status-template.md`. 7 başlık zorunludur;
 > `session-close-validator` hook'u eksik başlıkta kapanışı reddeder.
 
 ## Aşama
@@ -25,6 +25,10 @@ Yok.
 2. PM'e ilk task DAG'ını çıkarttır (`project-planning`).
 3. İlk feature'ı `/start-feature` ile başlat.
 
-## Son Commit Kanıtı
+## Son Uygulama Commiti
 
 Yok (ilk commit bekleniyor).
+
+## Memory Closure Commiti
+
+Yok (ilk oturum kapanışı).

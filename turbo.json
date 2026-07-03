@@ -3,6 +3,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": ["NEXT_PUBLIC_SITE_URL", "SITE_SKELETON_ALLOW_LOCALHOST_URL"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "test": {

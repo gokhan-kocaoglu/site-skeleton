@@ -13,7 +13,9 @@ description: >
 
 **Kanıtsız PASS bildirimi yasak.** Her verdict, çalıştırılan komutların
 gerçek çıktısını (veya özetini) içermek zorunda. "Testler geçti" cümlesi
-komut + çıktı olmadan geçersizdir.
+komut + çıktı olmadan geçersizdir. **Kanıt dosyası, üretildiği koşunun
+commit hash'ini içerir; commit'lenmemiş kodla üretilen kanıt geçersizdir**
+(audit #8 — yeniden-üretilebilirlik).
 
 ## Doğrulama Döngüsü (sırayla; biri kırılırsa dur, düzelt, baştan)
 
@@ -64,6 +66,7 @@ Severity tanımları ve verdict kuralları TEK kaynaktan gelir:
 ```markdown
 # Quality Gate Raporu — <feature>
 **Tarih:** YYYY-MM-DD  **Mod:** Final Gate  **Verdict:** PASS/PASS_WITH_RISKS/FAIL
+**Commit:** <git log --oneline -1 — kanıtın üretildiği koşunun hash'i>
 ## Çalıştırılan Komutlar
 - `pnpm gate` → (çıktı özeti / exit code)
 - `mvn verify` → (çıktı özeti)

@@ -29,9 +29,9 @@ Final Review PASS sonrası). Diğer ajanlar `HANDOFF → memory-steward` gönder
 
 ## Current Status Disiplini
 
-6 zorunlu başlık (hook doğrular): `## Aşama` · `## Son Tamamlanan Görev` ·
-`## Aktif Görev` · `## Blocker` · `## Sonraki 3 Adım` · `## Son Commit Kanıtı`.
-Kısa tut; detay rol dosyalarına.
+7 zorunlu başlık (hook doğrular): `## Aşama` · `## Son Tamamlanan Görev` ·
+`## Aktif Görev` · `## Blocker` · `## Sonraki 3 Adım` · `## Son Uygulama Commiti` ·
+`## Memory Closure Commiti`. Kısa tut; detay rol dosyalarına.
 
 ## Yazılmayacaklar (ihlal = hook bloğu)
 

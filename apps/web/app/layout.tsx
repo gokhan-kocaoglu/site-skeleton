@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { getSiteUrl } from "../lib/site-url";
 import "./globals.css";
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const baseUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -20,6 +21,12 @@ export const metadata: Metadata = {
     url: baseUrl,
     siteName: "Site Skeleton",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Site Skeleton",
+    description:
+      "Production-ready monorepo starter: Next.js 15, Vite + React admin, Spring Boot 3 API.",
   },
 };
 

@@ -1,0 +1,14 @@
+{
+  "hook": "session-close-validator.js",
+  "name": "CLI mode: unknown --project lists valid project folders (audit #8 reproducibility)",
+  "args": [
+    "--project",
+    "YokBoyleBirProje"
+  ],
+  "cwd": ".claude/hooks/tests",
+  "stdinRaw": "",
+  "expect": {
+    "exitCode": 1,
+    "stdoutIncludes": "Geçerli projeler: SiteSkeleton"
+  }
+}

@@ -1,6 +1,6 @@
 # Current Status — Site Skeleton
 
-> Şablon: `00_System/Current-Status-template.md`. 6 başlık zorunludur;
+> Şablon: `00_System/Current-Status-template.md`. 7 başlık zorunludur;
 > `session-close-validator` hook'u eksik başlıkta kapanışı reddeder.
 
 ## Aşama
@@ -25,6 +25,10 @@ Yok. (Not: branch protection enforcement pasif [private + ücretsiz plan]; telaf
 2. Sprint 3 sonunda pnpm gate + mvn verify (3.5.x) + bootstrap dry-run.
 3. Sprint 4 + final resertifikasyon (27 madde).
 
-## Son Commit Kanıtı
+## Son Uygulama Commiti
 
-`8e253af docs: faz 8.1 sprint 2 kanit raporu` (2026-07-03)
+`8e253af docs: faz 8.1 sprint 2 kanit raporu`
+
+## Memory Closure Commiti
+
+`7602983 chore(memory): close session 2026-07-03`

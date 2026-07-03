@@ -15,7 +15,7 @@ the work through the quality-gate chain.
 | Monorepo | pnpm 9 + Turborepo, Node 22 |
 | `apps/web` | Next.js 15, React 19, TypeScript strict, Tailwind v4 (CSS-first) |
 | `apps/admin` | Vite 5, React 19 (React Router v7 + Zustand by convention, not preinstalled) |
-| `apps/api` | Java 21, Spring Boot 3.3, JPA + Hibernate (validate only), PostgreSQL 16, Flyway |
+| `apps/api` | Java 21, Spring Boot 3.5, JPA + Hibernate (validate only), PostgreSQL 16, Flyway |
 | Tests | Vitest / Testing Library / MSW · JUnit 5 / Testcontainers (`postgres:16`) |
 
 `apps/api` is Maven-only and deliberately **not** part of the pnpm workspace.
@@ -35,7 +35,8 @@ Set-Location apps/api; mvn verify
 Set-Location apps/api; mvn verify "-Pit-local"
 ```
 
-> Docker Engine 29+ requires Testcontainers >= 1.21.4 (pinned in `apps/api/pom.xml`).
+> Docker Engine 29+ requires Testcontainers >= 1.21.4 (managed at 1.21.4 by the
+> Spring Boot 3.5.16 BOM; re-pin in `apps/api/pom.xml` only if a future BOM drops below it).
 
 ## Commands
 
@@ -55,12 +56,30 @@ Claude Code slash commands (`.claude/commands/`): `/new-project`, `/start-featur
 
 1. GitHub → **Use this template** → create the new project repo and clone it.
 2. Run the setup guide (`docs/setup/local-setup-windows.md`) once per machine.
-3. Open Claude Code and run `/new-project` — it asks for a source brief, seeds the
-   memory vault (`project-memory/`) from `01_Projects/_TEMPLATE/`, and has the PM
-   agent produce the first task DAG.
+3. Open Claude Code and run `/new-project` — it runs the bootstrap rename (below),
+   asks for a source brief, seeds the memory vault (`project-memory/`) from
+   `01_Projects/_TEMPLATE/`, and has the PM agent produce the first task DAG.
 4. Every feature starts with `/start-feature`; the gate chain (PM → Arch → UX → Dev →
    QA → Security → SEO → Final → memory → commit) is defined in
    `.claude/skills/feature-workflow/`.
+
+### Bootstrap rename — exact scope
+
+`node scripts/bootstrap-project.mjs <project-name>` previews (dry-run); add
+`--apply` to execute. Deterministic text/dir renames only — **no LLM, no magic**:
+
+- root package name & README title `site-skeleton` → `<slug>`; npm scope `@skeleton/*` → `@<slug>/*`
+- Java package `com.skeleton` → `com.<slug-without-dashes>` (directories moved too)
+- Maven `skeleton-api` / `Skeleton API` → `<slug>-api` / `<Display> API`
+- DB names `skeleton` / `skeleton_it` → `<slug_with_underscores>` (+`_it`)
+- OpenAPI title and web metadata `Site Skeleton` → `<Display Name>`
+- `scripts/structure-manifest.json` `mode: skeleton-dev` → `project` (turns off
+  skeleton-only forbidden-pattern scans)
+
+It does **not** touch historical evidence (`docs/test-reports`, `docs/audits`,
+`docs/source-briefs`, `project-memory/`), does not rewrite git history, and is
+idempotent (re-running with the same name exits cleanly). After `--apply`:
+`pnpm install`, then `pnpm gate` and `mvn verify` to re-verify.
 
 ### Optional modules (copy to activate — never part of the build)
 
@@ -80,7 +99,7 @@ create it under `packages/` when the project needs a shared component library.
 | `.claude/agents/` | 9 file-based subagents (PM, architect, UX, FE/BE devs, SEO, QA, reviewer, memory steward) |
 | `.claude/skills/` | 10 skills (workflow, quality gate, stack patterns, graphify, ...) |
 | `.claude/rules/` | Common + TypeScript rule sets |
-| `.claude/hooks/` | 7 fail-safe Node hooks + self-test harness |
+| `.claude/hooks/` | 8 fail-safe Node hooks + self-test harness |
 | `docs/adr/` | Architecture decision records (`ADR-0000-template.md`) |
 | `docs/operations/authority-map.md` | Agent × write-path authority matrix |
 | `project-memory/` | Obsidian-compatible team memory vault (single writer: memory-steward) |
