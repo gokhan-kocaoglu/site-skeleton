@@ -42,6 +42,14 @@ Notlar:
 Job adı değişirse bu liste ve workflow birlikte güncellenir (workflow başındaki
 uyarı yorumu).
 
+**Bilinen kısıt (2026-07-03):** Ruleset yukarıdaki listeyle yapılandırıldı,
+ancak repo **private + ücretsiz GitHub planında** olduğundan enforcement
+GitHub tarafından uygulanmıyor (rulesets/branch protection private repolarda
+Pro/Team planı ister; public repoda ücretsizdir). Yani required-checks şu an
+**bilgilendiricidir, merge'i teknik olarak engellemez** — disiplin insan
+onaylı push protokolüyle korunur. Repo public olursa veya plan yükselirse
+enforcement kendiliğinden devreye girer; bu not o zaman kaldırılır.
+
 ## Kanıt Kuralı
 
 CI yeşili tek başına verdict değildir; quality-gate raporları
