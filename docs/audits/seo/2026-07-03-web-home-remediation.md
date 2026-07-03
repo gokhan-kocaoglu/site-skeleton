@@ -1,6 +1,6 @@
 # SEO Denetim Raporu — apps/web home, Sprint 3 remediation yeniden-denetimi
 
-**Commit:** <pending — Sprint 3 commit'i sonrası doldurulacak>
+**Commit:** `1a512db feat(phase-8.1): sprint 3 — evidence reproducibility, closure cycle, site-url guard, three-list, boot 3.5, bootstrap` (denetim bu içerikle koşuldu; commit-öncesi working tree bu commit'le birebir aynıdır)
 
 **Tarih:** 2026-07-03 **Denetçi:** seo-specialist (salt-okunur) **Verdict:** PASS_WITH_RISKS
 
