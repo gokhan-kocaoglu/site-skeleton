@@ -1,28 +1,46 @@
 # Bağımlılık güncelleme stratejisi: ADR-0009 (framework support policy).
-# Haftalık toplu PR'lar; her PR normal CI zincirinden (quality-gate, api-verify,
-# hooks-windows, gitleaks) geçmek zorundadır — yeşil CI olmadan merge yok.
+# Haftalık, patch/minor gruplu tek PR; MAJOR sürümler Dependabot'a KAPALI —
+# major yükseltme ADR-0009 kural 1 (EOL hatta başlamama) çerçevesinde ADR
+# süreciyle değerlendirilir (örn. Boot 4.x = ADR-0010), bot PR'ıyla gelmez.
+# Her PR normal CI zincirinden (quality-gate, api-verify, hooks-windows,
+# gitleaks) geçmek zorundadır — yeşil CI olmadan merge yok.
 version: 2
 updates:
   - package-ecosystem: npm
     directory: "/"
     schedule:
       interval: weekly
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
     groups:
       npm-minor-patch:
+        patterns: ["*"]
         update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: maven
     directory: "/apps/api"
     schedule:
       interval: weekly
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
     groups:
       maven-minor-patch:
+        patterns: ["*"]
         update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: weekly
     open-pull-requests-limit: 3
+    groups:
+      actions-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

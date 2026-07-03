@@ -29,9 +29,10 @@ Destek verileri (endoflife.date, 2026-07-03): Boot 3.5 OSS EOL 2026-06-30
    girer; iskelet 2026-09 sonuna kadar 16'ya yükseltilmelidir.
 4. **Dependabot stratejisi:** `.github/dependabot.yml` — npm (kök),
    maven (apps/api), github-actions ekosistemleri; haftalık; minor+patch
-   gruplu tek PR, major ayrı PR. Her Dependabot PR'ı tam CI zincirinden
-   geçer; yeşil olmadan merge edilmez. Major yükseltmeler bu ADR'nin 1.
-   kuralına göre değerlendirilir.
+   gruplu tek PR (limit 3/ekosistem). MAJOR sürümler bot'a kapalıdır
+   (`ignore: semver-major`): major yükseltme bu ADR'nin 1. kuralı
+   çerçevesinde ADR süreciyle değerlendirilir, bot PR'ıyla gelmez.
+   Her Dependabot PR'ı tam CI zincirinden geçer; yeşil olmadan merge edilmez.
 5. **Kanıt kuralı:** Her framework yükseltmesi `mvn verify` / `pnpm gate`
    yeşil kanıtı olmadan commit'lenemez (verdict-policy kanıt kuralı).
 
