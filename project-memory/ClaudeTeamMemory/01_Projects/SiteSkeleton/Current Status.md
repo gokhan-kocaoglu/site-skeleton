@@ -5,30 +5,30 @@
 
 ## Aşama
 
-Faz 8.1 remediation — Sprint 4 tamamlandı ve commit'lendi (uygulama 4abd5a4 + kanıt raporu ade11ba); push + CI yeşil teyidi (4 job) bekleniyor. Sırada: final resertifikasyon (27 madde, manifest phase 8.1).
+Faz 8.1 remediation TAMAMLANDI — resertifikasyon 27/27, genel verdict PASS_WITH_RISKS (CRITICAL 0, HIGH 0). Tüm commit'ler push'landı, CI 4/4 yeşil (insan teyidi, 2026-07-03). İskelet v1 + Faz 8.1 sertifikalı; sırada R1–R6 takip görevlerinin backlog planlaması ve ilk gerçek proje (/new-project).
 
 ## Son Tamamlanan Görev
 
-Faz 8.1 Sprint 4 — §4.1 categories.sql (depth 0..3, soft-delete partial unique NULLS NOT DISTINCT, parent_id index, cycle servis kuralı + ADR-0008 Cycle Önleme bölümü), §4.2 coupons.sql üç-durum + ADR-0011 ACCEPTED (kupon ACTIVE/PASSIVE/DISABLED, üç-durumlu CHECK, sipariş başına tek kupon), §4.3 BFF hardening (body limit 413, upstream timeout 504, Secure=NODE_ENV, README PRODUCTION-READY DEĞİLDİR + checklist), §4.4 payment portu (idempotencyKey + PaymentStatus, ADR-0007 şerhi), §4.5 backend baseline (health live/ready, DB credential fail-fast + local profil, openapi+api-types, production-checklist şablonu), §4.6 baseline security review PASS (HOOK-1/CPN-1/PAY-1 sprint içinde kapandı, reviewer yeniden doğruladı), §4.7 it-local kanıtı (BUILD SUCCESS 3/3; sapma: lokal PG17 parolası oturumda yok → geçici PG16:55432 + env override, raporda belgeli), §4.8 pilot (bootstrap dry-run 38 dosya/72 ikame + tam gate zincirli feature: PM→UX→FE→PM diff→QA→Security+style→SEO→Final; TZ remediation döngüsü işledi; genel PASS_WITH_RISKS). Kanıt: docs/test-reports/2026-07-03-faz8.1-sprint4-quality-gate.md (pnpm gate 7/7, 853 structure check, harness 159, mvn verify 3/3 — hepsi 4abd5a4 üzerinde).
+Denetim #18 kapatma (kaynak metin kullanıcıdan alındı): web ESLint'e @next/eslint-plugin-next coreWebVitals + react-hooks + jsx-a11y; admin'e react-hooks + jsx-a11y + react-refresh (vite); iki app'e cross-app no-restricted-imports sınırı; coverage/ lint dışı. Type-aware lint ADR-0012 ACCEPTED ile ertelendi (ölçüm: web 2.1→4.1s, admin 1.6→2.8s ~2×; tsc gate ile mükerrer; benimseme yolu belgeli). Mevcut kod yeni kurallarla 0 ihlal; pnpm gate 7/7 (862 check). Resertifikasyon raporu 27/27'ye güncellendi (R7 kapalı; lessons #4: insan/orkestratör eşleme hataları tablo mutabakatıyla yakalanır). Commit'ler: 4d917ae (lint) + 4397816 (rapor); push + CI 4/4 yeşil.
 
 ## Aktif Görev
 
-Yok (sprint sınırında duruldu).
+Yok (Faz 8.1 kapandı; kapanış sonrası duruldu).
 
 ## Blocker
 
-Yok. (Not: push insan onayı bekliyor; CI teyidi push sonrası.)
+Yok.
 
 ## Sonraki 3 Adım
 
-1. git push (insan onayı, 3 commit: 4abd5a4 + ade11ba + closure) → CI 4 job yeşil teyidi.
-2. Final resertifikasyon: 27 denetim maddesi tablosu, yeni genel verdict, manifest phase: 8.1, docs/audits/recertification raporu.
-3. Risk defteri takipleri (R1 favicon, R2 sitemap lastModified→getLastUpdated, R3 dil kararı, R4 sayfadaki Boot 3.3 metni, R6 tsbuildinfo .gitignore) — resertifikasyon sonrası planlanır.
+1. R1–R6 takip görevlerini backlog'a planla (favicon, sitemap lastModified→getLastUpdated, dil kararı, page.tsx Boot 3.3 metni, BFF aktivasyon checklist takibi, tsbuildinfo .gitignore).
+2. Type-aware lint benimseme kararını ilk gerçek proje başlangıcında yeniden değerlendir (ADR-0012 karar noktası).
+3. İlk gerçek proje: /new-project ile bootstrap (iskelet artık sertifikalı).
 
 ## Son Uygulama Commiti
 
-`4abd5a4 feat(phase-8.1): sprint 4 — domain sql, bff hardening, payment port, backend baseline, pilot` (kanıt commit'i: `ade11ba docs: faz 8.1 sprint 4 kanit raporu`)
+`4d917ae fix(lint): denetim #18 — web cwv+hooks+a11y, admin hooks+a11y+refresh, import siniri` (rapor commit'i: `4397816 docs: resertifikasyon 27/27 — denetim #18 kapanisi islendi`)
 
 ## Memory Closure Commiti
 
-`PENDING — bu kapanışın commiti bu yazımdan sonra atılacak; önceki kapanış: c9610f8 chore(memory): close session 2026-07-03`
+`PENDING — bu kapanışın commiti bu yazımdan sonra atılacak; önceki kapanış: 3144fa3 chore(memory): close session 2026-07-03 (session 04)`
