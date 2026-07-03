@@ -14,8 +14,8 @@
   "dependencies": {
     "@skeleton/api-types": "workspace:*",
     "@skeleton/design-tokens": "workspace:*",
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
