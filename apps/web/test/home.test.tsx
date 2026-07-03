@@ -16,4 +16,11 @@ describe("HomePage", () => {
       screen.getByRole("heading", { level: 2, name: /what's inside/i }),
     ).toBeInTheDocument();
   });
+
+  it("renders a last-updated time element with a valid ISO date and visible label", () => {
+    render(<HomePage />);
+    const timeElement = screen.getByText(/son güncelleme:/i).querySelector("time");
+    expect(timeElement).not.toBeNull();
+    expect(timeElement).toHaveAttribute("datetime", expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/));
+  });
 });

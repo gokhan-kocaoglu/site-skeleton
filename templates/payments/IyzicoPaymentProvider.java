@@ -5,22 +5,23 @@ import java.math.BigDecimal;
 /**
  * Empty Iyzico adapter — intentionally unimplemented until ADR-0007 is ACCEPTED.
  * Implementation checklist: add the Iyzico SDK to pom.xml, map PaymentRequest to
- * the SDK model, read API keys from environment variables (never from files).
+ * the SDK model, pass idempotencyKey as conversationId, read API keys from
+ * environment variables (never from files).
  */
 public final class IyzicoPaymentProvider implements PaymentProvider {
 
     @Override
-    public PaymentResult authorize(PaymentRequest request) {
+    public PaymentResult authorize(PaymentRequest request, String idempotencyKey) {
         throw notImplemented();
     }
 
     @Override
-    public PaymentResult capture(String providerReference) {
+    public PaymentResult capture(String providerReference, String idempotencyKey) {
         throw notImplemented();
     }
 
     @Override
-    public PaymentResult refund(String providerReference, BigDecimal amount) {
+    public PaymentResult refund(String providerReference, BigDecimal amount, String idempotencyKey) {
         throw notImplemented();
     }
 

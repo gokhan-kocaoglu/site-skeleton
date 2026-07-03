@@ -54,9 +54,9 @@ docker version                           # engine must be running
 
 > **Docker Engine 29+ note.** Engine 29 raised the minimum Docker API version to 1.44,
 > which breaks Testcontainers releases before **1.21.4** ("Could not find a valid Docker
-> environment", npipe HTTP 400). This repo pins `<testcontainers.version>1.21.4</...>`
-> in `apps/api/pom.xml` — keep that override (or newer) when upgrading Spring Boot,
-> since Boot 3.3's managed default is 1.19.x.
+> environment", npipe HTTP 400). Spring Boot 3.5.16's BOM manages exactly 1.21.4, so
+> `apps/api/pom.xml` carries no explicit pin (dropped in Faz 8.1 Sprint 3); if a future
+> BOM ever manages a version below 1.21.4, re-pin it there (note kept in the pom).
 
 ## 6. Claude Code + user-level integrations
 
@@ -97,3 +97,15 @@ node .claude/hooks/tests/run-tests.js    # hook harness
 Gate environment switches: `$env:SKIP_API = '1'` skips Maven inside `pnpm gate`;
 `$env:IT_LOCAL = '1'` makes the test gate use the local PostgreSQL profile.
 Remove them with `Remove-Item Env:SKIP_API` when done.
+
+## 8. Running the API locally (fail-fast config)
+
+The default profile has **no DB credential fallback** — `DB_USER` / `DB_PASSWORD`
+must come from the environment or startup fails fast (by design, Faz 8.1 §4.5).
+For local development activate the `local` profile, which defaults to
+`postgres`/`postgres`:
+
+```powershell
+Set-Location apps/api
+mvn spring-boot:run "-Dspring-boot.run.profiles=local"
+```

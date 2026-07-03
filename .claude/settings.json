@@ -29,7 +29,14 @@
     "deny": [
       "Read(.env)",
       "Read(**/.env)",
-      "Read(**/*.pem)"
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*.p12)",
+      "Read(**/*.pfx)",
+      "Read(**/.npmrc)",
+      "Read(**/.pgpass)",
+      "Read(**/credentials*)",
+      "Read(**/id_rsa)"
     ]
   },
   "hooks": {

@@ -8,20 +8,43 @@ info:
 servers:
   - url: http://localhost:8080
 paths:
-  /api/health:
+  /api/health/live:
     get:
-      summary: Health check
-      operationId: getHealth
+      summary: Liveness probe (no dependency checks)
+      operationId: getHealthLive
       tags: [system]
       responses:
         "200":
-          description: Service is up
+          description: Process is up
           content:
             application/json:
               schema:
-                type: object
-                required: [status]
-                properties:
-                  status:
-                    type: string
-                    example: UP
+                $ref: "#/components/schemas/HealthStatus"
+  /api/health/ready:
+    get:
+      summary: Readiness probe (DB reachable + Flyway baseline applied)
+      operationId: getHealthReady
+      tags: [system]
+      responses:
+        "200":
+          description: Service is ready to receive traffic
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+        "503":
+          description: Database unreachable or migrations not applied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [UP, DOWN]
+          example: UP

@@ -3,8 +3,11 @@ spring:
     name: skeleton-api
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/skeleton}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:postgres}
+    # Fail-fast: no fallback for credentials in the default/production profile.
+    # A missing DB_USER/DB_PASSWORD must abort startup with an unresolved
+    # placeholder error, not silently connect with a guessable default.
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
   jpa:
     # Immutable rule: schema changes go through Flyway only (V<n>__desc.sql).
     hibernate:
@@ -15,3 +18,13 @@ spring:
 
 server:
   port: 8080
+
+---
+# Local development only — never activate this profile in production.
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}

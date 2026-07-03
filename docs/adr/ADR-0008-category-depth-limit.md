@@ -74,6 +74,22 @@ Negatif (üstlenilen borç):
   unique `WHERE deleted_at IS NULL` adayı) — kategori modülü aktive
   edilirken backend ile netleştirilmeli.
 
+## Cycle Önleme
+
+Adjacency list, `depth` sınırından bağımsız olarak döngü (bir düğümün kendi
+alt ağacına parent olması) riskini taşır. Bunu birincil olarak **service
+katmanında** önlüyoruz: bir reparent (taşıma) işleminde, hedef yeni parent'ın
+taşınan düğümün alt ağacında (descendant) BULUNMADIĞI, AYNI transaction içinde
+ancestor-yürüyüşüyle doğrulanır (yeni parent'tan köke çıkılır; yol üzerinde
+taşınan düğüm görülürse işlem reddedilir). Bu kontrol, depth yeniden hesabı ve
+`yeniParentDepth + altAğaçYüksekliği <= 3` doğrulamasıyla aynı transaction'da
+yapılır (ADR-0008 Decision §1).
+
+JPA tek yazar olduğu sürece DB tarafı koruma YAGNI gereği eklenmez; çok-yazarlı
+(ham SQL) senaryo için örnek koruma trigger'ı `templates/db/README.md`'de
+opsiyonel olarak gösterilir (etkinleştirme kararı ilgili projeye aittir).
+`templates/db/categories.sql` başlık yorumu bu service kuralına işaret eder.
+
 ## Alternatives Considered
 
 - **Sınırsız derinlik (saf adjacency list, CHECK yok):** öngörülemez

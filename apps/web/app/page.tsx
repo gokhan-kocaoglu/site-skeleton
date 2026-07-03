@@ -1,4 +1,8 @@
+import { getLastUpdated } from "../lib/last-updated";
+
 export default function HomePage() {
+  const { iso, display } = getLastUpdated();
+
   return (
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-3xl font-semibold">Site Skeleton</h1>
@@ -18,6 +22,11 @@ export default function HomePage() {
           <li>packages/design-tokens — single source of truth for styling</li>
         </ul>
       </section>
+      <footer lang="tr" className="mt-10 text-sm text-text-muted">
+        <p>
+          Son güncelleme: <time dateTime={iso}>{display}</time>
+        </p>
+      </footer>
     </main>
   );
 }

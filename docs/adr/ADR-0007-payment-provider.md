@@ -39,3 +39,17 @@ edilmesi) ile yapılır; ancak o zaman ilgili SDK `apps/api/pom.xml`'e eklenir.
 - **Port'suz bırakmak (karar tamamen projeye)**: kupon-ödeme transaction dikişi
   ve webhook doğrulama zorunluluğu iskelette güvence altına alınamazdı;
   reddedildi.
+
+## Şerh — Sprint 4 (2026-07-03)
+
+Port asgari düzeyde güçlendirildi (brief §4.4, Denetim #22): `authorize`,
+`capture` ve `refund` çağrılarına `idempotencyKey` parametresi eklendi
+(çift-gönderim/retry güvenliği) ve `PaymentStatus` enum'u tanımlandı
+(`AUTHORIZED / CAPTURED / FAILED / REFUNDED / PENDING_3DS`). Bu değişiklik
+YALNIZ `templates/payments/` içindedir; derlenen build'i etkilemez.
+
+Bu güçlendirme portu üretime hazır kılmaz: **sağlayıcı seçiminde port, o
+sağlayıcının webhook / 3DS / partial-capture modeline göre YENİDEN tasarlanır;
+mevcut port bir taslaktır.** Port'un tam production sözleşmesi, sağlayıcıyı
+belirleyen ADR'de (bu ADR'nin ACCEPTED'a çekilmesi veya süpersede eden yeni
+ADR) sonlandırılır (bkz. brief Kapsam-dışı maddesi).

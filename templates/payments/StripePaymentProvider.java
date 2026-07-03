@@ -5,22 +5,23 @@ import java.math.BigDecimal;
 /**
  * Empty Stripe adapter — intentionally unimplemented until ADR-0007 is ACCEPTED.
  * Implementation checklist: add the Stripe SDK to pom.xml, map PaymentRequest to
- * PaymentIntent, read API keys from environment variables (never from files).
+ * PaymentIntent, send idempotencyKey as the Idempotency-Key request option,
+ * read API keys from environment variables (never from files).
  */
 public final class StripePaymentProvider implements PaymentProvider {
 
     @Override
-    public PaymentResult authorize(PaymentRequest request) {
+    public PaymentResult authorize(PaymentRequest request, String idempotencyKey) {
         throw notImplemented();
     }
 
     @Override
-    public PaymentResult capture(String providerReference) {
+    public PaymentResult capture(String providerReference, String idempotencyKey) {
         throw notImplemented();
     }
 
     @Override
-    public PaymentResult refund(String providerReference, BigDecimal amount) {
+    public PaymentResult refund(String providerReference, BigDecimal amount, String idempotencyKey) {
         throw notImplemented();
     }
 

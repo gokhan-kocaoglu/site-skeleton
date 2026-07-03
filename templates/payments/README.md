@@ -8,7 +8,7 @@ is decided per project.
 
 | File | Role |
 |------|------|
-| `PaymentProvider.java` | The port: authorize / capture / refund / verifyWebhook |
+| `PaymentProvider.java` | The port: authorize / capture / refund / verifyWebhook, `PaymentStatus` enum, per-call `idempotencyKey` |
 | `IyzicoPaymentProvider.java` | Empty adapter (throws `UnsupportedOperationException`) |
 | `StripePaymentProvider.java` | Empty adapter (throws `UnsupportedOperationException`) |
 
@@ -21,5 +21,12 @@ is decided per project.
    coupon passivation must share the payment-confirmation transaction.
 5. Webhook secrets go to environment variables, NEVER into files
    (see `.claude/rules/common/security.md`).
+6. When implementing `verifyWebhook`, compare signatures with a
+   **constant-time** comparison (e.g. `MessageDigest.isEqual`), never
+   `String.equals`. Persist each operation's `idempotencyKey` so retries can
+   be recognized across restarts.
 
 Money is `BigDecimal` end to end, persisted as `NUMERIC(12,2)` (binding rule).
+
+> Sprint 4 şerhi (ADR-0007): bu port bir TASLAKTIR. Sağlayıcı seçiminde port,
+> sağlayıcının webhook / 3DS / partial-capture modeline göre yeniden tasarlanır.

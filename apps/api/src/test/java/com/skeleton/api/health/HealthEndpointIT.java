@@ -19,8 +19,16 @@ class HealthEndpointIT extends AbstractIntegrationTest {
     private JdbcTemplate jdbcTemplate;
 
     @Test
-    void healthEndpointReturns200WithStatusUp() {
-        ResponseEntity<String> response = restTemplate.getForEntity("/api/health", String.class);
+    void liveReturns200Up() {
+        ResponseEntity<String> response = restTemplate.getForEntity("/api/health/live", String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).contains("\"status\":\"UP\"");
+    }
+
+    @Test
+    void readyReturns200UpWhenDbAndFlywayHealthy() {
+        ResponseEntity<String> response = restTemplate.getForEntity("/api/health/ready", String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).contains("\"status\":\"UP\"");

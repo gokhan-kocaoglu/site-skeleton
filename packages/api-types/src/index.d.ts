@@ -4,15 +4,32 @@
  */
 
 export interface paths {
-    "/api/health": {
+    "/api/health/live": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Health check */
-        get: operations["getHealth"];
+        /** Liveness probe (no dependency checks) */
+        get: operations["getHealthLive"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/health/ready": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Readiness probe (DB reachable + Flyway baseline applied) */
+        get: operations["getHealthReady"];
         put?: never;
         post?: never;
         delete?: never;
@@ -24,7 +41,15 @@ export interface paths {
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: never;
+    schemas: {
+        HealthStatus: {
+            /**
+             * @example UP
+             * @enum {string}
+             */
+            status: "UP" | "DOWN";
+        };
+    };
     responses: never;
     parameters: never;
     requestBodies: never;
@@ -33,7 +58,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    getHealth: {
+    getHealthLive: {
         parameters: {
             query?: never;
             header?: never;
@@ -42,16 +67,42 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Service is up */
+            /** @description Process is up */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        /** @example UP */
-                        status: string;
-                    };
+                    "application/json": components["schemas"]["HealthStatus"];
+                };
+            };
+        };
+    };
+    getHealthReady: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Service is ready to receive traffic */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthStatus"];
+                };
+            };
+            /** @description Database unreachable or migrations not applied */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthStatus"];
                 };
             };
         };
