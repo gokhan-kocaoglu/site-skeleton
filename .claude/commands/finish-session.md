@@ -30,5 +30,9 @@ commit'i, sonra memory yazımı, en sonda ayrı memory-closure commit'i.
 7. **Memory closure commit'i:** yalnız `project-memory/**` (+ varsa memory
    kanıt dosyaları) kapsayan ayrı commit — mesaj formatı:
    `chore(memory): close session <YYYY-MM-DD>` (insan onayıyla push).
-8. Kullanıcıya kapanış özeti ver: yapılanlar · iki commit'in hash'leri ·
+8. **Kapanış-sonrası tarama:** `node scripts/verify-structure.mjs` koş —
+   kanıt raporları ve memory dosyaları gate koşusundan SONRA yazıldığı için
+   yasak-pattern taraması onları ancak burada görür (CI #15 dersi). FAIL
+   çıkarsa düzelt ve closure commit'ini amend etme; yeni fix commit'i at.
+9. Kullanıcıya kapanış özeti ver: yapılanlar · iki commit'in hash'leri ·
    sonraki adımlar.

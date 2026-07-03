@@ -65,6 +65,7 @@
     ".claude/mcp/postgres.example.json",
     "prompts/README.md",
     "scripts/verify-structure.mjs",
+    "scripts/tests/verify-structure-negative.mjs",
     ".claude/rules/common/agents.md",
     ".claude/rules/common/code-review.md",
     ".claude/rules/common/coding-style.md",
@@ -495,7 +496,15 @@
       "pattern": "cicekci|çiçek",
       "flags": "i",
       "modes": ["skeleton-dev"],
-      "excludePaths": ["scripts/structure-manifest.json", "pnpm-lock.yaml"]
+      "note": "Kanıt ve memory dosyaları pattern'i TARİF edebilir (secret-scan PLACEHOLDER muafiyetiyle aynı sınıf); kod, config ve şablon dosyaları taranmaya devam eder. Negatif test: scripts/tests/verify-structure-negative.mjs",
+      "excludePaths": [
+        "scripts/structure-manifest.json",
+        "pnpm-lock.yaml",
+        "scripts/tests/verify-structure-negative.mjs",
+        "docs/test-reports/",
+        "docs/audits/",
+        "project-memory/"
+      ]
     },
     {
       "pattern": "framer-motion",

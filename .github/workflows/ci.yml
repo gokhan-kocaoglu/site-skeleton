@@ -57,6 +57,7 @@ jobs:
           node-version: 22
       - run: node .claude/hooks/tests/run-tests.js
       - run: node scripts/verify-structure.mjs
+      - run: node scripts/tests/verify-structure-negative.mjs
 
   gitleaks:
     name: gitleaks-full-history
