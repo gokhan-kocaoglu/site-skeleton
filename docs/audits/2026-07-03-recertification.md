@@ -9,9 +9,10 @@
 
 ## Genel Verdict: **PASS_WITH_RISKS**
 
-- **CRITICAL: 0 · HIGH: 0.** 27 maddenin 26'sı kanıt linkli kapatıldı; 1 madde
-  (#18) kaynak-eşleme boşluğu olarak kayıtlı (R7, aşağıda).
-- Kalan riskler (R1–R7) tek tek kayıtlı, sahipli ve production-engelsiz —
+- **CRITICAL: 0 · HIGH: 0.** **27/27 madde kanıt linkli kapatıldı.** (#18,
+  kaynak metnin kullanıcıdan alınmasıyla `4d917ae`'de kapandı — R7 KAPALI;
+  güncelleme notu tablo satırında.)
+- Kalan riskler (R1–R6) tek tek kayıtlı, sahipli ve production-engelsiz —
   verdict-policy kural 3 koşulları sağlanıyor. Kural 1 (CRITICAL→FAIL)
   tetiklenmedi.
 
@@ -56,7 +57,7 @@ commit hash'leri ilgili kanıt dosyalarının içindedir.
 | 15 | Spring Boot 3.5 + sürüm politikası (§3.5) | KAPANDI (S3) | pom 3.5.16; ADR-0009 ACCEPTED; dependabot.yml (kalibrasyon `31175ac`); mvn verify yeşil |
 | 16 | gate-build + contract-drift (§1.4) | KAPANDI (S1) | `gate-build.mjs`, `gate-contract-drift.mjs`; bu koşuda contract-drift PASS (S4'te openapi değişikliğiyle fiilen test edildi) |
 | 17 | gate-audit üç-durum (INCONCLUSIVE) (§1.4) | KAPANDI (S1) | `gate-audit.mjs` PASS/FAIL/INCONCLUSIVE modeli; CI'da INCONCLUSIVE=fail |
-| 18 | — (brief'te eşlenmemiş) | **BOŞLUK (R7)** | Kaynak denetim raporu repoda değil; brief 27 maddenin 26'sını numarayla eşliyor, #18 hiçbir sprint görevine bağlanmamış. Kapatma için kaynak rapor gerekli |
+| 18 | ESLint zorlama derinliği (kaynak metin kullanıcıdan alındı, P1) | **KAPANDI (final, `4d917ae`)** | web: `@next/eslint-plugin-next` coreWebVitals + react-hooks + jsx-a11y; admin: react-hooks + jsx-a11y + react-refresh; iki app'te cross-app `no-restricted-imports` sınırı; type-aware lint ölçümle ertelendi (ADR-0012, ~2× süre + tsc mükerrerliği; benimseme yolu belgeli); mevcut kod 0 ihlal, gate 7/7 (862 check) |
 | 19 | Kategori SQL düzeltmeleri (§4.1) | KAPANDI (S4) | `templates/db/categories.sql` + README (PG15+, trigger örneği); ADR-0008 Cycle Önleme; S4 raporu |
 | 20 | Kupon invariant'ları (§4.2) | KAPANDI (S4) | `templates/db/coupons.sql` (üç-durum CHECK, partial unique); ADR-0011 ACCEPTED |
 | 21 | BFF hardening (§4.3) | KAPANDI (S4) | `templates/admin-bff/server.mjs` (413/504/Secure) + README checklist; kalan checklist kalemleri R5 |
@@ -82,7 +83,7 @@ sağlayıcı seçimi ADR'ı.
 | R4 | `apps/web/app/page.tsx` "Spring Boot 3.3" metni bayat (baseline 3.5) | LOW | project-manager | İçerik-tazeleme görevi |
 | R5 | BFF-1/2/3 (rate-limit / Origin / CORS+content-type+yanıt şeması) aktivasyon checklist'inde | MEDIUM | aktivasyon-anı implementer | BFF kopyalanırken checklist tamamlanmadan deploy yasak |
 | R6 | `apps/web/tsconfig.tsbuildinfo` git'te izleniyor (build artefaktı) | LOW | orkestratör | `.gitignore` adayı, ayrı hijyen commit'i |
-| R7 | Denetim maddesi #18 kaynak-eşleme boşluğu | MEDIUM (süreç) | kullanıcı + orkestratör | Kaynak denetim raporundan #18 metni alınıp eşlenecek; gerekirse ek remediation görevi açılır |
+| R7 | ~~Denetim maddesi #18 kaynak-eşleme boşluğu~~ **KAPANDI** (`4d917ae`) | — | — | Kaynak metin kullanıcıdan alındı; ESLint zenginleştirme + ADR-0012 ile kapatıldı |
 
 ## Lessons (kayıt — gelecekteki projelere taşınır)
 
@@ -106,10 +107,27 @@ sağlayıcı seçimi ADR'ı.
    ve insan-okunur (display) değerler AYNI UTC gününden türetilmeli
    (`Intl.DateTimeFormat(..., { timeZone: "UTC" })`); aksi negatif-offset
    TZ'lerde gün kayması ve flaky test üretir.
+4. **#18 eşleme boşluğu (insan/orkestratör hatası sınıfı):** Boşluğun kaynağı
+   ajan değil, brief'i yazan orkestratörün 27 maddeden birini sprint
+   görevlerine eşlemeyi atlamasıydı. Ders: insan/orkestratör eşleme hataları
+   da tablo doğrulamasıyla yakalanır — kaynak-listeden türetilen her plan,
+   kapanışta madde-madde tablo mutabakatından geçirilmeli (eksik numara =
+   otomatik bulgu). Bu resertifikasyonun 27 madde tablosu boşluğu tam bu
+   mekanizmayla görünür kıldı; kaynak metin alınınca madde `4d917ae` ile
+   kapatıldı.
+
+## Güncelleme — 2026-07-03, #18 kapanışı (`4d917ae`)
+
+Kaynak metin kullanıcıdan alındı ve madde aynı gün kapatıldı: web'e
+CWV+hooks+a11y, admin'e hooks+a11y+refresh, iki app'e cross-app import sınırı;
+type-aware lint ölçüm sonucuyla ADR-0012'de ertelendi (meşru kapsam kararı).
+Doğrulama (`4d917ae` çalışma ağacında koşuldu, commit'le mühürlendi):
+`pnpm gate` 7/7 PASS — lint PASS (yeni kurallarla 0 ihlal), structure 862
+checks OK, mvn verify 3/3. Genel verdict PASS_WITH_RISKS olarak sürer
+(kalan: R1–R6).
 
 ## Sonraki Adımlar
 
-1. `git push` (insan onayı: `c112eee` + bu rapor commit'i) → CI 4 job yeşil
-   teyidi → bu raporun CI satırı tam kapanır.
-2. R7: kaynak denetim raporundan #18 içeriği eşlenir; gerekirse görev açılır.
-3. R1–R6 takip görevleri planlanır (resertifikasyon sonrası backlog).
+1. `git push` (insan onayı: `c112eee` + rapor commit'leri + `4d917ae`) →
+   CI 4 job yeşil teyidi → bu raporun CI satırı tam kapanır.
+2. R1–R6 takip görevleri planlanır (resertifikasyon sonrası backlog).
