@@ -65,7 +65,7 @@ commit hash'leri ilgili kanıt dosyalarının içindedir.
 | 23 | Baseline Security Gate (§4.6) | KAPANDI (S4) | `docs/audits/2026-07-03-baseline-security-review.md` — PASS; 4 MEDIUM sprint içinde 0'a indi |
 | 24 | Secret taraması derinleştirme (§2.4) | KAPANDI (S2+S4) | Genişletilmiş pattern seti + redirect-guard + CI Gitleaks; S4: settings.json Read-deny paritesi |
 | 25 | Backend baseline (§4.5) | KAPANDI (S4) | health live/ready + fail-fast config + `templates/operations/production-checklist.md`; IT 3/3 |
-| 26 | it-local kanıtı (§4.7) | KAPANDI (S4) | S4 raporu — BUILD SUCCESS 3/3; sapma (geçici PG16:55432 + env override) raporda belgeli |
+| 26 | it-local kanıtı (§4.7) | KAPANDI (S4) | S4 raporu — BUILD SUCCESS 3/3; sapma (geçici PG16:55432 + env override) raporda belgeli. **Güncelleme (2026-07-03): lokal PG ile de doğrulandı** — kullanıcı koşusu: `IT_DB_PASSWORD` user-env override, Docker KAPALI, `mvn verify -Pit-local` → BUILD SUCCESS, Tests run: 3 (insan teyidi); sapma tamamen kapandı, rehber yolu birebir çalışıyor |
 | 27 | Uçtan uca pilot (§4.8) | KAPANDI (S4) | Bootstrap dry-run + tam gate zinciri (remediation döngüsü dahil); S4 raporu + `docs/audits/seo/2026-07-03-web-home-last-updated.md` |
 
 **Kapsam-dışı kararlar (brief'in kendi kaydı; ayrı madde değil):** Playwright →

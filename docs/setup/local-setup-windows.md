@@ -45,6 +45,21 @@ winget install PostgreSQL.PostgreSQL.16
 Credentials default to `postgres`/`postgres`; override with the `IT_DB_USER` /
 `IT_DB_PASSWORD` environment variables (see `apps/api/pom.xml`).
 
+> **it-local pitfalls (learned the hard way):**
+>
+> 1. **Env names must match the yml exactly**: the profile reads
+>    `IT_DB_USER` / `IT_DB_PASSWORD` (see
+>    `apps/api/src/test/resources/application-it-local.yml`) — not
+>    `DB_USER`/`DB_PASSWORD`, not `PGPASSWORD`. A near-miss name silently
+>    falls back to `postgres`/`postgres` and fails auth.
+> 2. **Persistent env vars only reach NEW processes**: `setx` or the System
+>    Properties dialog does not update already-running shells — open a fresh
+>    terminal (or set per-session: `$env:IT_DB_PASSWORD = '...'`) before
+>    `mvn verify "-Pit-local"`.
+> 3. **VS Code's integrated terminal inherits env from VS Code itself**: a
+>    persistent variable set after VS Code started stays invisible in its
+>    terminals until VS Code is fully restarted (not just a new terminal tab).
+
 ## 5. Docker Desktop (optional, preferred test path)
 
 ```powershell
