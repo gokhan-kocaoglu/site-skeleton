@@ -5,30 +5,30 @@
 
 ## Aşama
 
-Faz 8.1 remediation — Sprint 1 (commit 6599841) ve Sprint 2 (commit 1310bb9) tamamlandı ve push'landı; CI yeşil (4 job). Sırada Sprint 3 (insan onayı bekliyor).
+Faz 8.1 remediation — Sprint 3 tamamlandı ve commit'lendi (2 komit: uygulama 1a512db + kanıt raporu 2070505); push + CI yeşil teyidi (4 job) bekleniyor. Sprint 4 onay bekliyor.
 
 ## Son Tamamlanan Görev
 
-Faz 8.1 Sprint 2 — verdict-policy.md (.claude/rules/common/) + web 9 birim test (Vitest, %90 coverage) + admin 2 test (axe-core, %100) + MSW mock server + ci.yml (4 job: quality-gate-ubuntu, api-verify, hooks-and-structure, gitleaks) + docs/operations/ci.md + lib/secret-patterns.js (8 yeni sınıf) + pre-bash-redirect-guard hook + 13 test fixture + verify-structure manifest 799 check. Kanıt: docs/test-reports/2026-07-03-faz8.1-sprint2-quality-gate.md (commit 8e253af).
+Faz 8.1 Sprint 3 — §3.1 kanıt reprodüksiyonu (session-close-validator ve fixture sessionclose-08), §3.2 memory closure döngüsü (Current Status 7 başlık + /finish-session iki-commit akışı), §3.3 SITE_URL guard (production fail-fast, apps/web/lib/site-url.ts, SITE_SKELETON_ALLOW_LOCALHOST_URL kaçış kapısı, OG/Twitter image, 6 birim testi %100), SEO yeniden denetim CRITICAL+HIGH kapandı → PASS_WITH_RISKS, §3.4 CLAUDE.md üç-liste + manifest drift kontrolü, §3.5 Spring Boot 3.3.13→3.5.16 + ADR-0009 ACCEPTED + ADR-0010 PROPOSED + dependabot.yml, §3.6 bootstrap script (deterministik, dry-run default, idempotent, iki gerçek hata yakalattı). Kanıt: docs/test-reports/2026-07-03-faz8.1-sprint3-quality-gate.md (PASS_WITH_RISKS verdict) + docs/audits/seo/2026-07-03-web-home-remediation.md (hash ref 2070505'te).
 
 ## Aktif Görev
 
-Yok (kapanış).
+Yok (sprint sınırında duruldu).
 
 ## Blocker
 
-Yok. (Not: branch protection enforcement pasif [private + ücretsiz plan]; telafi: insan onaylı push.)
+Yok. (Not: push insan onayı bekliyor; CI teyidi push sonrası.)
 
 ## Sonraki 3 Adım
 
-1. İnsan onayıyla Sprint 3'ü başlat (brief §3.1–3.6: kanıt reprodüksiyonu, memory closure, SITE_URL guard, CLAUDE.md üç-liste, Spring Boot 3.5.x + ADR-0009 + dependabot, bootstrap script).
-2. Sprint 3 sonunda pnpm gate + mvn verify (3.5.x) + bootstrap dry-run.
-3. Sprint 4 + final resertifikasyon (27 madde).
+1. `git push` (insan onayı) + CI 4 job yeşil teyidi → rapora not.
+2. Sprint 4 onayı (kategori/kupon SQL + DISABLED kararı, BFF hardening, payment port, backend baseline, baseline security review, it-local kanıtı, uçtan uca pilot).
+3. Final resertifikasyon (27 madde tablosu, manifest phase 8.1).
 
 ## Son Uygulama Commiti
 
-`8e253af docs: faz 8.1 sprint 2 kanit raporu`
+`1a512db feat(phase-8.1): sprint 3 — evidence reproducibility, closure cycle, site-url guard, three-list, boot 3.5, bootstrap`
 
 ## Memory Closure Commiti
 
-`7602983 chore(memory): close session 2026-07-03`
+`PENDING — bu kapanışın commiti bu yazımdan sonra atılacak; önceki kapanış: 7602983 chore(memory): close session 2026-07-03`
