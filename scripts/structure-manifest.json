@@ -239,6 +239,7 @@
     "docs/adr/ADR-0009-framework-support-policy.md",
     "docs/adr/ADR-0010-spring-boot-4-migration.md",
     "docs/adr/ADR-0011-coupon-status-model.md",
+    "docs/adr/ADR-0012-lint-enforcement-depth.md",
     "scripts/bootstrap-project.mjs",
     "scripts/quality/gate-build.mjs",
     "scripts/quality/gate-typecheck.mjs",
@@ -343,6 +344,7 @@
     "docs/adr/ADR-0009-framework-support-policy.md": 60,
     "docs/adr/ADR-0010-spring-boot-4-migration.md": 60,
     "docs/adr/ADR-0011-coupon-status-model.md": 60,
+    "docs/adr/ADR-0012-lint-enforcement-depth.md": 60,
     "scripts/quality/run-gates.mjs": 60
   },
   "noBom": [
