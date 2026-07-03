@@ -1,5 +1,5 @@
 {
-  "phase": 8,
+  "phase": 8.1,
   "mode": "skeleton-dev",
   "requiredDirs": [
     "apps/web",
@@ -257,8 +257,13 @@
     "docs/adr/ADR-0006-decision-log-convention.md",
     "docs/adr/ADR-0008-category-depth-limit.md",
     "docs/test-reports/2026-07-02-faz8-quality-gate.md",
+    "docs/test-reports/2026-07-03-faz8.1-sprint2-quality-gate.md",
+    "docs/test-reports/2026-07-03-faz8.1-sprint3-quality-gate.md",
+    "docs/test-reports/2026-07-03-faz8.1-sprint4-quality-gate.md",
+    "docs/audits/2026-07-03-baseline-security-review.md",
     "docs/audits/seo/2026-07-02-web-home.md",
     "docs/audits/seo/2026-07-03-web-home-remediation.md",
+    "docs/audits/seo/2026-07-03-web-home-last-updated.md",
     "project-memory/ClaudeTeamMemory/01_Projects/SiteSkeleton/Current Status.md",
     "project-memory/ClaudeTeamMemory/01_Projects/SiteSkeleton/08_Session_Logs/2026-07-02-session-01.md"
   ],

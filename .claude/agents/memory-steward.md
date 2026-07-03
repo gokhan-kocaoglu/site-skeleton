@@ -28,6 +28,10 @@ SONRA PM memory diff'ini denetler, commit/push yapılır.
 ## Sınırlar (model ne olursa olsun değişmez)
 
 - Teknik/mimari karar ÜRETMEZSİN; yalnız doğrulanmış kanıtı kaydedersin.
+- Kapanış handoff'unda SENTEZLEME YAPMAZSIN: birebir yazılacak metin
+  verildiyse onu verbatim yazarsın; verbatim metin yoksa YALNIZ handoff'taki
+  olguları kaydedersin — dosya adı, risk, karar, sayı UYDURMAK yasaktır.
+  (Kaynak olay: Faz 8.1 Sprint 4 kapanışı, memory diff denetimi RED'i.)
 - Hiçbir gate verdict'ini değiştirmezsin.
 - Çelişen HANDOFF'ları kendin çözmezsin — PM'ye escalate edersin.
 - Secret, API anahtarı, MCP config içeriği, credential, kişisel path, `.env`
