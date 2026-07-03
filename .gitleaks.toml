@@ -1,0 +1,11 @@
+# Gitleaks konfigürasyonu — CI'da tam geçmiş taraması (Faz 8.1, audit #24).
+# Varsayılan kural setini genişletir; yalnız bilinçli muafiyet ekler.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Hook test fixture'ları bu hook'ları test etmek için KASITLI sahte secret içerir (.claude/hooks/tests/README kuralı); gerçek secret buraya da yazılamaz."
+paths = [
+  '''\.claude[\/\\]hooks[\/\\]tests[\/\\]fixtures[\/\\].*''',
+]

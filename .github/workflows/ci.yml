@@ -1,0 +1,70 @@
+# CI — Faz 8.1 (audit #6). Doküman: docs/operations/ci.md
+# Job adları branch-protection required-checks listesiyle birebir aynıdır;
+# ad değiştirirsen dokümandaki listeyi ve GitHub ayarını birlikte güncelle.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: quality-gate-ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4 # sürümü package.json packageManager alanından okur
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # SKIP_API=1: backend'in kendi job'u var (api-verify); gate frontend
+      # zincirini koşar: build/typecheck/lint/test/audit/structure/contract-drift.
+      # CI env'i set olduğu için gate-audit INCONCLUSIVE = FAIL (merge engeli).
+      - run: pnpm gate
+        env:
+          SKIP_API: "1"
+
+  api:
+    name: api-verify-testcontainers
+    runs-on: ubuntu-latest # Docker mevcut; Testcontainers gerçek postgres:16 koşar
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - run: mvn --batch-mode verify
+        working-directory: apps/api
+
+  windows-parity:
+    name: hooks-and-structure-windows
+    runs-on: windows-latest # path/CRLF paritesi: hook'lar Windows'ta da çalışmalı
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node .claude/hooks/tests/run-tests.js
+      - run: node scripts/verify-structure.mjs
+
+  gitleaks:
+    name: gitleaks-full-history
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # tam git geçmişi taraması (audit #24)
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

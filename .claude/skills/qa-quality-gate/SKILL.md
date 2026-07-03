@@ -41,11 +41,15 @@ Kestirme: `pnpm gate` (scripts/quality/) 1–4'ü tek komutla koşar.
 
 ## Verdict (tam olarak biri)
 
-- **PASS** — tüm kriterler kanıtla karşılandı.
-- **PASS_WITH_RISKS** — karşılandı; kayıtlı ve kabul edilmiş risk(ler) var
-  (her risk: açıklama + sahip + takip adımı).
-- **FAIL** — en az bir kriter karşılanmadı; bulgular implementer'a döner,
-  önceki PASS'ler geçersiz (remediation: `feature-workflow` skill'i).
+Severity tanımları ve verdict kuralları TEK kaynaktan gelir:
+`.claude/rules/common/verdict-policy.md`. Özet (bağlayıcı metin oradadır):
+
+- **PASS** — CRITICAL ve HIGH yok; tüm kriterler kanıtla karşılandı.
+- **PASS_WITH_RISKS** — CRITICAL yok; kalan riskler kayıtlı + sahipli +
+  kabul edilmiş (her risk: açıklama + sahip + takip adımı).
+- **FAIL** — HERHANGİ bir gate'te CRITICAL/BLOCKER bulgu VEYA karşılanmayan
+  kriter; bulgular implementer'a döner, önceki PASS'ler geçersiz ve tüm
+  gate zinciri yeniden koşar (remediation: `feature-workflow` skill'i).
 
 ## Modlar
 

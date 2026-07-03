@@ -1,0 +1,16 @@
+{
+  "hook": "pre-bash-redirect-guard.js",
+  "name": "PowerShell Set-Content of a Stripe live key into config.json asks",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "PowerShell",
+    "tool_input": {
+      "command": "Set-Content -Path config.json -Value 'sk_live_9htK2qWm8ZnR5vB1'"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "permissionDecision": "ask",
+    "reasonIncludes": "Stripe"
+  }
+}

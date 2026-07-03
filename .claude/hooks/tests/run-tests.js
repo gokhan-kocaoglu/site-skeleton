@@ -148,6 +148,7 @@ const SETTINGS_PATH = path.join(ROOT, '.claude', 'settings.json');
 const EXPECTED_HOOKS = [
   'pre-write-secret-scan.js',
   'pre-bash-git-guard.js',
+  'pre-bash-redirect-guard.js',
   'post-edit-style-guard.js',
   'memory-writer-guard.js',
   'task-card-validator.js',

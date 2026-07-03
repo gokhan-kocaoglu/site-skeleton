@@ -1,0 +1,16 @@
+{
+  "hook": "pre-bash-redirect-guard.js",
+  "name": "appending a GitHub token to .env asks",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "echo GITHUB_TOKEN=ghp_0123456789abcdef0123456789abcdef >> .env"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "permissionDecision": "ask",
+    "reasonIncludes": "GitHub"
+  }
+}

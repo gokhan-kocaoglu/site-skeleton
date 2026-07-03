@@ -1,0 +1,15 @@
+{
+  "hook": "pre-bash-redirect-guard.js",
+  "name": "plain redirect without tokens passes silently",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "echo hello > notes.txt"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

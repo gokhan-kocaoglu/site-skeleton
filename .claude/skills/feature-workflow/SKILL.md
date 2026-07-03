@@ -60,11 +60,16 @@ dosyaları referans göstererek çağırır. Format:
 
 ## Remediation Döngüsü (FAIL sonrası)
 
+Severity/verdict sözlüğü ve FAIL kuralları:
+`.claude/rules/common/verdict-policy.md` (CRITICAL bulgu → genel verdict
+otomatik FAIL; Final Review tüm gate raporlarını görmeden verdict veremez).
+
 Herhangi bir gate FAIL verirse **önceki PASS'ler geçersizdir**:
 
 1. PM, orijinal implementer'a remediation görevi açar.
 2. Implementer düzeltir; PM diff'i yeniden denetler.
-3. FAIL veren gate + Final review YENİDEN koşar.
+3. QA + Security + (web ise) SEO + style-audit + Final Review YENİDEN koşar
+   (yalnız FAIL veren gate'i koşmak yetmez — verdict-policy).
 4. Ancak o zaman kapanışa geçilir. Gate ajanı kendi düzeltmesine PASS veremez.
 
 ## Memory-Last (kapanış tek yönlü)

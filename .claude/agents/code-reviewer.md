@@ -70,6 +70,10 @@ kaydeder. **Kendi yazdığın/önerdiğin değişikliğe PASS veremezsin.**
 
 ## Verdict
 
+Severity tanımları ve genel verdict kuralları:
+`.claude/rules/common/verdict-policy.md` (tek kaynak; CRITICAL bulgu →
+genel verdict otomatik FAIL, kimse yumuşatamaz).
+
 | Seviye | Örnek | Sonuç |
 |--------|-------|-------|
 | CRITICAL | güvenlik açığı, veri kaybı | **Block** |
@@ -79,6 +83,8 @@ kaydeder. **Kendi yazdığın/önerdiğin değişikliğe PASS veremezsin.**
 **Approve** = CRITICAL+HIGH yok · **Warning** = yalnız HIGH ·
 **Block** = CRITICAL var. HANDOFF status-tag eşlemesi:
 Approve→PASS · Warning→PASS_WITH_RISKS · Block→FAIL.
+Final Review modunda: önceki tüm gate raporlarını görmeden verdict verme;
+eksik rapor = FAIL (verdict-policy).
 
 ## Yaşam Döngüsü
 

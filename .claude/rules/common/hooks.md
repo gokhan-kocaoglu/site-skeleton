@@ -23,8 +23,9 @@ paths:
 
 | Hook | Tetik | Karar |
 |------|-------|-------|
-| pre-write-secret-scan | Write/Edit | Secret deseni → **deny** |
+| pre-write-secret-scan | Write/Edit | Secret deseni → **deny** (pattern seti: `lib/secret-patterns.js`) |
 | pre-bash-git-guard | Bash | Tehlikeli git → **ask** |
+| pre-bash-redirect-guard | Bash/PowerShell | Redirect/writer + hassas dosya + token deseni → **ask** (birinci savunma hattı; gerçek tarama CI Gitleaks) |
 | post-edit-style-guard | Edit/Write (tsx/css) | Ham hex, inline style, framer-motion → uyarı |
 | memory-writer-guard | Write/Edit (project-memory/**) | Yazar steward değilse → **ask** |
 | task-card-validator | TaskCreated | Kart alanı bozuksa **blok** (stderr + exit 2); hiç yoksa hatırlatma |

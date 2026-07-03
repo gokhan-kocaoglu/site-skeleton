@@ -1,0 +1,9 @@
+{
+  "hook": "pre-bash-redirect-guard.js",
+  "name": "garbage stdin fails open",
+  "stdinRaw": "this is not json {",
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}
