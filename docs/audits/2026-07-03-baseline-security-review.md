@@ -45,6 +45,11 @@ DB düzeyinde imkânsız (ADR-0011).
 
 ## Verdict: **PASS (Approve)**
 
+> **Düzeltme şerhi (2026-07-03, Faz 8.2):** Rapor kayıtlı/ertelenen MEDIUM
+> riskler (BFF-1/2/3) içerdiğinden verdict-policy kural 6 gereği geçerli
+> verdict **PASS_WITH_RISKS**'tir. Orijinal satır kanıt bütünlüğü için
+> korunmuştur.
+
 CRITICAL: 0 · HIGH: 0 · Kalan MEDIUM: BFF-1/2/3 (sahip: aktivasyon-anı
 implementer; BFF şablonu kopyalanırken checklist tamamlanmadan deploy yasak).
 verdict-policy kural 2 gereği genel Security gate sonucu PASS; kalan riskler

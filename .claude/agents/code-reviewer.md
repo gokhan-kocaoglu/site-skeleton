@@ -72,7 +72,8 @@ kaydeder. **Kendi yazdığın/önerdiğin değişikliğe PASS veremezsin.**
 
 Severity tanımları ve genel verdict kuralları:
 `.claude/rules/common/verdict-policy.md` (tek kaynak; CRITICAL bulgu →
-genel verdict otomatik FAIL, kimse yumuşatamaz).
+genel verdict otomatik FAIL, kimse yumuşatamaz). Ertelenmiş riskler de
+açık risktir → PASS verilemez (verdict-policy kural 6).
 
 | Seviye | Örnek | Sonuç |
 |--------|-------|-------|

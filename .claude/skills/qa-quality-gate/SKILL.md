@@ -52,6 +52,8 @@ Severity tanımları ve verdict kuralları TEK kaynaktan gelir:
 - **FAIL** — HERHANGİ bir gate'te CRITICAL/BLOCKER bulgu VEYA karşılanmayan
   kriter; bulgular implementer'a döner, önceki PASS'ler geçersiz ve tüm
   gate zinciri yeniden koşar (remediation: `feature-workflow` skill'i).
+- Ertelenmiş riskler de açık risktir → verdict PASS olamaz
+  (verdict-policy **kural 6**).
 
 ## Modlar
 

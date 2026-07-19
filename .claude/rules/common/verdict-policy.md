@@ -30,6 +30,10 @@ paths:
    Kayıtsız risk = FAIL.
 4. **FAIL** — kural 1 tetiklendi VEYA en az bir kabul kriteri karşılanmadı.
 5. code-reviewer eşlemesi: Approve→PASS · Warning→PASS_WITH_RISKS · Block→FAIL.
+6. Açık risk YOK → **PASS**. LOW/MEDIUM/HIGH risk bilinçli + kayıtlı + sahipli →
+   **PASS_WITH_RISKS**. CRITICAL/BLOCKER → **FAIL**. **Ertelenmiş riskler de
+   açık risktir**: rapora "sonraya bırakıldı" diye kaydedilen bulgu varken
+   verdict PASS olamaz — doğru verdict PASS_WITH_RISKS'tir.
 
 ## Remediation Döngüsü
 
