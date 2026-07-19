@@ -4,6 +4,10 @@
 - Date: 2026-07-03
 - Authors: orkestratör (ölçüm + kayıt); onay: kullanıcı (denetim #18 kapatma görevi)
 
+> **Şerh (2026-07-03, Faz 8.2):** Bilinen 2 bulgu (`metadata.test.ts`
+> no-unsafe-assignment) Faz 8.2/C10'da açık tiplemeyle kapatıldı; type-aware
+> kural benimseme kararı ilk gerçek projede verilir (statü değişmedi).
+
 ## Context
 
 Denetim #18 (P1): web/admin ESLint yalnız `@eslint/js` + `typescript-eslint`

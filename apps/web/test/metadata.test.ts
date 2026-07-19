@@ -1,3 +1,4 @@
+import type { MetadataRoute } from "next";
 import { describe, expect, it } from "vitest";
 import { metadata } from "../app/layout";
 import robots from "../app/robots";
@@ -29,7 +30,7 @@ describe("root metadata export", () => {
 
 describe("robots route", () => {
   it("allows crawling and points at the sitemap", () => {
-    const result = robots();
+    const result: MetadataRoute.Robots = robots();
     expect(result.rules).toMatchObject({ userAgent: "*", allow: "/" });
     expect(String(result.sitemap)).toMatch(/\/sitemap\.xml$/);
   });
@@ -37,13 +38,13 @@ describe("robots route", () => {
 
 describe("sitemap route", () => {
   it("lists the home page with an absolute URL", () => {
-    const entries = sitemap();
+    const entries: MetadataRoute.Sitemap = sitemap();
     expect(entries.length).toBeGreaterThan(0);
     expect(entries[0].url).toMatch(/^https?:\/\//);
   });
 
   it("pins lastModified to the last-updated value instead of the build clock", () => {
-    const entries = sitemap();
+    const entries: MetadataRoute.Sitemap = sitemap();
     expect(entries[0].lastModified).toBe(getLastUpdated().iso);
   });
 });
