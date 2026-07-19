@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!--
+    Neutral placeholder favicon (skeleton-bars motif). A standalone SVG is
+    rasterized without the CSS pipeline, so it cannot resolve tokens.css
+    custom properties: the design-token VALUES are inlined verbatim below.
+    Keep them in sync with packages/design-tokens/tokens.css.
+    (.svg is deliberately outside the raw-hex scan's extension scope and
+    post-edit-style-guard; this comment documents the intent.)
+  -->
+  <!-- #4f46e5 = --color-primary -->
+  <rect width="32" height="32" rx="7" fill="#4f46e5"/>
+  <!-- #ffffff = --color-primary-foreground -->
+  <rect x="8" y="9" width="16" height="3" rx="1.5" fill="#ffffff"/>
+  <rect x="8" y="14.5" width="11" height="3" rx="1.5" fill="#ffffff"/>
+  <rect x="8" y="20" width="16" height="3" rx="1.5" fill="#ffffff"/>
+</svg>
