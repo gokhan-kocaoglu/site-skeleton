@@ -1,0 +1,15 @@
+{
+  "hook": "session-close-validator.js",
+  "name": "CLI mode PENDING closure prints non-blocking seal reminder (exit stays 0)",
+  "args": [
+    "--file",
+    "fixtures/status/good-status-pending-closure.md"
+  ],
+  "cwd": ".claude/hooks/tests",
+  "stdinRaw": "",
+  "expect": {
+    "exitCode": 0,
+    "stdoutIncludes": "PASS",
+    "stderrIncludes": "mühür zorunlu"
+  }
+}

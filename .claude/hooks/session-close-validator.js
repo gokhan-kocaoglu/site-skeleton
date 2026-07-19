@@ -96,6 +96,14 @@ function validateStatusFile(filePath) {
         '(kapanış commiti sonra atılacaksa "PENDING — <not>" yaz)'
     );
   }
+  if (closure !== null && /\bPENDING\b/.test(closure)) {
+    // Faz 8.2 (brief 1.4): blok OLMAYAN hatırlatma — PENDING bir sonraki
+    // kapanışta gerçek closure hash'iyle mühürlenmek zorundadır.
+    console.error(
+      'UYARI — Memory Closure Commiti PENDING: bir sonraki kapanışta mühür zorunlu ' +
+        '(chore(memory): seal <session> — closure hash <hash>)'
+    );
+  }
   return problems;
 }
 

@@ -68,3 +68,9 @@ kişisel path. Tespit edilirse redakte referansla geçilir.
 
 Oturum bitmeden `/finish-session`: Current Status güncellenir + session log
 yazılır (`08_Session_Logs/`). Sonraki oturumun giriş noktası Current Status'tur.
+
+**Mühür konvansiyonu (milestone/sertifikasyon kapanışı):** closure commit
+atıldıktan SONRA steward, Current Status'taki `PENDING — <not>` satırını
+gerçek closure hash'iyle değiştirir; tek satırlık
+`chore(memory): seal <session> — closure hash <hash>` commit'i atılır.
+Mühür commit'i hiçbir kanıt/raporda referanslanmaz — zincir orada sonlanır.
