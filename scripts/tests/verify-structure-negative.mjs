@@ -7,7 +7,7 @@
  * not loosen the scan (CI #15 regression) and structural rules actually
  * bite. Node stdlib only. Exit 0 = all scenarios behave, exit 1 otherwise.
  */
-import { writeFileSync, rmSync } from 'node:fs';
+import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -33,6 +33,28 @@ const scenarios = [
       const tmp = path.join(ROOT, '.claude', 'rules', '__handoff-negative.tmp.md');
       writeFileSync(tmp, `# negative fixture\n\nHANDOFF → ${'team-' + 'lead'}\n`);
       return [tmp];
+    },
+  },
+  {
+    name: 'ACTIVATION.md olmadan aktive edilen admin-bff FAIL üretir (activationGates)',
+    expectFragment: 'ACTIVATION.md olmadan',
+    setup() {
+      const dir = path.join(ROOT, 'apps', 'admin-bff');
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(path.join(dir, 'package.json'), '{ "name": "admin-bff", "private": true }\n');
+      return [dir];
+    },
+  },
+  {
+    name: 'işaretsiz checklist maddesi kalan ACTIVATION.md FAIL üretir (activationGates)',
+    expectFragment: 'işaretsiz checklist maddesi',
+    setup() {
+      const dir = path.join(ROOT, 'apps', 'admin-bff');
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(path.join(dir, 'package.json'), '{ "name": "admin-bff", "private": true }\n');
+      const ticked = Array.from({ length: 11 }, (_, i) => `- [x] item ${i + 1}`).join('\n');
+      writeFileSync(path.join(dir, 'ACTIVATION.md'), `# checklist\n\n${ticked}\n- [ ] item 12\n`);
+      return [dir];
     },
   },
 ];

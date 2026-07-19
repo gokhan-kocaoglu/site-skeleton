@@ -201,6 +201,44 @@ if (manifest.handoffTargets) {
   }
 }
 
+// 7f. Activation gates (Faz 8.2, brief 3.2/R5): a template activated under
+// apps/ must carry a fully ticked ACTIVATION.md hardening checklist (zero
+// "- [ ]", exactly the declared number of "- [x]"). Detection is deliberately
+// limited to apps/ — the pristine, unticked template under templates/ never
+// trips this rule.
+for (const gate of manifest.activationGates ?? []) {
+  const appsDir = p('apps');
+  if (!existsSync(appsDir)) continue;
+  for (const entry of readdirSync(appsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    let activated = entry.name === gate.name;
+    if (!activated) {
+      const pkgPath = path.join(appsDir, entry.name, 'package.json');
+      if (existsSync(pkgPath)) {
+        try {
+          activated = JSON.parse(readFileSync(pkgPath, 'utf8')).name === gate.name;
+        } catch {
+          /* invalid package.json is caught by its own checks */
+        }
+      }
+    }
+    if (!activated) continue;
+    const actRel = `apps/${entry.name}/ACTIVATION.md`;
+    if (!existsSync(p(actRel))) {
+      check(false, `apps/${entry.name}: aktive şablon ACTIVATION.md olmadan (hardening checklist zorunlu)`);
+      continue;
+    }
+    const text = readFileSync(p(actRel), 'utf8');
+    const unchecked = (text.match(/- \[ \]/g) ?? []).length;
+    const ticked = (text.match(/- \[x\]/gi) ?? []).length;
+    check(unchecked === 0, `${actRel}: ${unchecked} işaretsiz checklist maddesi (- [ ]) var`);
+    check(
+      ticked === gate.checklistItems,
+      `${actRel}: ${ticked} işaretli madde (beklenen ${gate.checklistItems})`
+    );
+  }
+}
+
 // 7e. Tracked-forbidden files (Faz 8.2, brief 2.1): build artefacts like
 // *.tsbuildinfo regenerate as UNTRACKED files on every build, so a tree walk
 // would false-positive; only the git index can say "tracked". Deliberately

@@ -11,29 +11,14 @@ the short-lived access token in memory only.
 
 ## Hardening checklist (zorunlu — production öncesi)
 
-Already in the skeleton (baseline, still review per project):
+The full, tickable checklist lives in **[`ACTIVATION.md`](./ACTIVATION.md)** —
+copy it together with the template and tick every item before deploy. The
+structural gate (`verify-structure` activationGates) FAILs the build while an
+activated copy under `apps/` still has unticked boxes.
 
-- [x] Request body size limit (`MAX_BODY_BYTES`, 413 on overflow)
-- [x] Upstream timeout via `AbortSignal.timeout` (504 on a stuck API)
-- [x] `Secure` cookie attribute tied to `NODE_ENV=production`
-
-Must be added per project before any deploy:
-
-- [ ] Origin / CSRF defense: validate `Origin`/`Sec-Fetch-Site` on every POST
-      (SameSite=Strict helps but is not sufficient alone)
-- [ ] `content-type: application/json` validation on requests (reject others)
-- [ ] Explicit CORS policy (deny by default; allow only the admin origin)
-- [ ] Response shape validation of upstream API payloads (never trust blindly;
-      current code assumes `{ accessToken, refreshToken }`)
-- [ ] Cookie `Max-Age` aligned with the API's refresh-token TTL
-- [ ] Structured logging (JSON, correlation ID) — tokens/credentials NEVER logged
-- [ ] Rate limiting on `/auth/*` (brute-force defense)
-- [ ] Body-limit robustness: count **bytes** (not string length) and attach a
-      `req.on('error', ...)` handler so a socket error cannot leave the
-      request hanging
-- [ ] Correct error semantics: malformed JSON → 400 (not 500); `204 No Content`
-      responses carry no body
-- [ ] Tests: unit for cookie/body/timeout paths + integration against the API
+Already in the skeleton (baseline, still re-verify per project): byte-counted
+body limit (413) · upstream timeout (504) · `Secure` cookie via `NODE_ENV` ·
+malformed client JSON → 400 · malformed upstream JSON → 502 · body-less 204.
 
 ## Flow
 
