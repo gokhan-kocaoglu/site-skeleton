@@ -2,9 +2,12 @@
 //   PASS         no high/critical findings (moderate/low -> WARN, still pass)
 //   FAIL         high+critical > 0
 //   INCONCLUSIVE the scan could not run or be parsed (offline registry, parse
-//                error). Locally a warning (exit 0) so the gate never blocks on
+//                error). Locally non-blocking so the gate never blocks on
 //                infrastructure; in CI (CI env var set) a merge blocker (exit 1)
 //                because "could not scan" must never read as "scanned clean".
+// Exit-code contract (Faz 8.2, brief 3.1): 0 = PASS · 1 = FAIL (also
+// INCONCLUSIVE in CI) · 2 = INCONCLUSIVE locally. run-gates.mjs maps exit 2
+// to an INCONCLUSIVE row so the summary never shows it as a silent PASS.
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -24,10 +27,10 @@ try {
   const inCi = !!process.env.CI;
   console.log(
     `[gate-audit] INCONCLUSIVE: could not run/parse the audit (registry unreachable?) - ` +
-      (inCi ? 'CI treats this as FAIL' : 'local warning only'),
+      (inCi ? 'CI treats this as FAIL' : 'local warning only (exit 2, surfaced by run-gates)'),
   );
   if (result.stderr) console.log(result.stderr.slice(0, 1000));
-  process.exit(inCi ? 1 : 0);
+  process.exit(inCi ? 1 : 2);
 }
 
 const { info = 0, low = 0, moderate = 0, high = 0, critical = 0 } = counts;

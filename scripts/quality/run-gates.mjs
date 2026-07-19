@@ -5,6 +5,10 @@
 // evidence). Gate order is binding (Faz 8.1): build first (cheapest total signal
 // after cache), structure and contract-drift last (they assert the repo's shape
 // after everything else ran).
+// Exit-code contract (Faz 8.2, brief 3.1): gate scripts exit 0 = PASS,
+// 2 = INCONCLUSIVE (today only gate-audit, locally), anything else = FAIL.
+// Overall: any FAIL -> exit 1; else any INCONCLUSIVE -> PASS_WITH_WARNINGS
+// (exit 0, warning visible in the table); else "All gates PASS".
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -18,15 +22,23 @@ for (const gate of GATES) {
   const run = spawnSync(process.execPath, [path.join(here, `gate-${gate}.mjs`)], {
     stdio: 'inherit',
   });
-  results.push({ gate, ok: run.status === 0 });
+  const status = run.status === 0 ? 'PASS' : run.status === 2 ? 'INCONCLUSIVE' : 'FAIL';
+  results.push({ gate, status });
 }
 
 console.log('\nGate            Result');
-console.log('--------------  ------');
-for (const { gate, ok } of results) {
-  console.log(`${gate.padEnd(14)}  ${ok ? 'PASS' : 'FAIL'}`);
+console.log('--------------  ------------');
+for (const { gate, status } of results) {
+  console.log(`${gate.padEnd(14)}  ${status}`);
 }
 
-const allPass = results.every((r) => r.ok);
-console.log(allPass ? '\nAll gates PASS' : '\nOne or more gates FAILED');
-process.exit(allPass ? 0 : 1);
+if (results.some((r) => r.status === 'FAIL')) {
+  console.log('\nOne or more gates FAILED');
+  process.exit(1);
+}
+if (results.some((r) => r.status === 'INCONCLUSIVE')) {
+  console.log('\nPASS_WITH_WARNINGS — audit inconclusive locally');
+  process.exit(0);
+}
+console.log('\nAll gates PASS');
+process.exit(0);
