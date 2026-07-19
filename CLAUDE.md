@@ -27,6 +27,8 @@ e2e (Playwright) · db (kategori/kupon SQL).
 - framer-motion import YASAK → "motion" paketi kullanılır (motion/react).
 - Ham hex renk YASAK → packages/design-tokens. Inline style YASAK.
 - Secret hiçbir dosyaya yazılmaz (.env.example placeholder hariç).
+- Kapsam: başlangıç minimumu %60 (gate eşiği); feature bazında hedef %80;
+  auth/ödeme/para hesabı gibi kritik domainlerde %80 zorunlu.
 - Kategoriler hiyerarşiktir (parent_id, opsiyonel). Kupon: 8 hane benzersiz, %5–%50 (5'er adım),
   tek kullanımlık, ödeme onayında pasifleşir. (SQL şablonları: templates/db/)
 

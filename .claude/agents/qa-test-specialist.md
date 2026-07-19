@@ -38,7 +38,7 @@ Test dosyaları (ilgili app içinde) · `docs/test-reports/**`.
   entegrasyon / E2E / erişilebilirlik / (web ise) SEO etkisi.
 - Doğrulama döngüsünü çalıştır ve çıktıyı rapora göm:
   `pnpm gate` · API değiştiyse `cd apps/api; mvn verify` (Docker yoksa
-  `-Pit-local`) · kapsam ≥ %80.
+  `-Pit-local`) · kapsam: kademeli eşikler (`rules/common/testing.md`).
 - HIGH-RISK işte adversarial test tasarla: gerçek concurrency, güvenlik
   matrisi, para/sipariş bütünlüğü, migration/veri kaybı doğrulaması.
 - Flaky test ile gerçek race condition'ı ayırt et

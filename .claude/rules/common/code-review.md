@@ -22,7 +22,7 @@ dal hedef dalla güncel olmalı.
 - [ ] Hatalar açıkça ele alınıyor; sessiz yutma yok
 - [ ] Hardcoded secret/credential yok
 - [ ] console.log / System.out kalıntısı yok
-- [ ] Yeni işlevsellik için test var; kapsam ≥ %80
+- [ ] Yeni işlevsellik için test var; kapsam eşikleri: [testing.md](testing.md)
 
 ## Güvenlik Tetikleyicileri — DUR ve code-reviewer ajanını kullan
 

@@ -23,7 +23,9 @@ commit hash'ini içerir; commit'lenmemiş kodla üretilen kanıt geçersizdir**
    `cd apps/api; mvn verify -DskipTests` derleme kontrolü)
 2. **Statik analiz** — `pnpm type-check` + `pnpm lint`
 3. **Test + kapsam** — `pnpm test`; API değiştiyse `cd apps/api; mvn verify`
-   (Docker yoksa `mvn verify -Pit-local`); kapsam hedefi ≥ %80
+   (Docker yoksa `mvn verify -Pit-local`). Kapsam: başlangıç minimumu %60
+   (gate eşiği); feature bazında hedef %80; auth/ödeme/para hesabı gibi
+   kritik domainlerde %80 zorunlu.
 4. **Güvenlik taraması** — `pnpm audit --prod` (high/critical → FAIL);
    diff'te secret/credential taraması
 5. **Diff incelemesi** — değişen dosya listesi task card owned-files ile

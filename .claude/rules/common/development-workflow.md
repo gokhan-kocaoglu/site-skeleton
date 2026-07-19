@@ -24,7 +24,7 @@ paths:
 
 2. **TDD Yaklaşımı**
    - Önce test yaz (RED) → geçir (GREEN) → iyileştir (REFACTOR)
-   - Kapsam hedefi ≥ %80 — bkz. [testing.md](./testing.md)
+   - Kapsam: kademeli eşikler — bkz. [testing.md](./testing.md)
 
 3. **Kod İncelemesi**
    - Kod yazıldıktan hemen sonra **code-reviewer** ajanı

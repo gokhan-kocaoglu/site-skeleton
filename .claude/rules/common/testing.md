@@ -4,7 +4,10 @@ paths:
 ---
 # Test Gereksinimleri
 
-## Minimum Kapsam: %80
+## Kapsam (kademeli eşikler)
+
+Başlangıç minimumu %60 (gate eşiği); feature bazında hedef %80;
+auth/ödeme/para hesabı gibi kritik domainlerde %80 zorunlu.
 
 Üç test tipi de gereklidir:
 1. **Birim** — fonksiyonlar, util'ler, bileşenler
@@ -19,7 +22,7 @@ backend JUnit 5 + Mockito + Testcontainers (`postgres:16`).
 1. Önce testi yaz (RED) — çalıştır, BAŞARISIZ olmalı
 2. Geçirecek minimum kodu yaz (GREEN)
 3. Refactor et (IMPROVE)
-4. Kapsamı doğrula (≥ %80)
+4. Kapsamı doğrula (kademeli eşikler: yukarıdaki Kapsam bölümü)
 
 ## Test Yapısı (AAA)
 
