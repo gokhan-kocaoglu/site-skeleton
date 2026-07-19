@@ -5,6 +5,7 @@
  * Node stdlib only. Exit 0 = PASS, exit 1 = FAIL.
  */
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -198,6 +199,23 @@ if (manifest.handoffTargets) {
       check(valid.has(m[1]), `${rel}: HANDOFF hedefi geçersiz ajan: ${m[1]}`);
     }
   }
+}
+
+// 7e. Tracked-forbidden files (Faz 8.2, brief 2.1): build artefacts like
+// *.tsbuildinfo regenerate as UNTRACKED files on every build, so a tree walk
+// would false-positive; only the git index can say "tracked". Deliberately
+// git-based; git missing/failing -> fail-safe skip with a note.
+for (const pattern of manifest.trackedForbidden ?? []) {
+  const git = spawnSync('git', ['ls-files', pattern], { cwd: ROOT, encoding: 'utf8' });
+  if (git.error || git.status !== 0) {
+    console.error(`  ! trackedForbidden kontrolü atlandı (git yok/başarısız): ${pattern}`);
+    continue;
+  }
+  const tracked = git.stdout.trim();
+  check(
+    tracked === '',
+    `izlenen yasak dosya [${pattern}]: ${tracked.replace(/\r?\n/g, ', ')} (git rm --cached ile çıkar)`
+  );
 }
 
 // 8. Forbidden patterns (repo-wide scan of text files). A rule with a

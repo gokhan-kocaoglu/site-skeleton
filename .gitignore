@@ -10,6 +10,7 @@ dist/
 target/
 .turbo/
 coverage/
+*.tsbuildinfo
 
 # Graphify output (hook test fixture is the one committed exception)
 graphify-out/

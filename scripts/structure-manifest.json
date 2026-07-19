@@ -492,6 +492,7 @@
     "agentsDir": ".claude/agents",
     "skillsDir": ".claude/skills"
   },
+  "trackedForbidden": ["*.tsbuildinfo"],
   "handoffTargets": {
     "dirs": [".claude/agents", ".claude/skills", ".claude/commands", ".claude/rules"],
     "validAgents": [
