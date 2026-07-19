@@ -12,12 +12,12 @@ export const metadata: Metadata = {
     template: "%s | Site Skeleton",
   },
   description:
-    "A production-ready web project skeleton: Next.js 15 storefront, Vite + React admin panel, and a Spring Boot 3 API with PostgreSQL and Flyway migrations.",
+    "A production-ready web project skeleton: Next.js storefront, Vite + React admin panel, and a Spring Boot API with PostgreSQL and Flyway migrations.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "Site Skeleton",
     description:
-      "Production-ready monorepo starter: Next.js 15, Vite + React admin, Spring Boot 3 API.",
+      "Production-ready monorepo starter: Next.js, Vite + React admin, Spring Boot API.",
     url: baseUrl,
     siteName: "Site Skeleton",
     type: "website",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Site Skeleton",
     description:
-      "Production-ready monorepo starter: Next.js 15, Vite + React admin, Spring Boot 3 API.",
+      "Production-ready monorepo starter: Next.js, Vite + React admin, Spring Boot API.",
   },
 };
 

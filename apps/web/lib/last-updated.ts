@@ -8,14 +8,14 @@
 export interface LastUpdated {
   /** "YYYY-MM-DD", for the <time dateTime> attribute. */
   iso: string;
-  /** tr-TR long format, e.g. "3 Temmuz 2026". */
+  /** en-US long format, e.g. "July 3, 2026". */
   display: string;
 }
 
 export function getLastUpdated(date: Date = new Date()): LastUpdated {
   const iso = date.toISOString().slice(0, 10);
   // iso and display are derived from the same UTC calendar day (deterministic, TZ-independent).
-  const display = new Intl.DateTimeFormat("tr-TR", {
+  const display = new Intl.DateTimeFormat("en-US", {
     day: "numeric",
     month: "long",
     year: "numeric",

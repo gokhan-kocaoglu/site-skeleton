@@ -7,6 +7,8 @@ the work through the quality-gate chain.
 - Binding spec: `docs/source-briefs/skeleton-brief.md`
 - Working constitution: `CLAUDE.md` (token-minimal; read it first)
 - Governance language is Turkish; code, comments and developer docs are English.
+- The template's public-facing surface (`apps/web` pages/metadata) is English; the real
+  project's language is a per-project brief decision.
 
 ## Stack
 

@@ -19,7 +19,7 @@ describe("HomePage", () => {
 
   it("renders a last-updated time element with a valid ISO date and visible label", () => {
     render(<HomePage />);
-    const timeElement = screen.getByText(/son güncelleme:/i).querySelector("time");
+    const timeElement = screen.getByText(/last updated:/i).querySelector("time");
     expect(timeElement).not.toBeNull();
     expect(timeElement).toHaveAttribute("datetime", expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/));
   });
