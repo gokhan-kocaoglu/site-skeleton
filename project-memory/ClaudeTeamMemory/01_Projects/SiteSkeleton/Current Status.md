@@ -31,4 +31,4 @@ Yok.
 
 ## Memory Closure Commiti
 
-`PENDING — bu kapanışın commiti bu yazımdan sonra atılacak; önceki kapanış: 3144fa3 chore(memory): close session 2026-07-03 (session 04)`
+`21bd1f9 chore(memory): close session 2026-07-03 (session 05)`
