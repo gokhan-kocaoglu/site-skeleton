@@ -375,7 +375,7 @@ git init
 mkdir refs
 git clone --depth 1 https://github.com/affaan-m/ECC refs/ecc
 git clone --depth 1 https://github.com/safishamsi/graphify refs/graphify
-git clone --depth 1 https://github.com/gokhan-kocaoglu/premium-3d-cicekci refs/cicekci
+git clone --depth 1 <referans-repo-url> refs/cicekci
 git clone --depth 1 https://github.com/ruvnet/ruflo refs/ruflo
 "refs/" | Out-File -Encoding utf8 .gitignore
 code .        # VS Code aç → entegre terminal → claude
