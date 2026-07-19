@@ -108,7 +108,10 @@ create it under `packages/` when the project needs a shared component library.
 
 ## Build phases
 
-The skeleton was built in 8 verified phases: 1 repo hygiene → 2 rules/skills distillation →
-3 agents/commands/vault → 4 hooks + harness → 5 frontend workspaces → 6 backend API +
-domain templates → 7 quality gates + docs + ADR drafts → 8 validation tour. Each phase
-extends `scripts/structure-manifest.json`; run `node scripts/verify-structure.mjs` to verify.
+The skeleton was built in 8 build phases + 8.1 remediation + 8.2 sealing (recertified):
+1 repo hygiene → 2 rules/skills distillation → 3 agents/commands/vault → 4 hooks + harness →
+5 frontend workspaces → 6 backend API + domain templates → 7 quality gates + docs + ADR
+drafts → 8 validation tour; then 8.1 (27-item independent audit remediation, recertified
+27/27) and 8.2 (second-audit governance seals + hygiene closures; repo public, ruleset
+enforcement active). Each phase extends `scripts/structure-manifest.json`; run
+`node scripts/verify-structure.mjs` to verify.

@@ -131,3 +131,40 @@ checks OK, mvn verify 3/3. Genel verdict PASS_WITH_RISKS olarak sürer
 1. `git push` (insan onayı: `c112eee` + rapor commit'leri + `4d917ae`) →
    CI 4 job yeşil teyidi → bu raporun CI satırı tam kapanır.
 2. R1–R6 takip görevleri planlanır (resertifikasyon sonrası backlog).
+
+---
+
+## Faz 8.2 Eki — Mühürleme Sprinti Kapanış Tablosu (2026-07-19)
+
+> Bu ek, ikinci bağımsız denetimin (6.5-7.0 → 8.0-8.3, Koşullu GO) A–F /
+> N1–N9 / R1–R6 bulgularının kapanışını işler. Yukarıdaki orijinal metin
+> korunmuştur; bu bölüm yalnız ektir. Kanıt ayrıntıları:
+> `docs/test-reports/2026-07-03-faz8.2-sealing.md`.
+
+**CI run URL şerhi (N4):** Yukarıdaki "Doğrulama Zinciri" bölümünün CI satırı
+insan teyidine dayanıyordu; N4 kuralı gereği bu ekten itibaren kanıt raporları
+CI run URL'si taşır. Faz 8.2 push'unun run'ı:
+<https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/29685746130>
+(run #28, commit `0e9b80d`, 4/4 job PASS, gitleaks "No leaks detected").
+
+| Bulgu | Konu | Kapatan | Kanıt |
+|---|---|---|---|
+| A / N5 | Branch protection enforcement | Seçenek A: repo **Public** + ruleset **Active** (kullanıcı teyidi, 2026-07-19) | ci.md kapanış şerhi (C15); dört required check aktif |
+| B / N3 | Memory mühür konvansiyonu | `6047e7e` | finish-session + memory-protocol + validator hatırlatması + fixture; session-05 PENDING'i fiilen mühürlendi (mühür commit'i konvansiyon gereği referanslanmaz) |
+| C / N1 | Handoff hedefleri | `d2f1c68` | 2 dosyada düzeltme + `handoffTargets` yapısal kuralı + negatif senaryo 2 |
+| D | Kapsam dili | `d0a13ff` | CLAUDE.md kanonik satır + 5 dosya hizalaması |
+| E / N2 | Verdict disiplini | `74d329b` | verdict-policy kural 6 + baseline review şerhi (orijinal korundu) |
+| F / N4 | Doküman tazeliği + CI-URL kuralı | bu ekin commit'i | README faz haritası + qa-quality-gate CI-URL kuralı + bu şerh |
+| N6 | gate-audit INCONCLUSIVE görünürlüğü | `efda55c` | exit-code protokolü (lokal 2 / CI 1); run-gates üç durumlu tablo + PASS_WITH_WARNINGS kanıtı |
+| N7 + R5 | BFF düzeltmeleri + aktivasyon kapısı | `dc15c7c` | 204 gövdesiz / 400-502 ayrımı / byte limit (curl kanıtı) + ACTIVATION.md (12 madde) + `activationGates` kuralı + negatif senaryo 3/3b |
+| N8 | Bilinen 2 type-safety bulgusu | `0a60bb1` | metadata.test açık tipleme + ADR-0012 şerhi (kural benimseme kararı ilk projede) |
+| N9 / R6 | tsbuildinfo | `4f5cc08` | `.gitignore` pattern + `git rm --cached` + `trackedForbidden` git-index kuralı |
+| R1 | Favicon | `a299e0e` | icon.svg + apple-icon.tsx (token paleti, belgeli hex muafiyeti); build'de iki route |
+| R2 | sitemap lastModified | `497a4a4` | `getLastUpdated().iso` bağlaması + test |
+| R3 | Dil bütünlüğü | `f778b1e` | Public yüzey tamamen İngilizce (en-US locale); README karar notu |
+| R4 | Sürümlü pazarlama metni | `f778b1e` | page/layout/opengraph-image sürümsüzleştirildi |
+| — | Dış repo pointer redaksiyonu (Blok 4 ön koşul b) | `0e9b80d` | `skeleton-brief.md` clone satırı jenerik placeholder |
+
+**Risk defteri yeni durumu: BOŞ** — R1–R6 kapandı (yukarıdaki tablo);
+Seçenek A uygulandığı için R8 açılmadı. Yazar e-postası bilinçli-kabul notu
+kanıt raporundadır.
