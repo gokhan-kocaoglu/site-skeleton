@@ -15,7 +15,9 @@ description: >
 gerçek çıktısını (veya özetini) içermek zorunda. "Testler geçti" cümlesi
 komut + çıktı olmadan geçersizdir. **Kanıt dosyası, üretildiği koşunun
 commit hash'ini içerir; commit'lenmemiş kodla üretilen kanıt geçersizdir**
-(audit #8 — yeniden-üretilebilirlik).
+(audit #8 — yeniden-üretilebilirlik). **Her kanıt raporu, doğrulandığı CI
+workflow run'ının URL'sini içerir; insan teyidi yalnız URL erişilemezse son
+çaredir** (Faz 8.2, N4 — run URL'sini kullanıcı sağlar).
 
 ## Doğrulama Döngüsü (sırayla; biri kırılırsa dur, düzelt, baştan)
 
