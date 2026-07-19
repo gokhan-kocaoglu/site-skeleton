@@ -1,5 +1,5 @@
 {
-  "phase": 8.1,
+  "phase": 8.2,
   "mode": "skeleton-dev",
   "requiredDirs": [
     "apps/web",
@@ -490,6 +490,20 @@
   "agentSkills": {
     "agentsDir": ".claude/agents",
     "skillsDir": ".claude/skills"
+  },
+  "handoffTargets": {
+    "dirs": [".claude/agents", ".claude/skills", ".claude/commands", ".claude/rules"],
+    "validAgents": [
+      "project-manager",
+      "system-architect",
+      "ux-ui-designer",
+      "frontend-developer",
+      "backend-developer",
+      "seo-specialist",
+      "qa-test-specialist",
+      "code-reviewer",
+      "memory-steward"
+    ]
   },
   "scanExcludeDirs": [
     ".git",

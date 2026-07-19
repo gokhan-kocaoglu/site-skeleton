@@ -175,6 +175,31 @@ for (const entry of manifest.installedBaseline ?? []) {
   }
 }
 
+// 7d. Handoff targets (Faz 8.2, brief 1.1): every `HANDOFF → <target>` in
+// governance markdown must name an agent the manifest declares valid, so a
+// report can never be handed to a non-existent role (team-lead regression).
+if (manifest.handoffTargets) {
+  const { dirs, validAgents } = manifest.handoffTargets;
+  const valid = new Set(validAgents);
+  const mdFiles = [];
+  const collect = (dir) => {
+    for (const entry of readdirSync(p(dir), { withFileTypes: true })) {
+      const rel = `${dir}/${entry.name}`;
+      if (entry.isDirectory()) collect(rel);
+      else if (entry.name.endsWith('.md')) mdFiles.push(rel);
+    }
+  };
+  for (const dir of dirs) {
+    if (existsSync(p(dir))) collect(dir);
+  }
+  for (const rel of mdFiles) {
+    const text = readFileSync(p(rel), 'utf8');
+    for (const m of text.matchAll(/HANDOFF\s*→\s*([a-z-]+)/g)) {
+      check(valid.has(m[1]), `${rel}: HANDOFF hedefi geçersiz ajan: ${m[1]}`);
+    }
+  }
+}
+
 // 8. Forbidden patterns (repo-wide scan of text files). A rule with a
 // "modes" array only runs when manifest.mode matches (Faz 8.1, audit #11:
 // the skeleton-dev guard patterns must not fire in bootstrapped projects).

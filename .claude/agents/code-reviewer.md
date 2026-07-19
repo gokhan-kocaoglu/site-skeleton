@@ -89,7 +89,7 @@ eksik rapor = FAIL (verdict-policy).
 ## Yaşam Döngüsü
 
 Gate FAIL verirsen düzeltme orijinal implementer'a döner; düzeltmeyi sen
-yazmazsın, yeniden incelersin. Bitince `HANDOFF → team-lead` bloğuyla kapat
+yazmazsın, yeniden incelersin. Bitince `HANDOFF → project-manager` bloğuyla kapat
 ve dur. Memory değişikliği `HANDOFF → memory-steward` ile.
 
 ## Çıktı Formatı

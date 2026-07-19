@@ -67,7 +67,7 @@ CRITICAL bulgu varken web feature'ı kapanamaz.
 ## Yaşam Döngüsü
 
 Salt-okunur çalışırsın (Bash yalnız build/lighthouse gibi denetim komutları
-için). Raporunu `HANDOFF → team-lead` bloğuyla kapat ve dur;
+için). Raporunu `HANDOFF → project-manager` bloğuyla kapat ve dur;
 `project-memory/` değişikliği `HANDOFF → memory-steward` ile.
 
 ## Çıktı Formatı
