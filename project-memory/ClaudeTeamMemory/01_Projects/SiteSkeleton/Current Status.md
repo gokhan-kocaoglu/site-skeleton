@@ -5,15 +5,15 @@
 
 ## Aşama
 
-Faz 8.1 remediation TAMAMLANDI — resertifikasyon 27/27, genel verdict PASS_WITH_RISKS (CRITICAL 0, HIGH 0). Tüm commit'ler push'landı, CI 4/4 yeşil (insan teyidi, 2026-07-03). İskelet v1 + Faz 8.1 sertifikalı; sırada R1–R6 takip görevlerinin backlog planlaması ve ilk gerçek proje (/new-project).
+Faz 8.2 mühürleme sprinti TAMAMLANDI (uygulama: 2026-07-19) — C1–C15 uygulandı; C1–C13 push'u CI run #28 4/4 yeşil (gitleaks "No leaks detected", insan teyidi + run URL kanıt raporunda). Repo PUBLIC (Seçenek A), ruleset enforcement Active, dört required check aktif. Risk defteri BOŞ (R1–R6 kapandı, R8 açılmadı). İskelet v1 + Faz 8.1 + Faz 8.2 sertifikalı.
 
 ## Son Tamamlanan Görev
 
-Denetim #18 kapatma (kaynak metin kullanıcıdan alındı): web ESLint'e @next/eslint-plugin-next coreWebVitals + react-hooks + jsx-a11y; admin'e react-hooks + jsx-a11y + react-refresh (vite); iki app'e cross-app no-restricted-imports sınırı; coverage/ lint dışı. Type-aware lint ADR-0012 ACCEPTED ile ertelendi (ölçüm: web 2.1→4.1s, admin 1.6→2.8s ~2×; tsc gate ile mükerrer; benimseme yolu belgeli). Mevcut kod yeni kurallarla 0 ihlal; pnpm gate 7/7 (862 check). Resertifikasyon raporu 27/27'ye güncellendi (R7 kapalı; lessons #4: insan/orkestratör eşleme hataları tablo mutabakatıyla yakalanır). Commit'ler: 4d917ae (lint) + 4397816 (rapor); push + CI 4/4 yeşil.
+Faz 8.2 mühürleme: governance (handoff hedefleri + handoffTargets kuralı; verdict kural 6 + baseline şerhi; kademeli kapsam dili; seal-commit konvansiyonu + validator hatırlatması) · hijyen (tsbuildinfo trackedForbidden; sitemap lastModified→getLastUpdated; public yüzey sürümsüz/İngilizce en-US; favicon seti token paletli; metadata.test tipleme + ADR-0012 şerhi) · yapısal (gate-audit INCONCLUSIVE exit-code protokolü lokal 2/CI 1 + run-gates PASS_WITH_WARNINGS; admin-bff 204/400/502/byte-limit + ACTIVATION.md 12 madde + activationGates kuralı + negatif senaryolar 4/4) · public hazırlığı (dış repo pointer redaksiyonu; ci.md kısıt kapanış şerhi). Kanıt: docs/test-reports/2026-07-03-faz8.2-sealing.md (CI run URL'li) + resertifikasyon raporu Faz 8.2 eki (bulgu→commit tablosu).
 
 ## Aktif Görev
 
-Yok (Faz 8.1 kapandı; kapanış sonrası duruldu).
+Yok (Faz 8.2 kapandı; push noktası 2 kullanıcı onayı bekleniyor).
 
 ## Blocker
 
@@ -21,14 +21,14 @@ Yok.
 
 ## Sonraki 3 Adım
 
-1. R1–R6 takip görevlerini backlog'a planla (favicon, sitemap lastModified→getLastUpdated, dil kararı, page.tsx Boot 3.3 metni, BFF aktivasyon checklist takibi, tsbuildinfo .gitignore).
-2. Type-aware lint benimseme kararını ilk gerçek proje başlangıcında yeniden değerlendir (ADR-0012 karar noktası).
-3. İlk gerçek proje: /new-project ile bootstrap (iskelet artık sertifikalı).
+1. C14–C17 commit'lerinin push'u (push noktası 2, kullanıcı) + CI yeşil teyidi.
+2. Type-aware lint benimseme kararı ilk gerçek proje başlangıcında (ADR-0012; bilinen 2 bulgu Faz 8.2'de kapandı).
+3. İlk gerçek proje: /new-project ile bootstrap (iskelet sertifikalı, repo public).
 
 ## Son Uygulama Commiti
 
-`4d917ae fix(lint): denetim #18 — web cwv+hooks+a11y, admin hooks+a11y+refresh, import siniri` (rapor commit'i: `4397816 docs: resertifikasyon 27/27 — denetim #18 kapanisi islendi`)
+`e39865d docs(ops): ci.md kisit notu kapandi — repo public, ruleset aktif` (kanıt commit'i: `a182d61 docs(test-reports): faz 8.2 muhurleme kaniti + resertifikasyon eki`)
 
 ## Memory Closure Commiti
 
-`21bd1f9 chore(memory): close session 2026-07-03 (session 05)`
+`PENDING — bu kapanışın commiti bu yazımdan sonra atılır; önceki kapanış: 21bd1f9 chore(memory): close session 2026-07-03 (session 05)`
