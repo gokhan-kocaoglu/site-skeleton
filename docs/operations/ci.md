@@ -50,6 +50,12 @@ Pro/Team planı ister; public repoda ücretsizdir). Yani required-checks şu an
 onaylı push protokolüyle korunur. Repo public olursa veya plan yükselirse
 enforcement kendiliğinden devreye girer; bu not o zaman kaldırılır.
 
+> **Kapanış şerhi (2026-07-19, Faz 8.2):** Repo public'e alındı (Seçenek A);
+> ruleset enforcement'ın **Active** olduğu ve dört required check'in tamamının
+> aktif olduğu kullanıcı tarafından teyit edildi. Yukarıdaki kısıt kapanmıştır;
+> required-checks artık merge'i teknik olarak engeller. (Orijinal not kanıt
+> bütünlüğü için korunmuştur.)
+
 ## Kanıt Kuralı
 
 CI yeşili tek başına verdict değildir; quality-gate raporları
