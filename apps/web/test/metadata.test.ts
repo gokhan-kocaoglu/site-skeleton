@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { metadata } from "../app/layout";
 import robots from "../app/robots";
 import sitemap from "../app/sitemap";
+import { getLastUpdated } from "../lib/last-updated";
 
 describe("root metadata export", () => {
   it("declares a default title and a template", () => {
@@ -39,5 +40,10 @@ describe("sitemap route", () => {
     const entries = sitemap();
     expect(entries.length).toBeGreaterThan(0);
     expect(entries[0].url).toMatch(/^https?:\/\//);
+  });
+
+  it("pins lastModified to the last-updated value instead of the build clock", () => {
+    const entries = sitemap();
+    expect(entries[0].lastModified).toBe(getLastUpdated().iso);
   });
 });
