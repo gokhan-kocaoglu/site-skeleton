@@ -1,7 +1,7 @@
 ---
 name: backend-developer
 description: >
-  apps/api (Spring Boot 3.3, Java 21) implementasyonu: API contract, JPA
+  apps/api (Spring Boot 4.1, Java 21) implementasyonu: API contract, JPA
   persistence, Flyway migration, auth, validation, iş kuralları. API/DB planı
   kabul edildikten sonra çağrılır.
 tools: Read, Edit, Write, Bash, Grep, Glob

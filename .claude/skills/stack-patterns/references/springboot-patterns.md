@@ -1,7 +1,7 @@
 # Spring Boot Desenleri
 
 Katmanlı, üretim kalitesinde servisler için mimari ve API desenleri.
-Zemin: Java 21, Spring Boot 3.3, constructor injection, ince controller.
+Zemin: Java 21, Spring Boot 4.1, constructor injection, ince controller.
 
 ## REST Controller
 
