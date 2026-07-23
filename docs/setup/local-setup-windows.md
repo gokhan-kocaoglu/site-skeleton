@@ -3,11 +3,11 @@
 One-time machine setup for working on projects created from this skeleton.
 Run the commands in PowerShell; installs use `winget` where possible.
 
-## 1. Node 22 + pnpm 9
+## 1. Node 22 (minimum 22.12.0) + pnpm 9
 
 ```powershell
 winget install OpenJS.NodeJS.LTS        # Node 22.x
-node -v                                  # expect v22.x
+node -v                                  # expect v22.12.0 or newer (Vite 8 engines floor)
 corepack enable
 corepack prepare pnpm@9.15.4 --activate  # exact version pinned in package.json
 pnpm -v                                  # expect 9.15.4

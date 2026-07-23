@@ -29,13 +29,23 @@ biri kendi başına yeterlidir — görevle ilgisiz referansı YÜKLEME.
    fazla iki: örn. yeni endpoint → `api-design` + `springboot-patterns`).
 2. Referanslar bu iskeletin değişmezleriyle uyumludur; çelişki görürsen
    `CLAUDE.md` ve `.claude/rules/` kazanır.
-3. Bu stack'in sabitleri (her referansın varsaydığı zemin):
-   - Backend: Java 21, Spring Boot 3.3, JPA (`ddl-auto: validate`),
-     PostgreSQL 16, Flyway, JJWT, Bucket4j
-   - Frontend: Next.js 15 (App Router), React 19, Tailwind v4,
-     TanStack Query, RHF+Zod, `motion` paketi (framer-motion YASAK)
-   - Admin: Vite 5, React Router v7, Zustand
-   - Test: Vitest/Testing Library/MSW, JUnit 5/Testcontainers, Playwright
+3. Bu stack'in sabitleri (her referansın varsaydığı zemin — installed
+   baseline ile approved defaults AYRIDIR, bkz. `CLAUDE.md` üç-liste):
+   - Toolchain: Node >=22.12.0, pnpm 9.
+   - Installed backend: Java 21, Spring Boot 4.1, JPA (`ddl-auto: validate`),
+     PostgreSQL 16, Flyway.
+   - Installed web: Next.js 15 (App Router), React 19, Tailwind v4,
+     Vitest 3 (+ Testing Library, MSW).
+   - Installed admin: Vite 8, React 19, Vitest 4 (+ Testing Library,
+     axe-core).
+   - **Approved defaults — henüz KURULU DEĞİL** (ilk ihtiyaçta kurulur;
+     referanslar bunları kurulu zemin gibi SUNMAZ): web'de TanStack Query,
+     RHF+Zod, `motion`; admin'de React Router v7, Zustand; API'de Spring
+     Security, JJWT, Bucket4j, springdoc.
+   - Playwright E2E: kurulu baseline değil; `templates/e2e` altında isteğe
+     bağlı aktivasyon şablonu.
+   - Bağlayıcı tercih (kurulu paket iddiasından bağımsız): animasyon işi
+     `motion` paketiyle yapılır — framer-motion importu YASAK.
 
 ## İlişkili
 
