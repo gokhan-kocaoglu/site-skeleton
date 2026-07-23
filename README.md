@@ -14,11 +14,11 @@ the work through the quality-gate chain.
 
 | Layer | Technology |
 |---|---|
-| Monorepo | pnpm 9 + Turborepo, Node 22 |
+| Monorepo | pnpm 9 + Turborepo, Node 22.12+ |
 | `apps/web` | Next.js 15, React 19, TypeScript strict, Tailwind v4 (CSS-first) |
-| `apps/admin` | Vite 5, React 19 (React Router v7 + Zustand by convention, not preinstalled) |
+| `apps/admin` | Vite 8, React 19 (React Router v7 + Zustand by convention, not preinstalled) |
 | `apps/api` | Java 21, Spring Boot 4.1, JPA + Hibernate (validate only), PostgreSQL 16, Flyway |
-| Tests | Vitest / Testing Library / MSW · JUnit 5 / Testcontainers (`postgres:16`) |
+| Tests | Vitest (admin: v4; web: v3, moves to v4 with the Next 16 PR — ADR-0013) / Testing Library / MSW · JUnit 5 / Testcontainers (`postgres:16`) |
 
 `apps/api` is Maven-only and deliberately **not** part of the pnpm workspace.
 
