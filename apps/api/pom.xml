@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.16</version>
+    <version>4.1.0</version>
     <relativePath/>
   </parent>
 
@@ -20,23 +20,26 @@
   <properties>
     <java.version>21</java.version>
     <!-- Docker Engine 29+ requires Testcontainers >= 1.21.4 (min API 1.44 →
-         npipe 400). Boot 3.5.16 BOM manages exactly 1.21.4, so the explicit
-         pin was dropped (Faz 8.1 Sprint 3); if a future BOM downgrade ever
-         lands below 1.21.4, re-pin here. -->
+         npipe 400). Testcontainers stays BOM-managed: Boot 4.1 imports
+         testcontainers-bom 2.0.5 (verified via dependency:tree in the Faz 8.3
+         evidence report); if a future BOM downgrade ever lands below 1.21.4,
+         re-pin here. -->
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
+      <artifactId>spring-boot-starter-webmvc</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
+    <!-- Boot 4 modular starters: Flyway auto-configuration ships in its own
+         starter; the postgres dialect module is still added alongside it. -->
     <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-core</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-flyway</artifactId>
     </dependency>
     <dependency>
       <groupId>org.flywaydb</groupId>
@@ -48,19 +51,32 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!-- Boot 4 technology-specific test starter (brings spring-boot-starter-test
+         and spring-boot-resttestclient transitively; verified via dependency:tree). -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
+      <artifactId>spring-boot-starter-webmvc-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- TestRestTemplate auto-configuration introspects RestTemplateBuilder
+         (org.springframework.boot.restclient), which webmvc-test does NOT pull
+         in. Test scope only: production code has no RestTemplate usage, so the
+         runtime classpath must not grow (Faz 8.3 PR-A1 condition 1). -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-restclient</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- Testcontainers 2.x renamed all modules with a testcontainers- prefix
+         (Boot 4.1 BOM imports testcontainers-bom 2.0.5). -->
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers-junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>postgresql</artifactId>
+      <artifactId>testcontainers-postgresql</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

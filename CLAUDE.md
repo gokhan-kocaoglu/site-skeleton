@@ -7,7 +7,7 @@ Monorepo: pnpm 9 + Turborepo + Node 22.
 - apps/web: Next.js 15, React 19, TS strict, Tailwind v4 (CSS-first);
   test: Vitest + Testing Library + MSW.
 - apps/admin: Vite 5, React 19, TS; test: Vitest + Testing Library + axe-core.
-- apps/api: Java 21, Spring Boot 3.5, JPA+Hibernate, PostgreSQL 16, Flyway;
+- apps/api: Java 21, Spring Boot 4.1, JPA+Hibernate, PostgreSQL 16, Flyway;
   test: JUnit5 + Testcontainers. (Sürüm politikası: ADR-0009.)
 
 **Approved defaults** (kurulu DEĞİL; ilk ihtiyaçta bunlar kurulur, seçim tartışması yeniden açılmaz):

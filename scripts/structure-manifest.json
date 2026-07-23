@@ -424,7 +424,7 @@
     {
       "file": "apps/api/pom.xml",
       "type": "maven",
-      "artifacts": ["spring-boot-starter-web", "spring-boot-starter-data-jpa", "flyway-core", "flyway-database-postgresql", "postgresql", "spring-boot-starter-test", "junit-jupiter"],
+      "artifacts": ["spring-boot-starter-webmvc", "spring-boot-starter-data-jpa", "spring-boot-starter-flyway", "flyway-database-postgresql", "postgresql", "spring-boot-starter-webmvc-test", "spring-boot-restclient", "testcontainers-junit-jupiter", "testcontainers-postgresql"],
       "mustBeAbsent": ["spring-boot-starter-security", "jjwt", "bucket4j", "springdoc"]
     }
   ],

@@ -17,7 +17,7 @@ the work through the quality-gate chain.
 | Monorepo | pnpm 9 + Turborepo, Node 22 |
 | `apps/web` | Next.js 15, React 19, TypeScript strict, Tailwind v4 (CSS-first) |
 | `apps/admin` | Vite 5, React 19 (React Router v7 + Zustand by convention, not preinstalled) |
-| `apps/api` | Java 21, Spring Boot 3.5, JPA + Hibernate (validate only), PostgreSQL 16, Flyway |
+| `apps/api` | Java 21, Spring Boot 4.1, JPA + Hibernate (validate only), PostgreSQL 16, Flyway |
 | Tests | Vitest / Testing Library / MSW · JUnit 5 / Testcontainers (`postgres:16`) |
 
 `apps/api` is Maven-only and deliberately **not** part of the pnpm workspace.
@@ -37,8 +37,9 @@ Set-Location apps/api; mvn verify
 Set-Location apps/api; mvn verify "-Pit-local"
 ```
 
-> Docker Engine 29+ requires Testcontainers >= 1.21.4 (managed at 1.21.4 by the
-> Spring Boot 3.5.16 BOM; re-pin in `apps/api/pom.xml` only if a future BOM drops below it).
+> Docker Engine 29+ requires Testcontainers >= 1.21.4. The Spring Boot 4.1 BOM imports
+> `testcontainers-bom` 2.0.5 (well above the minimum); re-pin in `apps/api/pom.xml` only
+> if a future BOM ever drops below 1.21.4.
 
 ## Commands
 
