@@ -59,6 +59,21 @@ Credentials default to `postgres`/`postgres`; override with the `IT_DB_USER` /
 > 3. **VS Code's integrated terminal inherits env from VS Code itself**: a
 >    persistent variable set after VS Code started stays invisible in its
 >    terminals until VS Code is fully restarted (not just a new terminal tab).
+> 4. **The it-local baseline is PostgreSQL 16** — the same major the skeleton
+>    targets in production and in Testcontainers (`postgres:16`). Verify the
+>    server version **before** running (`psql -tAc "SELECT version();"`); a
+>    different major on the machine is not a valid it-local run.
+> 5. **Environment variables override the YAML settings** (standard Spring
+>    property precedence). Useful on purpose — e.g. a PostgreSQL 16 instance
+>    on a non-default port can be targeted with
+>    `SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:<port>/skeleton_it` —
+>    but also a silent trap: a stale globally-set `IT_DB_*`/`SPRING_*`
+>    variable changes what the tests connect to. Check your environment when
+>    results make no sense.
+> 6. **Passwords are never written to files** (repo rule: secrets only via
+>    environment variables; `.env.example` placeholders are the sole
+>    exception). Pass DB credentials per-session via env, not via edits to
+>    the yml/pom.
 
 ## 5. Docker Desktop (optional, preferred test path)
 
@@ -69,9 +84,10 @@ docker version                           # engine must be running
 
 > **Docker Engine 29+ note.** Engine 29 raised the minimum Docker API version to 1.44,
 > which breaks Testcontainers releases before **1.21.4** ("Could not find a valid Docker
-> environment", npipe HTTP 400). Spring Boot 3.5.16's BOM manages exactly 1.21.4, so
-> `apps/api/pom.xml` carries no explicit pin (dropped in Faz 8.1 Sprint 3); if a future
-> BOM ever manages a version below 1.21.4, re-pin it there (note kept in the pom).
+> environment", npipe HTTP 400). Spring Boot 4.1's BOM imports `testcontainers-bom`
+> **2.0.5** (well above the minimum), so `apps/api/pom.xml` carries no explicit pin
+> (dropped in Faz 8.1 Sprint 3); if a future BOM ever manages a version below 1.21.4,
+> re-pin it there (note kept in the pom).
 
 ## 6. Claude Code + user-level integrations
 
