@@ -13,7 +13,9 @@ export default tseslint.config(
   { languageOptions: { parserOptions: { tsconfigRootDir: import.meta.dirname } } },
   js.configs.recommended,
   ...tseslint.configs.recommended,
-  nextPlugin.flatConfig.coreWebVitals,
+  // @next/eslint-plugin-next 16: flatConfig export'u kaldırıldı; flat
+  // config'ler artık configs altında (legacy varyantlar eslintrc içindir).
+  nextPlugin.configs["core-web-vitals"],
   jsxA11y.flatConfigs.recommended,
   {
     files: ["**/*.{ts,tsx}"],
