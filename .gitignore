@@ -27,6 +27,9 @@ graphify-out/
 # Local machine settings
 .claude/settings.local.json
 
+# Next.js generated TypeScript declaration
+apps/web/next-env.d.ts
+
 # Logs / OS noise
 *.log
 .DS_Store
