@@ -4,10 +4,10 @@
 Monorepo: pnpm 9 + Turborepo + Node 22.12+.
 
 **Installed baseline** (package dosyalarında gerçekten var):
-- apps/web: Next.js 15, React 19, TS strict, Tailwind v4 (CSS-first);
-  test: Vitest + Testing Library + MSW.
+- apps/web: Next.js 16, React 19, TS strict, Tailwind v4 (CSS-first);
+  test: Vitest 4 + Testing Library + MSW. (Geçiş: ADR-0014; `next-env.d.ts`
+  generated + untracked — politika ADR-0014'te.)
 - apps/admin: Vite 8, React 19, TS; test: Vitest 4 + Testing Library + axe-core.
-  (web geçici olarak Vitest 3'te — Vitest 4 geçişi PR-A3 kapsamı; ADR-0013.)
 - apps/api: Java 21, Spring Boot 4.1, JPA+Hibernate, PostgreSQL 16, Flyway;
   test: JUnit5 + Testcontainers. (Sürüm politikası: ADR-0009.)
 

@@ -24,15 +24,19 @@ Destek verileri (endoflife.date, 2026-07-03): Boot 3.5 OSS EOL 2026-06-30
    ayrı PROPOSED ADR'dir (ADR-0010) ve ilk gerçek projede değerlendirilmesi
    ZORUNLUDUR. Testcontainers pini kaldırıldı: 3.5.16 BOM'u 1.21.4 yönetir
    (Docker Engine 29 gereksinimi, bkz. pom.xml notu).
-3. **Next.js 15→16 takvimi:** Next 15 EOL 2026-10-21. İlk gerçek web
-   projesi bu tarihten önce açılırsa Next 16 değerlendirmesi task DAG'ına
-   girer; iskelet 2026-09 sonuna kadar 16'ya yükseltilmelidir.
+3. **Active LTS / desteklenen hat (Faz 8.3 netleştirmesi):** Baseline yalnız
+   OSS desteği süren — "active LTS" veya güncel — hatlarda tutulur; EOL'e
+   yaklaşan hat, tarih gelmeden yükseltilir. Next 15 (EOL 2026-10-21) →
+   Next 16 geçişi bu kural gereği tamamlandı (ADR-0014); Boot: ADR-0010.
 4. **Dependabot stratejisi:** `.github/dependabot.yml` — npm (kök),
    maven (apps/api), github-actions ekosistemleri; haftalık; minor+patch
    gruplu tek PR (limit 3/ekosistem). MAJOR sürümler bot'a kapalıdır
    (`ignore: semver-major`): major yükseltme bu ADR'nin 1. kuralı
    çerçevesinde ADR süreciyle değerlendirilir, bot PR'ıyla gelmez.
    Her Dependabot PR'ı tam CI zincirinden geçer; yeşil olmadan merge edilmez.
+   **İki akış ayrıdır:** (a) bot minor/patch akışı — otomatik PR, yeşil CI
+   yeterli; (b) kontrollü major migration — OTOMATİK YAPILMAZ, ADR + migration
+   planı + rollback planı + tam quality gate kanıtı olmadan merge edilemez.
 5. **Kanıt kuralı:** Her framework yükseltmesi `mvn verify` / `pnpm gate`
    yeşil kanıtı olmadan commit'lenemez (verdict-policy kanıt kuralı).
 
