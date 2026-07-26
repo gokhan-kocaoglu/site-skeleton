@@ -1,9 +1,11 @@
 # Frontend Desenleri
 
 React 19 bileşen, state, form, performans ve animasyon desenleri.
-Zemin: apps/web = Next.js 16 App Router + TanStack Query + RHF/Zod;
-apps/admin = Vite + React Router v7 + Zustand. Stil: Tailwind v4 +
-`packages/design-tokens` (ham hex ve inline style YASAK).
+Kurulu zemin: apps/web = Next.js 16 App Router, React 19, TypeScript strict;
+apps/admin = Vite, React 19. Stil: Tailwind v4 + `packages/design-tokens`
+(ham hex ve inline style YASAK). Approved default — HENÜZ KURULU DEĞİL (ilk
+ihtiyaçta kurulur; bölümler bunları kurulu zemin gibi SUNMAZ): web'de
+TanStack Query ve RHF+Zod; admin'de React Router v7 ve Zustand.
 
 ## Bileşen Kompozisyonu (kalıtım değil)
 

@@ -1,7 +1,7 @@
 ---
 name: frontend-developer
 description: >
-  apps/web (Next.js 15) ve apps/admin (Vite + React 19) implementasyonu:
+  apps/web (Next.js 16) ve apps/admin (Vite + React 19) implementasyonu:
   bileşen, state, form, stil, animasyon, API entegrasyonu. UX çıktısı ve API
   contract netleştikten sonra çağrılır.
 tools: Read, Edit, Write, Bash, Grep, Glob
