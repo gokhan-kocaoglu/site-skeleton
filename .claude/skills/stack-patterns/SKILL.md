@@ -34,8 +34,8 @@ biri kendi başına yeterlidir — görevle ilgisiz referansı YÜKLEME.
    - Toolchain: Node >=22.12.0, pnpm 9.
    - Installed backend: Java 21, Spring Boot 4.1, JPA (`ddl-auto: validate`),
      PostgreSQL 16, Flyway.
-   - Installed web: Next.js 15 (App Router), React 19, Tailwind v4,
-     Vitest 3 (+ Testing Library, MSW).
+   - Installed web: Next.js 16 (App Router), React 19, Tailwind v4,
+     Vitest 4 (+ Testing Library, MSW).
    - Installed admin: Vite 8, React 19, Vitest 4 (+ Testing Library,
      axe-core).
    - **Approved defaults — henüz KURULU DEĞİL** (ilk ihtiyaçta kurulur;

@@ -187,7 +187,6 @@
     "apps/web/test/site-url.test.ts",
     "apps/web/next.config.ts",
     "apps/web/tsconfig.json",
-    "apps/web/next-env.d.ts",
     "apps/web/postcss.config.mjs",
     "apps/web/eslint.config.mjs",
     "apps/web/app/layout.tsx",
@@ -245,6 +244,7 @@
     "docs/adr/ADR-0011-coupon-status-model.md",
     "docs/adr/ADR-0012-lint-enforcement-depth.md",
     "docs/adr/ADR-0013-vite-8-migration.md",
+    "docs/adr/ADR-0014-next-16-migration.md",
     "scripts/bootstrap-project.mjs",
     "scripts/quality/gate-build.mjs",
     "scripts/quality/gate-typecheck.mjs",
@@ -352,6 +352,7 @@
     "docs/adr/ADR-0011-coupon-status-model.md": 60,
     "docs/adr/ADR-0012-lint-enforcement-depth.md": 60,
     "docs/adr/ADR-0013-vite-8-migration.md": 60,
+    "docs/adr/ADR-0014-next-16-migration.md": 65,
     "scripts/quality/run-gates.mjs": 60
   },
   "noBom": [
@@ -498,7 +499,7 @@
     "agentsDir": ".claude/agents",
     "skillsDir": ".claude/skills"
   },
-  "trackedForbidden": ["*.tsbuildinfo"],
+  "trackedForbidden": ["*.tsbuildinfo", "apps/web/next-env.d.ts"],
   "activationGates": [{ "name": "admin-bff", "checklistItems": 12 }],
   "handoffTargets": {
     "dirs": [".claude/agents", ".claude/skills", ".claude/commands", ".claude/rules"],
