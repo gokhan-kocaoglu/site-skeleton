@@ -358,7 +358,8 @@
     "docs/adr/ADR-0014-next-16-migration.md": 65,
     "docs/adr/ADR-0015-supply-chain-hardening.md": 170,
     "scripts/quality/assert-sbom.mjs": 130,
-    "scripts/quality/run-gates.mjs": 60
+    "scripts/quality/run-gates.mjs": 60,
+    "scripts/bootstrap-project.mjs": 500
   },
   "noBom": [
     ".gitignore",
@@ -391,6 +392,7 @@
     "scripts/quality/run-gates.mjs",
     "scripts/quality/gate-audit.mjs",
     "scripts/quality/assert-sbom.mjs",
+    "scripts/bootstrap-project.mjs",
     "docs/setup/local-setup-windows.md",
     "docs/adr/ADR-0001-model-routing.md",
     "docs/operations/authority-map.md",
