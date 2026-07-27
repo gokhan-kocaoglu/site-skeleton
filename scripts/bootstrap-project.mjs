@@ -348,8 +348,10 @@ function applyOperation(root, op, backupDir, journal, index) {
     journal.push({ type: 'replace', rel: op.rel, backup });
     writeFileSync(abs, op.after);
   } else if (op.type === 'move') {
-    journal.push({ type: 'move', from: op.from, to: op.to });
+    // Journal only completed moves; a failed rename must not create a
+    // rollback entry for a target that never existed.
     renameSync(p(root, op.from), p(root, op.to));
+    journal.push({ type: 'move', from: op.from, to: op.to });
   } else if (op.type === 'mkdir') {
     journal.push({ type: 'mkdir', rel: op.rel });
     mkdirSync(abs);

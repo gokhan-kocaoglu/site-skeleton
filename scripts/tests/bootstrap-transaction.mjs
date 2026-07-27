@@ -9,7 +9,8 @@
  *
  * Exit 0 = all scenarios behave, exit 1 otherwise.
  */
-import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'node:fs';
+import { writeFileSync, readFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import {
   createRepoFixture, git, gitStatus, hashTree, diffHashTrees, run, SOURCE_ROOT,
@@ -146,7 +147,61 @@ scenario('transaction ortasında hata tam rollback üretir', (dir) => {
   assert(manifest.mode === 'skeleton-dev' && manifest.projectSlug === undefined, 'manifest geri alınmadı');
 });
 
-// 6. Identity guards reject inconsistent manifests without touching the tree.
+// 6. A REAL renameSync failure — not an injected throw. Regression guard: the
+//    journal must record a move only after it actually succeeded, otherwise
+//    rollback tries to move a target that never existed, dies mid-unwind and
+//    leaves the earlier operations applied.
+const countBackupDirs = () =>
+  readdirSync(os.tmpdir(), { withFileTypes: true })
+    .filter((e) => e.isDirectory() && e.name.startsWith('skeleton-bootstrap-')).length;
+
+scenario('move rename hatası önceki operasyonları tamamen geri alır', (dir) => {
+  const identity = validateProjectSlug(SLUG);
+  const plan = createBootstrapPlan(dir, identity);
+  validateBootstrapPlan(dir, plan); // plan is valid at this point
+
+  const moves = plan.operations.filter((op) => op.type === 'move');
+  assert(moves.length >= 3, `beklenen move sayısı bulunamadı (${moves.length})`);
+  const firstJavaMove = moves[0];
+  const secondJavaMove = moves[1];
+  assert(secondJavaMove.from.includes('src/test/java'), `ikinci move beklenen değil: ${secondJavaMove.from}`);
+
+  // Occupy the SECOND move's target AFTER validation. The source stays intact,
+  // so every replacement and the first move still apply; only the rename itself
+  // fails (EPERM on Windows, ENOTEMPTY on Linux). Removing the source instead
+  // would break an earlier replacement backup and never reach the move.
+  const blockedTarget = path.join(dir, ...secondJavaMove.to.split('/'));
+  mkdirSync(blockedTarget, { recursive: true });
+  writeFileSync(path.join(blockedTarget, 'occupied.txt'), 'blocks the rename\n');
+
+  const backupsBefore = countBackupDirs();
+  const before = hashTree(dir);
+  const statusBefore = gitStatus(dir);
+
+  let thrown = null;
+  try {
+    executeBootstrapPlan(dir, plan);
+  } catch (error) {
+    thrown = error;
+  }
+
+  assert(thrown instanceof BootstrapError, `beklenen BootstrapError yerine: ${thrown}`);
+  assert(/rename/i.test(thrown.message), `gerçek rename hatası değil: ${thrown.message}`);
+  assert(/rollback tamam/.test(thrown.message), `rollback tamamlanmadı: ${thrown.message}`);
+  assert(!/GERİ ALMA DA BAŞARISIZ/.test(thrown.message), `rollback kendisi kırıldı: ${thrown.message}`);
+
+  const problems = diffHashTrees(before, hashTree(dir));
+  assert(problems.length === 0, `rollback sonrası fark:\n    ${problems.slice(0, 6).join('\n    ')}`);
+  assert(gitStatus(dir) === statusBefore, `git status değişti:\n${gitStatus(dir)}`);
+  assert(existsSync(path.join(dir, ...firstJavaMove.from.split('/'))), 'ilk Java move geri alınmadı');
+  assert(!existsSync(path.join(dir, ...firstJavaMove.to.split('/'))), 'ilk Java move hedefi kaldırılmadı');
+  assert(existsSync(path.join(blockedTarget, 'occupied.txt')), 'engelleyen hedef rollback tarafından silinmemeli');
+  const manifest = JSON.parse(readFileSync(path.join(dir, 'scripts', 'structure-manifest.json'), 'utf8'));
+  assert(manifest.mode === 'skeleton-dev' && manifest.projectSlug === undefined, 'manifest geri alınmadı');
+  assert(countBackupDirs() === backupsBefore, 'transaction backup dizini kaldı');
+});
+
+// 7. Identity guards reject inconsistent manifests without touching the tree.
 scenario('tutarsız manifest state kontrollü hata üretir', (dir) => {
   const manifestPath = path.join(dir, 'scripts', 'structure-manifest.json');
   const original = readFileSync(manifestPath);
