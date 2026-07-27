@@ -1,5 +1,5 @@
 {
-  "phase": 8.2,
+  "phase": 8.3,
   "mode": "skeleton-dev",
   "requiredDirs": [
     "apps/web",
@@ -245,6 +245,7 @@
     "docs/adr/ADR-0012-lint-enforcement-depth.md",
     "docs/adr/ADR-0013-vite-8-migration.md",
     "docs/adr/ADR-0014-next-16-migration.md",
+    "docs/adr/ADR-0015-supply-chain-hardening.md",
     "scripts/bootstrap-project.mjs",
     "scripts/quality/gate-build.mjs",
     "scripts/quality/gate-typecheck.mjs",
@@ -253,6 +254,7 @@
     "scripts/quality/gate-audit.mjs",
     "scripts/quality/gate-structure.mjs",
     "scripts/quality/gate-contract-drift.mjs",
+    "scripts/quality/assert-sbom.mjs",
     "scripts/quality/run-gates.mjs",
     "docs/setup/local-setup-windows.md",
     "docs/adr/ADR-0001-model-routing.md",
@@ -267,6 +269,7 @@
     "docs/test-reports/2026-07-03-faz8.1-sprint3-quality-gate.md",
     "docs/test-reports/2026-07-03-faz8.1-sprint4-quality-gate.md",
     "docs/test-reports/2026-07-03-faz8.2-sealing.md",
+    "docs/test-reports/2026-07-26-faz8.3-pr-b-quality-gate.md",
     "docs/audits/2026-07-03-baseline-security-review.md",
     "docs/audits/2026-07-03-recertification.md",
     "docs/audits/seo/2026-07-02-web-home.md",
@@ -353,6 +356,8 @@
     "docs/adr/ADR-0012-lint-enforcement-depth.md": 60,
     "docs/adr/ADR-0013-vite-8-migration.md": 60,
     "docs/adr/ADR-0014-next-16-migration.md": 65,
+    "docs/adr/ADR-0015-supply-chain-hardening.md": 170,
+    "scripts/quality/assert-sbom.mjs": 130,
     "scripts/quality/run-gates.mjs": 60
   },
   "noBom": [
@@ -382,8 +387,10 @@
     "templates/payments/PaymentProvider.java",
     "templates/admin-bff/server.mjs",
     "docs/adr/ADR-0007-payment-provider.md",
+    "docs/adr/ADR-0015-supply-chain-hardening.md",
     "scripts/quality/run-gates.mjs",
     "scripts/quality/gate-audit.mjs",
+    "scripts/quality/assert-sbom.mjs",
     "docs/setup/local-setup-windows.md",
     "docs/adr/ADR-0001-model-routing.md",
     "docs/operations/authority-map.md",
@@ -498,6 +505,19 @@
   "agentSkills": {
     "agentsDir": ".claude/agents",
     "skillsDir": ".claude/skills"
+  },
+  "githubActionsPins": {
+    "dirs": [".github/workflows"],
+    "extensions": [".yml", ".yaml"],
+    "requireVersionComment": true
+  },
+  "nextSecurityOverrides": {
+    "webPackage": "apps/web/package.json",
+    "rootPackage": "package.json",
+    "required": {
+      "sharp": "0.35.0",
+      "postcss": "8.5.18"
+    }
   },
   "trackedForbidden": ["*.tsbuildinfo", "apps/web/next-env.d.ts"],
   "activationGates": [{ "name": "admin-bff", "checklistItems": 12 }],

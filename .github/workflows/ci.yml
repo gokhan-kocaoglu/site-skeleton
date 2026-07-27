@@ -1,6 +1,10 @@
 # CI — Faz 8.1 (audit #6). Doküman: docs/operations/ci.md
 # Job adları branch-protection required-checks listesiyle birebir aynıdır;
 # ad değiştirirsen dokümandaki listeyi ve GitHub ayarını birlikte güncelle.
+# Harici `uses:` referansları tam 40 karakter commit SHA'sına pinlidir ve aynı
+# satırda exact release tag yorumu taşır (ADR-0015). Kural verify-structure
+# `githubActionsPins` bölümüyle enforce edilir — tag/kısa SHA/yorumsuz pin FAIL.
+# Action runtime hattı Node 24'tür; uygulama matrisi Node.js 22 + Java 21 kalır.
 name: CI
 
 on:
@@ -20,9 +24,10 @@ jobs:
     name: quality-gate-ubuntu
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4 # sürümü package.json packageManager alanından okur
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        # sürümü package.json packageManager alanından okur
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 22
           cache: pnpm
@@ -38,8 +43,8 @@ jobs:
     name: api-verify-testcontainers
     runs-on: ubuntu-latest # Docker mevcut; Testcontainers gerçek postgres:16 koşar
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
         with:
           distribution: temurin
           java-version: 21
@@ -51,10 +56,13 @@ jobs:
     name: hooks-and-structure-windows
     runs-on: windows-latest # path/CRLF paritesi: hook'lar Windows'ta da çalışmalı
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 22
+          # Bu job dependency kurmaz; setup-node'un otomatik paket yöneticisi
+          # cache'i istenmeyen bir pnpm store restore'u tetiklemesin.
+          package-manager-cache: false
       - run: node .claude/hooks/tests/run-tests.js
       - run: node scripts/verify-structure.mjs
       - run: node scripts/tests/verify-structure-negative.mjs
@@ -63,9 +71,106 @@ jobs:
     name: gitleaks-full-history
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0 # tam git geçmişi taraması (audit #24)
-      - uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ADR-0015: pnpm audit yalnız npm production ağacını görür. Bu job Maven
+  # ağacını, npm dev bağımlılıklarını ve üretilen JAR'ın gömülü içeriğini de
+  # tarar. `pnpm gate` zincirine EKLENMEZ (ağ bağımlılığı + süre).
+  supply-chain:
+    name: supply-chain-trivy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 22
+          package-manager-cache: false # dependency kurulmuyor; assert-sbom Node stdlib
+      - uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - name: Build API jar
+        run: mvn --batch-mode -DskipTests package
+        working-directory: apps/api
+      - name: Resolve executable Spring Boot jar
+        id: jar
+        run: |
+          set -euo pipefail
+          mapfile -t jars < <(find apps/api/target -maxdepth 1 -type f -name '*.jar' \
+            ! -name '*.jar.original' ! -name '*-sources.jar' \
+            ! -name '*-javadoc.jar' ! -name '*-tests.jar' | sort)
+          if [ "${#jars[@]}" -ne 1 ]; then
+            echo "FAIL: tam olarak bir executable JAR bekleniyordu, bulunan ${#jars[@]}"
+            printf '  %s\n' "${jars[@]:-<yok>}"
+            exit 1
+          fi
+          echo "resolved executable jar: ${jars[0]}"
+          echo "path=${jars[0]}" >> "$GITHUB_OUTPUT"
+      # exit-code 1 + ignore-unfixed false: düzeltmesi olmayan HIGH/CRITICAL de
+      # fail'dir. Tarama koşulamazsa adım fail eder — "temiz" sayılmaz.
+      - name: Trivy vulnerability scan (repository)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          ignore-unfixed: "false"
+          format: table
+          cache-dir: ${{ runner.temp }}/trivy-cache # workspace'i kirletme + kendini tarama
+      # scan-type rootfs: `fs` bir JAR dosyasını dil-spesifik dosya olarak
+      # TANIMAZ ("Supported files not found") ve sessizce temiz görünür;
+      # rootfs, BOOT-INF/lib altındaki gömülü bağımlılıkları çözer.
+      - name: Trivy vulnerability scan (API jar)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: rootfs
+          scan-ref: ${{ steps.jar.outputs.path }}
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          ignore-unfixed: "false"
+          format: table
+          cache-dir: ${{ runner.temp }}/trivy-cache
+      # Envanter adımı: exit-code 0 — verdict ÜRETMEZ. `scanners` bilinçli olarak
+      # boş bırakılır (saf SBOM; zafiyet verisi gömülmez).
+      - name: Generate CycloneDX SBOM (inventory only)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: cyclonedx
+          output: ${{ runner.temp }}/site-skeleton.cdx.json
+          exit-code: "0"
+          cache-dir: ${{ runner.temp }}/trivy-cache
+      - name: Assert SBOM inventory
+        run: node scripts/quality/assert-sbom.mjs "${{ runner.temp }}/site-skeleton.cdx.json"
+      - name: Upload SBOM
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: site-skeleton-cyclonedx-sbom
+          path: ${{ runner.temp }}/site-skeleton.cdx.json
+          retention-days: 14
+          if-no-files-found: error
+
+  # Yalnız PR olayında koşar; main push run'ında skipped görünür (ADR-0015).
+  dependency-review:
+    name: dependency-review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # PR yorumu YAZILMAZ: pull-requests: write verilmez
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high # license allow/deny listesi ilk kapsamda YOK
