@@ -254,6 +254,7 @@
     "scripts/quality/gate-audit.mjs",
     "scripts/quality/gate-structure.mjs",
     "scripts/quality/gate-contract-drift.mjs",
+    "scripts/quality/assert-sbom.mjs",
     "scripts/quality/run-gates.mjs",
     "docs/setup/local-setup-windows.md",
     "docs/adr/ADR-0001-model-routing.md",
@@ -355,6 +356,7 @@
     "docs/adr/ADR-0013-vite-8-migration.md": 60,
     "docs/adr/ADR-0014-next-16-migration.md": 65,
     "docs/adr/ADR-0015-supply-chain-hardening.md": 170,
+    "scripts/quality/assert-sbom.mjs": 130,
     "scripts/quality/run-gates.mjs": 60
   },
   "noBom": [
@@ -387,6 +389,7 @@
     "docs/adr/ADR-0015-supply-chain-hardening.md",
     "scripts/quality/run-gates.mjs",
     "scripts/quality/gate-audit.mjs",
+    "scripts/quality/assert-sbom.mjs",
     "docs/setup/local-setup-windows.md",
     "docs/adr/ADR-0001-model-routing.md",
     "docs/operations/authority-map.md",
