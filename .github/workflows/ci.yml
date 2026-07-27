@@ -127,10 +127,13 @@ jobs:
           ignore-unfixed: "false"
           format: table
           cache-dir: ${{ runner.temp }}/trivy-cache # workspace'i kirletme + kendini tarama
+      # scan-type rootfs: `fs` bir JAR dosyasını dil-spesifik dosya olarak
+      # TANIMAZ ("Supported files not found") ve sessizce temiz görünür;
+      # rootfs, BOOT-INF/lib altındaki gömülü bağımlılıkları çözer.
       - name: Trivy vulnerability scan (API jar)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          scan-type: fs
+          scan-type: rootfs
           scan-ref: ${{ steps.jar.outputs.path }}
           scanners: vuln
           severity: HIGH,CRITICAL
