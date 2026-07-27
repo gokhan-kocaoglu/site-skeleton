@@ -274,7 +274,10 @@
     "docs/audits/2026-07-03-recertification.md",
     "docs/audits/seo/2026-07-02-web-home.md",
     "docs/audits/seo/2026-07-03-web-home-remediation.md",
-    "docs/audits/seo/2026-07-03-web-home-last-updated.md"
+    "docs/audits/seo/2026-07-03-web-home-last-updated.md",
+    "scripts/tests/lib/repo-fixture.mjs",
+    "scripts/tests/bootstrap-e2e.mjs",
+    "scripts/tests/bootstrap-transaction.mjs"
   ],
   "maxLines": {
     "CLAUDE.md": 80,
@@ -357,7 +360,10 @@
     "docs/adr/ADR-0015-supply-chain-hardening.md": 170,
     "scripts/quality/assert-sbom.mjs": 130,
     "scripts/quality/run-gates.mjs": 60,
-    "scripts/bootstrap-project.mjs": 500
+    "scripts/bootstrap-project.mjs": 500,
+    "scripts/tests/lib/repo-fixture.mjs": 160,
+    "scripts/tests/bootstrap-e2e.mjs": 330,
+    "scripts/tests/bootstrap-transaction.mjs": 240
   },
   "noBom": [
     ".gitignore",
@@ -391,6 +397,9 @@
     "scripts/quality/gate-audit.mjs",
     "scripts/quality/assert-sbom.mjs",
     "scripts/bootstrap-project.mjs",
+    "scripts/tests/lib/repo-fixture.mjs",
+    "scripts/tests/bootstrap-e2e.mjs",
+    "scripts/tests/bootstrap-transaction.mjs",
     "docs/setup/local-setup-windows.md",
     "docs/adr/ADR-0001-model-routing.md",
     "docs/operations/authority-map.md",

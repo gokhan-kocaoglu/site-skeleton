@@ -11,7 +11,8 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
-    "gate": "node scripts/quality/run-gates.mjs"
+    "gate": "node scripts/quality/run-gates.mjs",
+    "test:bootstrap-e2e": "node scripts/tests/bootstrap-e2e.mjs"
   },
   "devDependencies": {
     "@seriousme/openapi-schema-validator": "^2.0.0",
