@@ -1,5 +1,5 @@
 {
-  "phase": 8.2,
+  "phase": 8.3,
   "mode": "skeleton-dev",
   "requiredDirs": [
     "apps/web",
@@ -245,6 +245,7 @@
     "docs/adr/ADR-0012-lint-enforcement-depth.md",
     "docs/adr/ADR-0013-vite-8-migration.md",
     "docs/adr/ADR-0014-next-16-migration.md",
+    "docs/adr/ADR-0015-supply-chain-hardening.md",
     "scripts/bootstrap-project.mjs",
     "scripts/quality/gate-build.mjs",
     "scripts/quality/gate-typecheck.mjs",
@@ -353,6 +354,7 @@
     "docs/adr/ADR-0012-lint-enforcement-depth.md": 60,
     "docs/adr/ADR-0013-vite-8-migration.md": 60,
     "docs/adr/ADR-0014-next-16-migration.md": 65,
+    "docs/adr/ADR-0015-supply-chain-hardening.md": 170,
     "scripts/quality/run-gates.mjs": 60
   },
   "noBom": [
@@ -382,6 +384,7 @@
     "templates/payments/PaymentProvider.java",
     "templates/admin-bff/server.mjs",
     "docs/adr/ADR-0007-payment-provider.md",
+    "docs/adr/ADR-0015-supply-chain-hardening.md",
     "scripts/quality/run-gates.mjs",
     "scripts/quality/gate-audit.mjs",
     "docs/setup/local-setup-windows.md",
