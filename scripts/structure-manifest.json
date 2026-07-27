@@ -274,9 +274,7 @@
     "docs/audits/2026-07-03-recertification.md",
     "docs/audits/seo/2026-07-02-web-home.md",
     "docs/audits/seo/2026-07-03-web-home-remediation.md",
-    "docs/audits/seo/2026-07-03-web-home-last-updated.md",
-    "project-memory/ClaudeTeamMemory/01_Projects/SiteSkeleton/Current Status.md",
-    "project-memory/ClaudeTeamMemory/01_Projects/SiteSkeleton/08_Session_Logs/2026-07-02-session-01.md"
+    "docs/audits/seo/2026-07-03-web-home-last-updated.md"
   ],
   "maxLines": {
     "CLAUDE.md": 80,
@@ -520,6 +518,32 @@
       "sharp": "0.35.0",
       "postcss": "8.5.18"
     }
+  },
+  "projectMemory": {
+    "root": "project-memory/ClaudeTeamMemory/01_Projects",
+    "template": "_TEMPLATE",
+    "skeletonProject": "SiteSkeleton",
+    "archiveDir": "_ARCHIVE",
+    "requiredProjectFiles": ["Project Brief.md", "Current Status.md", "Backlog.md"],
+    "requiredProjectDirs": [
+      "01_PM",
+      "02_UX_UI",
+      "03_Backend",
+      "04_Frontend",
+      "05_QA",
+      "06_Decisions",
+      "07_Patterns",
+      "08_Session_Logs"
+    ],
+    "headings": {
+      "Project Brief.md": "# Project Brief —",
+      "Current Status.md": "# Current Status —",
+      "Backlog.md": "# Backlog —"
+    },
+    "requiredSkeletonFiles": [
+      "Current Status.md",
+      "08_Session_Logs/2026-07-02-session-01.md"
+    ]
   },
   "trackedForbidden": ["*.tsbuildinfo", "apps/web/next-env.d.ts"],
   "activationGates": [{ "name": "admin-bff", "checklistItems": 12 }],

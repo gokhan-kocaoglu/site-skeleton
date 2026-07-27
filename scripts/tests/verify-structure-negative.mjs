@@ -7,22 +7,71 @@
  * not loosen the scan (CI #15 regression) and structural rules actually
  * bite. Node stdlib only. Exit 0 = all scenarios behave, exit 1 otherwise.
  */
-import { mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const WORKFLOWS = path.join(ROOT, '.github', 'workflows');
+const MANIFEST = path.join(ROOT, 'scripts', 'structure-manifest.json');
+const MEMORY_ROOT = path.join(ROOT, 'project-memory', 'ClaudeTeamMemory', '01_Projects');
 const PINNED_SHA = 'd23441a48e516b6c34aea4fa41551a30e30af803';
+const NEG_SLUG = 'negative-demo';
+const MEMORY_SUBDIRS = ['01_PM', '02_UX_UI', '03_Backend', '04_Frontend', '05_QA', '06_Decisions', '07_Patterns', '08_Session_Logs'];
 
-// A scenario that mutates a TRACKED file must restore it byte for byte; this
-// snapshot is compared before/after the whole run so the negative suite can
-// never leave a working-tree diff behind.
-function gitDiffSnapshot() {
-  const run = spawnSync('git', ['diff'], { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+// This suite runs in the skeleton AND inside bootstrapped repositories (the
+// generated-project gate calls it). Rules that only exist in one mode must be
+// skipped in the other, or the scenario would fail itself — the latent bug the
+// bootstrap certification surfaced.
+const MODE = JSON.parse(readFileSync(MANIFEST, 'utf8')).mode ?? 'skeleton-dev';
+
+// A scenario that mutates tracked files or plants directories must leave no
+// trace; this snapshot covers tracked changes AND untracked leftovers.
+function worktreeSnapshot() {
+  const run = spawnSync('git', ['status', '--porcelain=v1', '--untracked-files=all'], {
+    cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
+  });
   if (run.error || run.status !== 0) return null; // git missing -> fail-safe skip
   return run.stdout;
+}
+
+/** Rewrites the manifest and hands back a byte-exact restore. */
+function patchManifest(mutate) {
+  const original = readFileSync(MANIFEST);
+  const data = JSON.parse(original.toString('utf8'));
+  mutate(data);
+  writeFileSync(MANIFEST, `${JSON.stringify(data, null, 2)}\n`);
+  return () => writeFileSync(MANIFEST, original);
+}
+
+/** Plants a throwaway project-memory folder; `omit` leaves one file out. */
+function plantMemoryProject(slug, { omit = null } = {}) {
+  const base = path.join(MEMORY_ROOT, slug);
+  const display = slug.split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ');
+  mkdirSync(base, { recursive: true });
+  const files = {
+    'Project Brief.md': `# Project Brief — ${display}\n`,
+    'Current Status.md': `# Current Status — ${display}\n`,
+    'Backlog.md': `# Backlog — ${display}\n`,
+  };
+  for (const [name, content] of Object.entries(files)) {
+    if (name !== omit) writeFileSync(path.join(base, name), content);
+  }
+  for (const sub of MEMORY_SUBDIRS) {
+    mkdirSync(path.join(base, sub), { recursive: true });
+    writeFileSync(path.join(base, sub, '.gitkeep'), '');
+  }
+  return base;
+}
+
+/** Guarantees a live SiteSkeleton folder exists; returns paths to clean up. */
+function plantLiveSkeleton() {
+  const live = path.join(MEMORY_ROOT, 'SiteSkeleton');
+  if (existsSync(live)) return [];
+  mkdirSync(live, { recursive: true });
+  writeFileSync(path.join(live, 'Current Status.md'), '# Current Status — Site Skeleton\n');
+  return [live];
 }
 
 // Writes a throwaway workflow whose only interesting content is one `uses:` line.
@@ -41,6 +90,9 @@ function plantWorkflow(slug, usesLine) {
 const scenarios = [
   {
     name: 'apps/ altındaki sahte pattern dosyası FAIL üretir (muafiyet kod taramasını gevşetmedi)',
+    // The guarded pattern rule is skeleton-dev only; in a bootstrapped project
+    // it is deliberately off, so asserting a FAIL there would be wrong.
+    modes: ['skeleton-dev'],
     expectFragment: '__forbidden-pattern-negative.tmp.ts',
     setup() {
       const tmp = path.join(ROOT, 'apps', 'web', '__forbidden-pattern-negative.tmp.ts');
@@ -110,11 +162,69 @@ const scenarios = [
       return { paths: [], restore: () => writeFileSync(file, original) };
     },
   },
+  {
+    name: 'mode=project ama projectSlug yoksa FAIL üretir (projectMemory)',
+    expectFragments: ['projectSlug yok/geçersiz', 'bootstrap tamamlanmamış'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.mode = 'project';
+        delete m.projectSlug;
+      }),
+    }),
+  },
+  {
+    name: 'projectSlug gerçek memory klasörüyle uyuşmuyorsa FAIL üretir (projectMemory)',
+    expectFragments: ['project memory klasörü yok', 'no-such-project'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.mode = 'project';
+        m.projectSlug = 'no-such-project';
+      }),
+    }),
+  },
+  {
+    name: 'project memory ana dosyası eksikse FAIL üretir (projectMemory)',
+    expectFragments: ['project memory dosyası eksik', 'Backlog.md'],
+    setup() {
+      const dir = plantMemoryProject(NEG_SLUG, { omit: 'Backlog.md' });
+      return {
+        paths: [dir],
+        restore: patchManifest((m) => {
+          m.mode = 'project';
+          m.projectSlug = NEG_SLUG;
+        }),
+      };
+    },
+  },
+  {
+    name: 'mode=project iken canlı SiteSkeleton varsa FAIL üretir (projectMemory)',
+    expectFragments: ['canlı iskelet memory', 'kalmamalı'],
+    setup() {
+      const dir = plantMemoryProject(NEG_SLUG);
+      return {
+        paths: [dir, ...plantLiveSkeleton()],
+        restore: patchManifest((m) => {
+          m.mode = 'project';
+          m.projectSlug = NEG_SLUG;
+        }),
+      };
+    },
+  },
 ];
 
-const diffBefore = gitDiffSnapshot();
+const snapshotBefore = worktreeSnapshot();
 let failed = 0;
+let skipped = 0;
+let ran = 0;
 for (const scenario of scenarios) {
+  if (scenario.modes && !scenario.modes.includes(MODE)) {
+    skipped++;
+    console.log(`[verify-structure-negative] SKIP — ${scenario.name} (kural mode=${MODE} için kapalı)`);
+    continue;
+  }
+  ran++;
   let cleanup = [];
   let restore = null;
   try {
@@ -145,17 +255,20 @@ for (const scenario of scenarios) {
   }
 }
 
-// Restoration proof: a scenario that touched a tracked file must not survive.
-const diffAfter = gitDiffSnapshot();
-if (diffBefore === null || diffAfter === null) {
-  console.error('[verify-structure-negative] ! git diff kontrolü atlandı (git yok/başarısız)');
-} else if (diffBefore !== diffAfter) {
+// Restoration proof: nothing a scenario touched or planted may survive.
+const snapshotAfter = worktreeSnapshot();
+if (snapshotBefore === null || snapshotAfter === null) {
+  console.error('[verify-structure-negative] ! worktree kontrolü atlandı (git yok/başarısız)');
+} else if (snapshotBefore !== snapshotAfter) {
   failed++;
   console.error(
-    '[verify-structure-negative] FAIL — izlenen dosya restore edilmedi: ' +
-      'senaryolardan sonra `git diff` çıktısı değişti.'
+    '[verify-structure-negative] FAIL — çalışma ağacı restore edilmedi:\n' +
+      `  önce:\n${snapshotBefore.trim() || '    (temiz)'}\n  sonra:\n${snapshotAfter.trim() || '    (temiz)'}`
   );
 }
 
 if (failed) process.exit(1);
-console.log(`[verify-structure-negative] ${scenarios.length}/${scenarios.length} senaryo PASS`);
+console.log(
+  `[verify-structure-negative] ${ran}/${ran} senaryo PASS` +
+    ` (mode=${MODE}${skipped ? `, ${skipped} senaryo bu modda kapalı` : ''}; toplam ${scenarios.length})`
+);
