@@ -239,6 +239,108 @@ for (const gate of manifest.activationGates ?? []) {
   }
 }
 
+// 7g. GitHub Actions SHA pins (Faz 8.3 PR-B, ADR-0015): a moving tag can be
+// re-pointed by its owner, so every external `uses:` reference — step-level and
+// job-level (reusable workflow) alike — must be an immutable 40-hex commit SHA
+// carrying an exact release-tag comment on the same line. Local `./` actions are
+// exempt: they are already bound to this commit. Negative tests:
+// scripts/tests/verify-structure-negative.mjs
+if (manifest.githubActionsPins) {
+  const cfg = manifest.githubActionsPins;
+  const exts = cfg.extensions ?? ['.yml', '.yaml'];
+  const EXPECTED = 'owner/repository@<40-hex-sha> # <exact-version-tag>';
+  const workflowFiles = [];
+  for (const dir of cfg.dirs ?? []) {
+    if (!existsSync(p(dir))) continue;
+    for (const entry of readdirSync(p(dir), { withFileTypes: true })) {
+      if (entry.isFile() && exts.some((ext) => entry.name.endsWith(ext))) {
+        workflowFiles.push(`${dir}/${entry.name}`);
+      }
+    }
+  }
+  for (const rel of workflowFiles) {
+    readFileSync(p(rel), 'utf8').split(/\r?\n/).forEach((line, i) => {
+      const m = line.match(/^\s*(?:-\s*)?uses\s*:\s*(\S+)(.*)$/);
+      if (!m) return;
+      const ref = m[1].replace(/^['"]|['"]$/g, '');
+      if (ref.startsWith('./') || ref.startsWith('.\\')) return; // local action
+      const where = `${rel}:${i + 1}`;
+      const at = ref.lastIndexOf('@');
+      if (at === -1) {
+        check(false, `${where}: "${ref}" SHA'sız referans — beklenen biçim: ${EXPECTED}`);
+        return;
+      }
+      check(
+        /^[0-9a-f]{40}$/.test(ref.slice(at + 1)),
+        `${where}: "${ref}" tam 40-hex commit SHA değil — beklenen biçim: ${EXPECTED}`
+      );
+      if (cfg.requireVersionComment) {
+        const tag = line.slice(line.indexOf(m[1]) + m[1].length).match(/#\s*(\S+)/)?.[1];
+        check(
+          !!tag && /^v?\d+\.\d+/.test(tag),
+          `${where}: "${ref}" yanında exact sürüm yorumu yok veya hareketli major alias` +
+            ` ("${tag ?? ''}") — beklenen biçim: ${EXPECTED}`
+        );
+      }
+    });
+  }
+}
+
+// 7h. Next security override alignment (Faz 8.3 PR-B, ADR-0015): pnpm's
+// parent-scoped overrides bind to an exact parent version, so a Next patch bump
+// silently unhooks them (PR #24 regression: postcss fell back to 8.4.31). The
+// manifest pins the safe versions; this rule keeps the selector and the
+// installed Next version in lockstep and rejects stale/loose selectors.
+if (manifest.nextSecurityOverrides) {
+  const cfg = manifest.nextSecurityOverrides;
+  const readPkg = (rel) => {
+    if (!existsSync(p(rel))) {
+      check(false, `nextSecurityOverrides hedefi eksik: ${rel}`);
+      return null;
+    }
+    try {
+      return JSON.parse(readFileSync(p(rel), 'utf8'));
+    } catch (e) {
+      check(false, `${rel}: nextSecurityOverrides için geçersiz JSON (${e.message})`);
+      return null;
+    }
+  };
+  const webPkg = readPkg(cfg.webPackage);
+  const rootPkg = readPkg(cfg.rootPackage);
+  if (webPkg && rootPkg) {
+    const next = webPkg.dependencies?.next ?? webPkg.devDependencies?.next ?? '';
+    check(
+      /^\d+\.\d+\.\d+$/.test(next),
+      `${cfg.webPackage}: next sürümü exact x.y.z olmalı (bulunan: "${next}")`
+    );
+    const overrides = rootPkg.pnpm?.overrides ?? {};
+    for (const [dep, safe] of Object.entries(cfg.required)) {
+      const key = `next@${next}>${dep}`;
+      check(
+        overrides[key] === safe,
+        `${cfg.rootPackage}: "${key}": "${safe}" override'ı eksik/farklı` +
+          ` (bulunan: ${JSON.stringify(overrides[key] ?? null)}) — Next sürümü ilerlediyse selector'ı güncelle`
+      );
+    }
+    for (const key of Object.keys(overrides)) {
+      const m = key.match(/^next(?:@([^>]*))?>(.+)$/);
+      if (!m || !(m[2] in cfg.required)) continue;
+      if (m[1] === undefined) {
+        check(false, `${cfg.rootPackage}: sürümsüz Next selector "${key}" — exact "next@${next}>${m[2]}" zorunlu`);
+        continue;
+      }
+      check(
+        /^\d+\.\d+\.\d+$/.test(m[1]),
+        `${cfg.rootPackage}: exact olmayan/aralıklı Next selector "${key}" — exact x.y.z zorunlu`
+      );
+      check(
+        m[1] === next,
+        `${cfg.rootPackage}: stale Next override selector "${key}" (kurulu Next ${next}) — kaldır`
+      );
+    }
+  }
+}
+
 // 7e. Tracked-forbidden files (Faz 8.2, brief 2.1): build artefacts like
 // *.tsbuildinfo regenerate as UNTRACKED files on every build, so a tree walk
 // would false-positive; only the git index can say "tracked". Deliberately
@@ -274,7 +376,41 @@ function* walk(dir) {
   }
 }
 
-const allFiles = [...walk(ROOT)];
+// The file list is git-derived (Faz 8.3 PR-B): tracked files plus untracked
+// files git would not ignore. A plain tree walk counted generated, ignored
+// artefacts too — `apps/web/next-env.d.ts` exists only after a build/typegen ran,
+// so the total check count drifted with local state (899 vs 896). Ignored
+// generated files are out of scope for a structural rule; temporary negative-test
+// fixtures (untracked, not ignored) stay in scope.
+function isExcludedPath(rel) {
+  const parts = rel.split('/');
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (EXCLUDE_DIRS.has(parts[i]) || EXCLUDE_DIRS.has(parts.slice(0, i + 1).join('/'))) return true;
+  }
+  return false;
+}
+
+function listScanFiles() {
+  const git = spawnSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  });
+  if (git.error || git.status !== 0) {
+    console.error(
+      '  ! forbidden-pattern dosya listesi ağaç taramasına düştü (git yok/başarısız):' +
+        ' ignore edilen generated dosyalar da taranır, check sayısı ortama göre değişebilir'
+    );
+    return [...walk(ROOT)];
+  }
+  return git.stdout
+    .split('\0')
+    .filter(Boolean)
+    .filter((rel) => !isExcludedPath(rel))
+    .filter((rel) => existsSync(p(rel)) && statSync(p(rel)).isFile());
+}
+
+const allFiles = listScanFiles();
 const MODE = manifest.mode ?? 'skeleton-dev';
 for (const rule of manifest.forbiddenPatterns ?? []) {
   if (rule.modes && !rule.modes.includes(MODE)) continue;

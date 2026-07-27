@@ -502,6 +502,19 @@
     "agentsDir": ".claude/agents",
     "skillsDir": ".claude/skills"
   },
+  "githubActionsPins": {
+    "dirs": [".github/workflows"],
+    "extensions": [".yml", ".yaml"],
+    "requireVersionComment": true
+  },
+  "nextSecurityOverrides": {
+    "webPackage": "apps/web/package.json",
+    "rootPackage": "package.json",
+    "required": {
+      "sharp": "0.35.0",
+      "postcss": "8.5.18"
+    }
+  },
   "trackedForbidden": ["*.tsbuildinfo", "apps/web/next-env.d.ts"],
   "activationGates": [{ "name": "admin-bff", "checklistItems": 12 }],
   "handoffTargets": {

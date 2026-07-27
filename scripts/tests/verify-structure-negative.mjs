@@ -7,12 +7,34 @@
  * not loosen the scan (CI #15 regression) and structural rules actually
  * bite. Node stdlib only. Exit 0 = all scenarios behave, exit 1 otherwise.
  */
-import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+const WORKFLOWS = path.join(ROOT, '.github', 'workflows');
+const PINNED_SHA = 'd23441a48e516b6c34aea4fa41551a30e30af803';
+
+// A scenario that mutates a TRACKED file must restore it byte for byte; this
+// snapshot is compared before/after the whole run so the negative suite can
+// never leave a working-tree diff behind.
+function gitDiffSnapshot() {
+  const run = spawnSync('git', ['diff'], { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  if (run.error || run.status !== 0) return null; // git missing -> fail-safe skip
+  return run.stdout;
+}
+
+// Writes a throwaway workflow whose only interesting content is one `uses:` line.
+function plantWorkflow(slug, usesLine) {
+  const file = path.join(WORKFLOWS, `__action-pin-negative-${slug}.tmp.yml`);
+  writeFileSync(
+    file,
+    `name: action-pin-negative-${slug}\non:\n  workflow_dispatch:\njobs:\n` +
+      `  probe:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: ${usesLine}\n`
+  );
+  return file;
+}
 
 // Forbidden tokens are assembled at runtime so this test file itself never
 // contains the literals it plants.
@@ -57,32 +79,82 @@ const scenarios = [
       return [dir];
     },
   },
+  {
+    name: 'tag referanslı action FAIL üretir (githubActionsPins: hareketli tag)',
+    expectFragments: ['__action-pin-negative-tag.tmp.yml', 'tam 40-hex commit SHA değil'],
+    setup: () => [plantWorkflow('tag', 'actions/checkout@v6')],
+  },
+  {
+    name: 'kısa SHA referanslı action FAIL üretir (githubActionsPins: 40-hex zorunlu)',
+    expectFragments: ['__action-pin-negative-short.tmp.yml', 'tam 40-hex commit SHA değil'],
+    setup: () => [plantWorkflow('short', `actions/checkout@${PINNED_SHA.slice(0, 7)} # v6.1.0`)],
+  },
+  {
+    name: 'sürüm yorumu olmayan tam SHA FAIL üretir (githubActionsPins: exact tag yorumu)',
+    expectFragments: ['__action-pin-negative-nocomment.tmp.yml', 'exact sürüm yorumu yok'],
+    setup: () => [plantWorkflow('nocomment', `actions/checkout@${PINNED_SHA}`)],
+  },
+  {
+    // Tracked-file mutation: the original bytes are held in memory and written
+    // back in the shared finally block, then asserted by the git-diff snapshot.
+    name: 'eksik Next güvenlik override selector FAIL üretir (nextSecurityOverrides)',
+    expectFragments: ['package.json', "override'ı eksik/farklı"],
+    setup() {
+      const file = path.join(ROOT, 'package.json');
+      const original = readFileSync(file);
+      const pkg = JSON.parse(original.toString('utf8'));
+      for (const key of Object.keys(pkg.pnpm?.overrides ?? {})) {
+        if (key.startsWith('next@') && key.endsWith('>postcss')) delete pkg.pnpm.overrides[key];
+      }
+      writeFileSync(file, `${JSON.stringify(pkg, null, 2)}\n`);
+      return { paths: [], restore: () => writeFileSync(file, original) };
+    },
+  },
 ];
 
+const diffBefore = gitDiffSnapshot();
 let failed = 0;
 for (const scenario of scenarios) {
   let cleanup = [];
+  let restore = null;
   try {
-    cleanup = scenario.setup();
+    const planted = scenario.setup();
+    if (Array.isArray(planted)) cleanup = planted;
+    else ({ paths: cleanup = [], restore = null } = planted);
+    const expected = scenario.expectFragments ?? [scenario.expectFragment];
     const run = spawnSync(
       process.execPath,
       [path.join(ROOT, 'scripts', 'verify-structure.mjs')],
       { cwd: ROOT, encoding: 'utf8' }
     );
     const out = `${run.stdout ?? ''}${run.stderr ?? ''}`;
-    if (run.status === 1 && out.includes(scenario.expectFragment)) {
+    const missing = expected.filter((fragment) => !out.includes(fragment));
+    if (run.status === 1 && missing.length === 0) {
       console.log(`[verify-structure-negative] PASS — ${scenario.name}`);
     } else {
       failed++;
       console.error(
         `[verify-structure-negative] FAIL — ${scenario.name}: ` +
-          `exit=${run.status} (beklenen 1) veya "${scenario.expectFragment}" çıktıda yok.`
+          `exit=${run.status} (beklenen 1) veya çıktıda yok: ${missing.join(' | ')}`
       );
       console.error(out.trim().split('\n').slice(-8).join('\n'));
     }
   } finally {
     for (const tmp of cleanup) rmSync(tmp, { recursive: true, force: true });
+    if (restore) restore();
   }
+}
+
+// Restoration proof: a scenario that touched a tracked file must not survive.
+const diffAfter = gitDiffSnapshot();
+if (diffBefore === null || diffAfter === null) {
+  console.error('[verify-structure-negative] ! git diff kontrolü atlandı (git yok/başarısız)');
+} else if (diffBefore !== diffAfter) {
+  failed++;
+  console.error(
+    '[verify-structure-negative] FAIL — izlenen dosya restore edilmedi: ' +
+      'senaryolardan sonra `git diff` çıktısı değişti.'
+  );
 }
 
 if (failed) process.exit(1);
