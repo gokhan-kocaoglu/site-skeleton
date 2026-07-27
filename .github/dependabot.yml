@@ -32,6 +32,10 @@ updates:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
 
+  # Action referansları tam 40-hex SHA + aynı satırda exact sürüm yorumu
+  # biçiminde tutulur (ADR-0015; verify-structure githubActionsPins kuralı).
+  # Dependabot bu biçimi tanır: SHA'yı ve yanındaki sürüm yorumunu birlikte
+  # günceller — yorum bir dokümantasyon süsü değil, gate'in beklediği alandır.
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
