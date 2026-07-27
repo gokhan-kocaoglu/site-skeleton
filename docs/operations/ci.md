@@ -3,9 +3,9 @@
 Pipeline: `.github/workflows/ci.yml` — her `push` (main) ve `pull_request`'te
 koşar. Job'lar paralel çalışır; hepsi yeşil olmadan merge yok.
 
-**PR'da altı job, main push'unda beş job koşar** — `dependency-review` yalnız
-`pull_request` olayında çalışır, main push run'ında **skipped** görünür ve
-orada beklenmez (Faz 8.3 PR-B, ADR-0015).
+**Yedi job tanımlıdır: PR'da yedisi de, main push'unda altısı koşar** —
+`dependency-review` yalnız `pull_request` olayında çalışır, main push run'ında
+**skipped** görünür ve orada beklenmez (Faz 8.3 PR-B, ADR-0015).
 
 ## Job'lar
 
@@ -16,6 +16,7 @@ orada beklenmez (Faz 8.3 PR-B, ADR-0015).
 | `hooks-and-structure-windows` | windows-latest | `node .claude/hooks/tests/run-tests.js` + `node scripts/verify-structure.mjs` + negatif senaryolar (path/CRLF paritesi) | aynı komutlar |
 | `gitleaks-full-history` | ubuntu-latest | Gitleaks, `fetch-depth: 0` ile TÜM git geçmişini tarar; konfig: `.gitleaks.toml` | `gitleaks git .` (CLI kuruluysa) |
 | `supply-chain-trivy` | ubuntu-latest | JAR build + iki Trivy vuln taraması (repo + JAR) + CycloneDX SBOM + `assert-sbom.mjs` + SBOM artifact | aşağıdaki "Lokal Trivy" bölümü |
+| `bootstrap-e2e` | ubuntu-latest | `bootstrap-transaction.mjs` + `bootstrap-e2e.mjs` — geçici repoda gerçek `--apply` ve **üretilen projenin kendi gate'i** | `pnpm test:bootstrap-e2e` |
 | `dependency-review` | ubuntu-latest | `actions/dependency-review-action`, `fail-on-severity: high` — **yalnız PR'da** | (yok; GitHub tarafı) |
 
 ## Supply-chain job'u (ADR-0015)
@@ -51,6 +52,28 @@ orada beklenmez (Faz 8.3 PR-B, ADR-0015).
 
 Lokal Trivy koşumunda `--skip-dirs refs` gerekir: `refs/` yalnız yerelde
 duran, `.gitignore`'lu referans repo klonudur ve CI checkout'unda yoktur.
+
+## Bootstrap sertifikasyonu (Faz 8.3 PR-C)
+
+`bootstrap-e2e`, PR ve main push'unun ikisinde de koşar.
+
+- **Playwright E2E DEĞİLDİR.** Buradaki "e2e", bootstrap yaşam döngüsünün
+  uçtan uca kanıtıdır: iskelet geçici bir git reposuna kopyalanır → gerçek
+  `--apply` → `pnpm install` → **üretilen projede** `SKIP_API=1 pnpm gate` →
+  project-mode `verify-structure` → aynı slug idempotency → farklı slug reddi.
+  `templates/e2e/` (Playwright) dormant şablon olarak kalır; bu job tarayıcı
+  kurmaz, browser testi çalıştırmaz.
+- **Maven burada koşmaz.** API kanıtı `api-verify-testcontainers` job'ındadır;
+  süre nedeniyle tekrar edilmez.
+- Job `pnpm gate` zincirine **eklenmez** (geçici repo kopyası + ağ kurulumu +
+  tam generated-project gate: ayrı ve uzun bir check'tir).
+- `bootstrap-transaction.mjs` aynı job'da önce koşar: kirli ağaç reddi,
+  plan-öncesi çakışma reddi, transaction ortası rollback ve dry-run no-write.
+- Negatif structure senaryoları **mode-farkındalıdır**: yalnız skeleton-dev'de
+  aktif olan kurallar (guarded forbidden-pattern) bootstrap'lanmış repoda SKIP
+  edilir — aksi hâlde senaryo kendini FAIL eder ve generated gate patlardı.
+- **Yeni required check:** `bootstrap-e2e` GitHub'da ilk kez göründükten sonra
+  ruleset'e kullanıcı tarafından eklenir (aşağıdaki Branch Protection bölümü).
 
 ## Dependency Review
 
@@ -104,21 +127,23 @@ Notlar:
 `main` için Settings → Branches → Branch protection rule:
 
 - Require a pull request before merging.
-- Require status checks to pass; **required checks listesi (Faz 8.3 PR-B ile
-  dörtten altıya çıkar):**
+- Require status checks to pass; **required checks listesi (Faz 8.3 ile dörtten
+  yediye çıkar):**
   1. `quality-gate-ubuntu`
   2. `api-verify-testcontainers`
   3. `hooks-and-structure-windows`
   4. `gitleaks-full-history`
-  5. `supply-chain-trivy`
-  6. `dependency-review`
+  5. `supply-chain-trivy` — PR-B ile eklendi
+  6. `dependency-review` — PR-B ile eklendi
+  7. `bootstrap-e2e` — PR-C ile eklenecek
 - Require branches to be up to date before merging.
 
-> **Faz 8.3 PR-B şerhi:** Yukarıdaki liste PR-B sonrası hedef durumdur.
-> 5 ve 6 numaralı check'ler ruleset'e **PR-B açıldıktan ve yeni check'ler
-> GitHub arayüzünde göründükten sonra** eklenir — bu bir insan adımıdır ve
-> repository dosyasıyla yapılamaz. Liste genişletilene kadar iki yeni job
-> koşar ama merge'ü teknik olarak engellemez.
+> **Faz 8.3 şerhi:** 5 ve 6 numaralı check'ler PR-B açıkken ruleset'e eklendi
+> (`main-branch-protection`, ruleset id 18469047 — altı check aktif).
+> 7 numaralı `bootstrap-e2e` ruleset'e **PR-C açıldıktan ve check GitHub
+> arayüzünde ilk kez göründükten sonra** eklenir — bu bir insan adımıdır ve
+> repository dosyasıyla yapılamaz. Liste genişletilene kadar yeni job koşar
+> ama merge'ü teknik olarak engellemez. Mevcut altı check korunur.
 >
 > **Actions full-SHA pin policy'si (Settings → Actions):** pinler CI'da
 > doğrulandıktan sonra açılır. Policy hesap/plan nedeniyle görünmüyorsa

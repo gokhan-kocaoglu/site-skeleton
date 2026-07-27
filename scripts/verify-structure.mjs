@@ -13,6 +13,10 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MANIFEST_PATH = path.join(ROOT, 'scripts', 'structure-manifest.json');
 const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));
 
+// Declared up front: mode-aware rules (project memory, forbidden patterns) all
+// branch on it, and the first of those runs well before the repo-wide scan.
+const MODE = manifest.mode ?? 'skeleton-dev';
+
 const failures = [];
 let checks = 0;
 
@@ -341,6 +345,59 @@ if (manifest.nextSecurityOverrides) {
   }
 }
 
+// 7i. Project memory namespace (Faz 8.3 PR-C). The vault layout differs by mode
+// and the ONLY source of truth for the project folder name is manifest
+// `projectSlug` — never a directory counter or "first folder found". In
+// skeleton-dev the live SiteSkeleton vault is required; in project mode it must
+// have been ARCHIVED (moved, never deleted) and replaced by the generated
+// <projectSlug> folder. Negative tests: scripts/tests/verify-structure-negative.mjs
+if (manifest.projectMemory) {
+  const cfg = manifest.projectMemory;
+  const dirExists = (rel) => existsSync(p(rel)) && statSync(p(rel)).isDirectory();
+  const template = `${cfg.root}/${cfg.template}`;
+  const liveSkeleton = `${cfg.root}/${cfg.skeletonProject}`;
+  const archived = `${cfg.root}/${cfg.archiveDir}/${cfg.skeletonProject}`;
+
+  check(dirExists(template), `project memory şablonu yok: ${template}`);
+
+  if (MODE === 'project') {
+    const slug = manifest.projectSlug;
+    const validSlug = typeof slug === 'string' && /^[a-z][a-z0-9-]{1,38}[a-z0-9]$/.test(slug);
+    check(validSlug, `mode=project ama projectSlug yok/geçersiz (${JSON.stringify(slug ?? null)}) — bootstrap tamamlanmamış`);
+    if (validSlug) {
+      const projectDir = `${cfg.root}/${slug}`;
+      const display = slug.split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ');
+      if (!dirExists(projectDir)) {
+        check(false, `project memory klasörü yok: ${projectDir} (manifest projectSlug="${slug}")`);
+      } else {
+        for (const file of cfg.requiredProjectFiles ?? []) {
+          const rel = `${projectDir}/${file}`;
+          if (!existsSync(p(rel))) {
+            check(false, `project memory dosyası eksik: ${rel}`);
+            continue;
+          }
+          const expected = (cfg.headings ?? {})[file];
+          if (!expected) continue;
+          const first = readFileSync(p(rel), 'utf8').split(/\r?\n/)[0].trim();
+          check(first === `${expected} ${display}`, `${rel}: başlık "${expected} ${display}" değil (bulunan: "${first}")`);
+        }
+        for (const dir of cfg.requiredProjectDirs ?? []) {
+          check(dirExists(`${projectDir}/${dir}`), `project memory alt klasörü eksik: ${projectDir}/${dir}`);
+        }
+      }
+      check(!existsSync(p(liveSkeleton)), `mode=project iken canlı iskelet memory'si kalmamalı: ${liveSkeleton}`);
+      check(dirExists(archived), `iskelet memory'si arşivlenmemiş: ${archived} (silinmez, taşınır)`);
+    }
+  } else {
+    check(manifest.projectSlug === undefined, `mode=${MODE} ama projectSlug kayıtlı (${JSON.stringify(manifest.projectSlug ?? null)})`);
+    check(dirExists(liveSkeleton), `iskelet memory'si yok: ${liveSkeleton}`);
+    for (const file of cfg.requiredSkeletonFiles ?? []) {
+      check(existsSync(p(`${liveSkeleton}/${file}`)), `iskelet memory dosyası eksik: ${liveSkeleton}/${file}`);
+    }
+    check(!existsSync(p(archived)), `mode=${MODE} ama arşiv mevcut: ${archived} (kısmi dönüşüm)`);
+  }
+}
+
 // 7e. Tracked-forbidden files (Faz 8.2, brief 2.1): build artefacts like
 // *.tsbuildinfo regenerate as UNTRACKED files on every build, so a tree walk
 // would false-positive; only the git index can say "tracked". Deliberately
@@ -411,7 +468,6 @@ function listScanFiles() {
 }
 
 const allFiles = listScanFiles();
-const MODE = manifest.mode ?? 'skeleton-dev';
 for (const rule of manifest.forbiddenPatterns ?? []) {
   if (rule.modes && !rule.modes.includes(MODE)) continue;
   const re = new RegExp(rule.pattern, rule.flags ?? '');

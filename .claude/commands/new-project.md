@@ -10,19 +10,19 @@ description: >
 
 Bu iskeletten kopyalanan yeni bir projeyi ayağa kaldırır. Adımlar:
 
-1. **Bootstrap (deterministik rename):**
-   `node scripts/bootstrap-project.mjs <proje-adi>` (dry-run) → çıktıyı
-   kullanıcıya göster → onayla `--apply` → `pnpm install` + `pnpm gate`.
-   Kapsam ve kapsam-dışı (tarihsel kanıtlara dokunmaz) README "Bootstrap"
-   bölümünde belgelidir; script idempotent'tir.
-2. **Brief iste.** Kullanıcıdan "şöyle bir site olacak" brief'ini al
-   (hedef, kullanıcılar, ödemeli mi, kategori yapısı, özel kısıtlar).
-3. **Brief'i kaydet:** `docs/source-briefs/<proje-adi>-brief.md`.
-4. **Vault proje klasörünü aç:**
-   `project-memory/ClaudeTeamMemory/01_Projects/_TEMPLATE/` klasörünü
-   `01_Projects/<ProjeAdi>/` olarak kopyala (PowerShell:
-   `Copy-Item -Recurse`). `Project Brief.md` ve `Current Status.md`
-   placeholder'larını brief'ten doldur.
+1. **Bootstrap — dry-run:** `node scripts/bootstrap-project.mjs <proje-adi>`.
+   Çıktı tüm planı gösterir (ikameler, taşımalar, üretilecek memory).
+2. **Plan onayı:** planı kullanıcıya sun; onay olmadan `--apply` çalıştırma.
+   Ön koşul: temiz git ağacı (bypass yok). Kayıtlı `projectSlug` varsa aynı
+   slug idempotent çıkar, farklı slug reddedilir.
+3. **Uygula:** `--apply` → `pnpm install` → `pnpm gate`. Herhangi bir adım
+   hata verirse script tüm değişiklikleri geri alır; yarım dönüşüm bırakmaz.
+   **Memory klasörünü script üretir** (`01_Projects/<slug>/`, başlıklar dolu)
+   ve iskelet vault'unu `_ARCHIVE/SiteSkeleton/` altına taşır — elle kopyalama
+   YOK. Kapsam README "Bootstrap" bölümünde belgelidir.
+4. **Brief iste ve kaydet:** kullanıcıdan brief'i al (hedef, kullanıcılar,
+   ödemeli mi, kategori yapısı, özel kısıtlar) → `docs/source-briefs/<proje-adi>-brief.md`.
+   Üretilmiş `Project Brief.md` / `Current Status.md` içeriğini brief'ten doldur.
 5. **Modül aktivasyonu öner (brief'e göre):**
    - Ödemeli site → `templates/payments/` + `templates/db/coupons.sql`
      (kupon modülü) + ödeme sağlayıcı ADR'si (`/create-adr`).

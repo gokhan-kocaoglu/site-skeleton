@@ -63,14 +63,15 @@ Claude Code slash commands (`.claude/commands/`): `/new-project`, `/start-featur
 
 1. GitHub → **Use this template** → create the new project repo and clone it.
 2. Run the setup guide (`docs/setup/local-setup-windows.md`) once per machine.
-3. Open Claude Code and run `/new-project` — it runs the bootstrap rename (below),
-   asks for a source brief, seeds the memory vault (`project-memory/`) from
-   `01_Projects/_TEMPLATE/`, and has the PM agent produce the first task DAG.
+3. Open Claude Code and run `/new-project` — it runs the bootstrap (below), which
+   also seeds the memory vault (`project-memory/`) from `01_Projects/_TEMPLATE/`
+   and archives the skeleton's own vault; then it asks for a source brief and has
+   the PM agent produce the first task DAG.
 4. Every feature starts with `/start-feature`; the gate chain (PM → Arch → UX → Dev →
    QA → Security → SEO → Final → memory → commit) is defined in
    `.claude/skills/feature-workflow/`.
 
-### Bootstrap rename — exact scope
+### Bootstrap — exact scope
 
 `node scripts/bootstrap-project.mjs <project-name>` previews (dry-run); add
 `--apply` to execute. Deterministic text/dir renames only — **no LLM, no magic**:
@@ -80,13 +81,39 @@ Claude Code slash commands (`.claude/commands/`): `/new-project`, `/start-featur
 - Maven `skeleton-api` / `Skeleton API` → `<slug>-api` / `<Display> API`
 - DB names `skeleton` / `skeleton_it` → `<slug_with_underscores>` (+`_it`)
 - OpenAPI title and web metadata `Site Skeleton` → `<Display Name>`
-- `scripts/structure-manifest.json` `mode: skeleton-dev` → `project` (turns off
-  skeleton-only forbidden-pattern scans)
+- `scripts/structure-manifest.json` records `mode: project` **and
+  `projectSlug: <slug>`** (turns off skeleton-only forbidden-pattern scans)
+- project memory: `01_Projects/_TEMPLATE/` → `01_Projects/<slug>/` with the
+  Project Brief / Current Status / Backlog headings filled in
 
-It does **not** touch historical evidence (`docs/test-reports`, `docs/audits`,
-`docs/source-briefs`, `project-memory/`), does not rewrite git history, and is
-idempotent (re-running with the same name exits cleanly). After `--apply`:
-`pnpm install`, then `pnpm gate` and `mvn verify` to re-verify.
+**Project identity is recorded, not guessed.** `projectSlug` is the single
+source of truth: re-running with the *same* slug exits 0 without writing a byte;
+a *different* slug is refused with exit 1 naming both slugs. There is no
+counter- or filename-based idempotency inference.
+
+**Preconditions and atomicity.** The first `--apply` requires a clean git
+worktree (ignored build output is not a blocker) — there is no bypass flag, no
+auto-stash, no auto-reset. Every replacement, move and file creation is written
+into one immutable plan whose targets are validated *before* the first byte is
+written; if any step then fails, the transaction rolls back to the exact prior
+bytes. Rollback touches only the paths the plan touched — never
+`git reset --hard` or `git clean`.
+
+**Historical memory is archived, not deleted.** The skeleton's own operational
+vault moves from `01_Projects/SiteSkeleton/` to
+`01_Projects/_ARCHIVE/SiteSkeleton/` with its decisions and session logs intact,
+and the general text-replacement pass never scans `project-memory/` — archived
+wording stays as written. `docs/test-reports`, `docs/audits` and
+`docs/source-briefs` are likewise out of scope, and git history is not rewritten.
+
+**Certification.** `pnpm test:bootstrap-e2e` copies the skeleton into a throwaway
+git repo, runs the real `--apply`, installs, runs the *generated* project's own
+`pnpm gate`, verifies project-mode structure, then asserts same-slug idempotency
+and different-slug rejection. It runs in CI as the `bootstrap-e2e` check.
+`node scripts/tests/bootstrap-transaction.mjs` covers the refusal and rollback
+invariants. Neither activates Playwright.
+
+After `--apply`: `pnpm install`, then `pnpm gate` and `mvn verify` to re-verify.
 
 ### Optional modules (copy to activate — never part of the build)
 

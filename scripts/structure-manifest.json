@@ -270,13 +270,15 @@
     "docs/test-reports/2026-07-03-faz8.1-sprint4-quality-gate.md",
     "docs/test-reports/2026-07-03-faz8.2-sealing.md",
     "docs/test-reports/2026-07-26-faz8.3-pr-b-quality-gate.md",
+    "docs/test-reports/2026-07-27-faz8.3-pr-c-bootstrap-certification.md",
     "docs/audits/2026-07-03-baseline-security-review.md",
     "docs/audits/2026-07-03-recertification.md",
     "docs/audits/seo/2026-07-02-web-home.md",
     "docs/audits/seo/2026-07-03-web-home-remediation.md",
     "docs/audits/seo/2026-07-03-web-home-last-updated.md",
-    "project-memory/ClaudeTeamMemory/01_Projects/SiteSkeleton/Current Status.md",
-    "project-memory/ClaudeTeamMemory/01_Projects/SiteSkeleton/08_Session_Logs/2026-07-02-session-01.md"
+    "scripts/tests/lib/repo-fixture.mjs",
+    "scripts/tests/bootstrap-e2e.mjs",
+    "scripts/tests/bootstrap-transaction.mjs"
   ],
   "maxLines": {
     "CLAUDE.md": 80,
@@ -358,7 +360,11 @@
     "docs/adr/ADR-0014-next-16-migration.md": 65,
     "docs/adr/ADR-0015-supply-chain-hardening.md": 170,
     "scripts/quality/assert-sbom.mjs": 130,
-    "scripts/quality/run-gates.mjs": 60
+    "scripts/quality/run-gates.mjs": 60,
+    "scripts/bootstrap-project.mjs": 500,
+    "scripts/tests/lib/repo-fixture.mjs": 160,
+    "scripts/tests/bootstrap-e2e.mjs": 330,
+    "scripts/tests/bootstrap-transaction.mjs": 240
   },
   "noBom": [
     ".gitignore",
@@ -391,6 +397,10 @@
     "scripts/quality/run-gates.mjs",
     "scripts/quality/gate-audit.mjs",
     "scripts/quality/assert-sbom.mjs",
+    "scripts/bootstrap-project.mjs",
+    "scripts/tests/lib/repo-fixture.mjs",
+    "scripts/tests/bootstrap-e2e.mjs",
+    "scripts/tests/bootstrap-transaction.mjs",
     "docs/setup/local-setup-windows.md",
     "docs/adr/ADR-0001-model-routing.md",
     "docs/operations/authority-map.md",
@@ -518,6 +528,32 @@
       "sharp": "0.35.0",
       "postcss": "8.5.18"
     }
+  },
+  "projectMemory": {
+    "root": "project-memory/ClaudeTeamMemory/01_Projects",
+    "template": "_TEMPLATE",
+    "skeletonProject": "SiteSkeleton",
+    "archiveDir": "_ARCHIVE",
+    "requiredProjectFiles": ["Project Brief.md", "Current Status.md", "Backlog.md"],
+    "requiredProjectDirs": [
+      "01_PM",
+      "02_UX_UI",
+      "03_Backend",
+      "04_Frontend",
+      "05_QA",
+      "06_Decisions",
+      "07_Patterns",
+      "08_Session_Logs"
+    ],
+    "headings": {
+      "Project Brief.md": "# Project Brief —",
+      "Current Status.md": "# Current Status —",
+      "Backlog.md": "# Backlog —"
+    },
+    "requiredSkeletonFiles": [
+      "Current Status.md",
+      "08_Session_Logs/2026-07-02-session-01.md"
+    ]
   },
   "trackedForbidden": ["*.tsbuildinfo", "apps/web/next-env.d.ts"],
   "activationGates": [{ "name": "admin-bff", "checklistItems": 12 }],
