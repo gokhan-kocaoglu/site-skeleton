@@ -19,6 +19,13 @@
 
   <properties>
     <java.version>21</java.version>
+    <!--
+      Security override: Spring Boot 4.1.0 BOM resolves pgJDBC 42.7.11,
+      which is affected by CVE-2026-54291. Fixed in 42.7.12.
+      Remove this override only when the active Boot BOM manages 42.7.12
+      or a later reviewed version and the supply-chain gates remain green.
+    -->
+    <postgresql.version>42.7.12</postgresql.version>
     <!-- Docker Engine 29+ requires Testcontainers >= 1.21.4 (min API 1.44 →
          npipe 400). Testcontainers stays BOM-managed: Boot 4.1 imports
          testcontainers-bom 2.0.5 (verified via dependency:tree in the Faz 8.3
