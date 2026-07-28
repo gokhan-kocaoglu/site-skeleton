@@ -14,7 +14,19 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
-const GATES = ['build', 'typecheck', 'lint', 'test', 'audit', 'structure', 'contract-drift'];
+// toolchain runs first: it is nearly free, and if the package manager pin is
+// wrong or below the security floor every downstream result was produced by an
+// unreviewed toolchain (Faz 8.3 F4 remediation, audit R-4).
+const GATES = [
+  'toolchain',
+  'build',
+  'typecheck',
+  'lint',
+  'test',
+  'audit',
+  'structure',
+  'contract-drift',
+];
 
 const results = [];
 for (const gate of GATES) {

@@ -14,7 +14,7 @@ the work through the quality-gate chain.
 
 | Layer | Technology |
 |---|---|
-| Monorepo | pnpm 9 + Turborepo, Node 22.12+ |
+| Monorepo | pnpm 10 + Turborepo, Node 22.12+ |
 | `apps/web` | Next.js 16, React 19, TypeScript strict, Tailwind v4 (CSS-first) |
 | `apps/admin` | Vite 8, React 19 (React Router v7 + Zustand by convention, not preinstalled) |
 | `apps/api` | Java 21, Spring Boot 4.1, JPA + Hibernate (validate only), PostgreSQL 16, Flyway |

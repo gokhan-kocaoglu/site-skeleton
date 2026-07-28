@@ -31,7 +31,8 @@ biri kendi başına yeterlidir — görevle ilgisiz referansı YÜKLEME.
    `CLAUDE.md` ve `.claude/rules/` kazanır.
 3. Bu stack'in sabitleri (her referansın varsaydığı zemin — installed
    baseline ile approved defaults AYRIDIR, bkz. `CLAUDE.md` üç-liste):
-   - Toolchain: Node >=22.12.0, pnpm 9.
+   - Toolchain: Node >=22.12.0, pnpm 10 (exact pin `pnpm@10.34.4`; security
+     floor, aşağısı gate FAIL).
    - Installed backend: Java 21, Spring Boot 4.1, JPA (`ddl-auto: validate`),
      PostgreSQL 16, Flyway.
    - Installed web: Next.js 16 (App Router), React 19, Tailwind v4,
