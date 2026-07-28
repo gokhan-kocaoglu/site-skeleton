@@ -288,6 +288,7 @@
     "docs/test-reports/2026-07-26-faz8.3-pr-b-quality-gate.md",
     "docs/test-reports/2026-07-27-faz8.3-pr-c-bootstrap-certification.md",
     "docs/test-reports/2026-07-27-faz8.3-pr-d-governance-seals.md",
+    "docs/test-reports/2026-07-28-faz8.3-release-hardening.md",
     "docs/audits/2026-07-03-baseline-security-review.md",
     "docs/audits/2026-07-03-recertification.md",
     "docs/audits/seo/2026-07-02-web-home.md",
@@ -386,7 +387,11 @@
     "scripts/tests/lib/repo-fixture.mjs": 160,
     "scripts/tests/bootstrap-e2e.mjs": 330,
     "scripts/tests/bootstrap-transaction.mjs": 240,
-    "scripts/tests/critical-domain-coverage-negative.mjs": 140
+    "scripts/tests/critical-domain-coverage-negative.mjs": 140,
+    "docs/test-reports/2026-07-28-faz8.3-release-hardening.md": 300,
+    "docs/operations/release-attestation.md": 150,
+    "docs/releases/v1.0.0-rc.1.md": 160,
+    "docs/audits/2026-07-03-recertification.md": 280
   },
   "noBom": [
     ".gitignore",
@@ -431,6 +436,8 @@
     "docs/operations/authority-map.md",
     "docs/operations/release-attestation.md",
     "docs/releases/v1.0.0-rc.1.md",
+    "docs/test-reports/2026-07-28-faz8.3-release-hardening.md",
+    "docs/audits/2026-07-03-recertification.md",
     "README.md"
   ],
   "validJson": [
