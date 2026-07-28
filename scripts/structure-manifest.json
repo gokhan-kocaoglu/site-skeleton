@@ -64,6 +64,7 @@
     "docs/operations/release-attestation.md",
     "docs/releases/v1.0.0-rc.1.md",
     "docs/source-briefs/skeleton-brief.md",
+    "docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md",
     ".claude/mcp/README.md",
     ".claude/mcp/21st-dev-magic.example.json",
     ".claude/mcp/postgres.example.json",
@@ -389,6 +390,7 @@
     "scripts/tests/bootstrap-transaction.mjs": 240,
     "scripts/tests/critical-domain-coverage-negative.mjs": 140,
     "docs/test-reports/2026-07-28-faz8.3-release-hardening.md": 300,
+    "docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md": 200,
     "docs/operations/release-attestation.md": 150,
     "docs/releases/v1.0.0-rc.1.md": 160,
     "docs/audits/2026-07-03-recertification.md": 280
@@ -438,6 +440,7 @@
     "docs/releases/v1.0.0-rc.1.md",
     "docs/test-reports/2026-07-28-faz8.3-release-hardening.md",
     "docs/audits/2026-07-03-recertification.md",
+    "docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md",
     "README.md"
   ],
   "validJson": [

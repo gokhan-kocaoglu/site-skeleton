@@ -198,7 +198,7 @@ kanıt raporundadır.
 
 | ID | Konu | Durum | Kanıt |
 |---|---|---|---|
-| MEDIUM-1 | **Kaynak denetimle eşleştirilemedi** | **`NOT_MAPPED`** | Brief yalnız M2–M10'a iş atar; üçüncü denetim raporu repository'de yok (git geçmişinde de hiç bulunmamış). Madde adı tahmin edilmedi |
+| MEDIUM-1 | Production-ready kapsam iddiası — core skeleton ile dormant optional modules sınırının ayrılması | **CLOSED_WITH_ACCEPTED_RISK** | README optional-module kapsam dili + release draft sınırı; `templates/` build/gate kapsamı dışında; enforcement `activationGates`. Provenance: `RECOVERED_WITH_DOCUMENTED_INFERENCE` — `docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md` |
 | MEDIUM-2 | Verdict eşlemesi tekleştirme | CLOSED | verdict-policy kural 5; disposition ≠ rapor verdict'i; baseline review şerhi |
 | MEDIUM-3 | Placeholder handoff kapatma | CLOSED | Somut hedefler + satır-anchor'lı parser; 3 negatif/pozitif senaryo |
 | MEDIUM-4 | Authority map netleştirme | CLOSED | İçerik sahibi / Fiziksel yazar / Onaylayan |
@@ -232,10 +232,17 @@ CRITICAL: 0 · HIGH: 0.
 ### Ön verdict
 
 ```text
-PASS_WITH_RISKS — dördüncü mini-denetim bekleniyor
+PASS_WITH_RISKS — READY_FOR_FOURTH_MINI_AUDIT
 ```
 
-**Şerh:** Bu ön verdict teknik kapanış tablosu içindir. Kanıt paketinin
-kendisi MEDIUM-1 `NOT_MAPPED` nedeniyle şu an
-`FAIL — NOT_READY_FOR_FOURTH_MINI_AUDIT` durumundadır; dördüncü mini-denetim,
-o madde sağlanıp tablo tamamlanmadan başlatılmamalıdır.
+**Şerh:** HIGH-1..4 ve MEDIUM-1..10 tabloları eksiksizdir; `NOT_MAPPED` satırı
+kalmamıştır. MEDIUM-1'in kaynak eşleşmesi
+`RECOVERED_WITH_DOCUMENTED_INFERENCE` niteliğindedir (bağlayıcı brief'in
+numarasız kapsam kararı + kullanıcı-onaylı final implementation planındaki
+PR-E mutabakatı); orijinal üçüncü denetim raporunun birebir metni
+bulunmamıştır ve bulunduğu iddia edilmemektedir —
+`docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md`.
+
+Bu ön verdict **production-ready hükmü değildir**; dördüncü mini-denetim henüz
+yürütülmemiştir, Release ve tag oluşturulmamıştır. Yukarıdaki üç risk açık,
+kayıtlı ve sahiplidir — risk defteri **boş değildir**.

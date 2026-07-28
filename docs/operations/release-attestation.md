@@ -108,8 +108,10 @@ kapanışta varsayılan "CI #29" numarası, sonradan GitHub kaydından doğrulan
 | Required checks | quality-gate-ubuntu · api-verify-testcontainers · hooks-and-structure-windows · gitleaks-full-history · supply-chain-trivy · dependency-review · bootstrap-e2e |
 | Release | **oluşturulmadı** |
 | Tag | **oluşturulmadı** |
-| Dördüncü mini-denetim | **bekleniyor** |
+| Kanıt paketi | **`PASS_WITH_RISKS`** — `READY_FOR_FOURTH_MINI_AUDIT` |
+| Dördüncü mini-denetim | **henüz yürütülmedi** (paket hazır) |
 | Kanıt raporu | `docs/test-reports/2026-07-28-faz8.3-release-hardening.md` |
+| Resertifikasyon eki | `docs/audits/2026-07-03-recertification.md` (Faz 8.3 eki) |
 | Release taslağı | `docs/releases/v1.0.0-rc.1.md` |
 
 `v1.0.0` etiketi bu turda gündemde değildir: brief gereği yalnız **dördüncü
