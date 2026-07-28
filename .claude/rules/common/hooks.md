@@ -29,7 +29,7 @@ paths:
 | post-edit-style-guard | Edit/Write (tsx/css) | Ham hex, inline style, framer-motion → uyarı |
 | memory-writer-guard | Write/Edit (project-memory/**) | Yazar steward değilse → **ask** |
 | task-card-validator | TaskCreated | Kart alanı bozuksa **blok** (stderr + exit 2); hiç yoksa hatırlatma |
-| session-close-validator | Stop / manuel | Current Status başlıkları + commit kanıtı yoksa kapanışı reddet |
+| session-close-validator | Stop / manuel | Başlık + commit kanıtı + bayat durum ifadesi; `--closure`/armed bayrakta ayrıca closure dalı, dirty-path ve merge-SHA ancestry → kapanışı reddet |
 | graph-first-reminder | Grep/grep-Bash | Graph varsa "graphify query kullan" hatırlatır |
 
 ## İzin Modu

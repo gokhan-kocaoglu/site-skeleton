@@ -22,9 +22,9 @@ description: >
 → Security gate (auth/ödeme/veri işiyse zorunlu)
 → (web işiyse) SEO gate + frontend-style-audit
 → Final review (code-reviewer)
-→ memory-steward: memory closure
-→ PM: memory diff denetimi → commit/push    [İNSAN ONAYI: push]
-→ Final kanıt raporu
+→ Final kanıt raporu (pre-merge commit + PR run URL)
+→ feature PR → required check'ler → MERGE      [İNSAN ONAYI: push]
+→ MERGE SONRASI: closure dalı → memory-steward → PM memory diff → closure PR
 ```
 
 İnsan onayı yalnız 3 noktada: **brief, plan, push** (+ hook'ların yakaladığı
@@ -72,10 +72,16 @@ Herhangi bir gate FAIL verirse **önceki PASS'ler geçersizdir**:
    (yalnız FAIL veren gate'i koşmak yetmez — verdict-policy).
 4. Ancak o zaman kapanışa geçilir. Gate ajanı kendi düzeltmesine PASS veremez.
 
-## Memory-Last (kapanış tek yönlü)
+## Memory-Last (kapanış tek yönlü, MERGE SONRASI)
 
-QA + Security + Final Review hepsi PASS
-→ memory-steward yazar → PM memory diff denetimi → commit/push → final sentez.
+Ruleset main'e doğrudan push'u reddeder; memory closure implementasyon dalında
+YAPILMAZ. QA + Security + Final Review hepsi PASS → feature PR merge edilir →
+lokal main güncellenir → merge SHA + PR no + post-merge main CI run kaydedilir →
+güncel main'den `chore/memory-close-<yyyy-mm-dd>-<project-slug>` dalı açılır →
+memory-steward yazar → PM memory diff denetimi → memory-only closure PR.
+
+Closure PR **terminaldir**: kendisi için yeni closure üretmez (sonsuz döngü
+yasağı). Ayrıntı ve bayat-durum kalıpları: `memory-protocol` skill'i.
 
 ## Kanıt Kuralı
 

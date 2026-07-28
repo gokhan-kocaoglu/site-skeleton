@@ -1,0 +1,14 @@
+{
+  "hook": "session-close-validator.js",
+  "name": "stale \"push ... bekleniyor\" in Aktif Görev blocks the closure",
+  "args": [
+    "--file",
+    "fixtures/status/stale-status-push-pending.md"
+  ],
+  "cwd": ".claude/hooks/tests",
+  "stdinRaw": "",
+  "expect": {
+    "exitCode": 1,
+    "stdoutIncludes": "bayat operasyonel ifade"
+  }
+}

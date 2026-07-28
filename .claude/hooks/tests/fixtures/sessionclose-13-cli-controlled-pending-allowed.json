@@ -1,0 +1,15 @@
+{
+  "hook": "session-close-validator.js",
+  "name": "controlled PENDING under Memory Closure Commiti is not stale state (pre-seal)",
+  "args": [
+    "--file",
+    "fixtures/status/good-status-post-merge-pending-closure.md"
+  ],
+  "cwd": ".claude/hooks/tests",
+  "stdinRaw": "",
+  "expect": {
+    "exitCode": 0,
+    "stdoutIncludes": "PASS",
+    "stderrIncludes": "mühür zorunlu"
+  }
+}

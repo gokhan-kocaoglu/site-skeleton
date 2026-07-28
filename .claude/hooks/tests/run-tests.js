@@ -27,6 +27,7 @@
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
+const { runGitContextTests } = require('./session-close-git-context');
 
 const TESTS_DIR = __dirname;
 const HOOKS_DIR = path.resolve(TESTS_DIR, '..');
@@ -207,10 +208,18 @@ if (settings) {
   );
 }
 
+// 3. Real-git closure scenarios (Faz 8.3 PR-D): branch, dirty-path and
+// ancestry semantics cannot be expressed as static JSON, so they run against
+// throwaway repositories under the OS temp dir (see session-close-git-context.js).
+runGitContextTests(assert);
+
 // Report
 if (failures.length > 0) {
   console.error(`FAIL — ${failures.length} of ${assertions} assertions failed:`);
   for (const f of failures) console.error(`  x ${f}`);
   process.exit(1);
 }
-console.log(`PASS — ${assertions} assertions OK (${fixtureFiles.length} fixtures + settings bindings)`);
+console.log(
+  `PASS — ${assertions} assertions OK (${fixtureFiles.length} fixtures + settings bindings` +
+    ' + git closure-context scenarios)'
+);
