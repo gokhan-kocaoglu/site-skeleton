@@ -19,6 +19,30 @@ Kaynak çalışma repository'si (`D:\Kodlar\Claude\site-skeleton`) bu denetimde
 **hiç kullanılmadı**: install, build, test, checkout, edit veya commit
 yapılmadı.
 
+> **Bağımsız reviewer correction**
+>
+> İlk synthesis `PASS_WITH_RISKS / CORE_SKELETON_PRODUCTION_READY /
+> GO_FOR_V1_0_0` sonucunu vermişti. PR #35 bağımsız incelemesinde bunun
+> `.claude/rules/common/verdict-policy.md` kural 4 ile çeliştiği tespit edildi:
+> Acceptance Matrix içinde AC-26, AC-29, AC-32 ve AC-33 `FAIL` durumundadır.
+> Bağlayıcı policy gereği en az bir karşılanmayan acceptance criterion formal
+> verdict'i `FAIL` yapar. Ölçülen test, advisory ve F4-HIGH-01 kapanış
+> kanıtları değişmemiştir; düzeltilen bölüm final synthesis ve release
+> recommendation'dır.
+>
+> Aynı incelemede iki kanıt hatası daha düzeltildi: (a) `v1.0.0` hedef SHA'sının
+> `175213d5…` olduğu iddiası — bu SHA yalnız denetlenmiş RC2 tabanıdır, final
+> release target'ı değildir (§23); (b) Kanıt İndeksi'nde PR #34'ün **head** CI
+> run'ı (`30392688620`) closure **post-merge** main CI'ı (`30393181957`) ile
+> karıştırılmıştı (§26).
+>
+> **İlk içe aktarılan rapor kimliği (tarihsel):**
+> `48412 byte` · `932 satır` ·
+> SHA-256 `2AB3B58672934917C2669384611842433E06A0C26A1430A80F198AA21B19672D` ·
+> durum: **`SUPERSEDED_BY_REVIEWER_CORRECTED_CANONICAL_REPORT`**.
+> Bu değerler artık **current canonical rapor kimliği değildir**; güncel
+> kimlik correction commit'inde yeniden hesaplanmıştır.
+
 ## 2. Rol Zinciri ve Dürüstlük Şerhi
 
 1. **project-manager** — audit charter, kapsam, RC1 bulgu envanteri + "RC2'de
@@ -37,7 +61,10 @@ yapılmadı.
    alınarak** başlatıldı (RC1'deki "bu yüzey incelenmedi" sınırlaması
    tekrarlanmasın diye). **Tamamlandı.** Disposition: **Approve** ·
    scope boundary: **RESPECTED** · önerdiği rapor verdict'i:
-   **`PASS_WITH_RISKS`**.
+   **`PASS_WITH_RISKS`**. *(Bu, ajanın kendi statik inceleme yüzeyi için
+   verdiği öneridir; ajanın kendisi de verdict'in tüm gate sonuçlarını gören
+   final sentez tarafından verilmesi gerektiğini yazmıştır. Final sentez
+   sonradan bağımsız incelemeyle **`FAIL`** olarak düzeltilmiştir — §21.)*
 
    Ajan on RC1 bulgusunu bağımsız olarak yeniden ölçtü (sonuçları
    orkestratörün ölçümleriyle **birebir örtüştü**), guard'ın bypass yüzeyini
@@ -106,11 +133,18 @@ Ayrıca RC1'in **F4-LOW-03 çerçevelemesi düzeltildi**: anayasa squash/rebase'
 yazılı olarak yasaklamıyor (grep = 0 sonuç), dolayısıyla "ruleset ↔ anayasa
 çelişkisi" değil bir **yazılı kural boşluğudur**.
 
-Açık CRITICAL veya HIGH release blocker **yoktur**. Verdict-policy kural 3/6
-gereği açık kayıtlı riskler mevcut olduğundan `PASS` erişilemez; ulaşılan
-sonuç **`PASS_WITH_RISKS`**, production-readiness hükmü
-**`CORE_SKELETON_PRODUCTION_READY`** (yalnız core kapsamı) ve tavsiye
-**`GO_FOR_V1_0_0`**'dır.
+Açık CRITICAL veya HIGH release blocker **yoktur** ve **F4-HIGH-01 kapanmıştır**.
+Buna rağmen Acceptance Matrix'te **dört kriter karşılanmamıştır** —
+**AC-26 · AC-29 · AC-32 · AC-33**. Verdict-policy kural 4, *"en az bir kabul
+kriteri karşılanmadı"* durumunu severity veya blocking şartına bağlamaksızın
+`FAIL` sayar. Dolayısıyla formal verdict **`FAIL`**, production-readiness
+hükmü **`CORE_SKELETON_NOT_PRODUCTION_READY`** ve tavsiye
+**`NO_GO_REMEDIATION_REQUIRED`**'dır.
+
+Bu bir **kanıt eksikliği değildir** — bütün zorunlu kanıtlar üretilebilmiştir —
+ve bir mühendislik krizi de değildir: iskeletin ölçülen teknik kalitesi
+yüksektir, eksik olan **kabul kriteri tamlığıdır**. Kapatılması gereken dört
+somut kriter §24'te sıralanmıştır.
 
 ## 4. Kapsam ve Kapsam Dışı
 
@@ -516,9 +550,13 @@ R-4 Node sürüm/EOL yarısı      : AÇIK
 desteklenen hattadır, yani borç bugün somut bir açığa dönüşmüyor; (b) risk
 kayıtlı ve sahiplidir (RC2 evidence raporu "Kalan Riskler" tablosu, MEDIUM);
 (c) ADR-0009 zaten "otomatik EOL kontrolü ileriye dönük borçtur" diye kayıt
-tutar; (d) verdict-policy kural 3 gereği kayıtlı + sahipli + production'ı
-engellemeyen risk `PASS_WITH_RISKS` ile uyumludur. Önceki sınıflandırmayı
-değiştirecek yeni kanıt bulunamadı; **MEDIUM/non-blocking teyit edildi.**
+tutar; (d) kayıtlı + sahipli + production'ı engellemeyen bir risktir. Önceki
+sınıflandırmayı değiştirecek yeni kanıt bulunamadı; **MEDIUM/non-blocking teyit
+edildi.**
+
+*Not: bu değerlendirme R-4 riskinin **kendi** sınıflandırmasıdır. Raporun final
+verdict'i `FAIL`'dir, ancak bunun nedeni R-4 değil, karşılanmayan dört
+acceptance criterion'dır (§21).*
 
 ## 16. RC1 Bulguları — RC2 Disposition Tablosu
 
@@ -774,10 +812,16 @@ beyanları · secret yüzeyi.
 | AC-35 | Generated project `pnpm@10.34.4` + gate 8/8 | **PASS** |
 | AC-36 | RC1→RC2 zincirinde scope dışı mutation yok | **PASS** |
 
-**Karşılanmayan kriterler:** AC-29 · AC-32 · AC-33 (MEDIUM) ve AC-26 (LOW).
-**Hiçbiri release-blocking değildir**; dördü de kayıtlı, sahipli açık
-bulgulara karşılık gelir ve verdict-policy kural 3 kapsamında
-`PASS_WITH_RISKS` ile uyumludur. **Blocking FAIL yoktur.**
+**Karşılanmayan kriterler: AC-26 · AC-29 · AC-32 · AC-33** (dördü de `FAIL`).
+
+Bunların hiçbiri bir **CRITICAL/HIGH release blocker** değildir ve tamamı
+kayıtlı, sahipli açık bulgulara karşılık gelir. **Ancak bu, verdict'i
+kurtarmaz:** verdict-policy kural 4 *"en az bir kabul kriteri karşılanmadı"*
+ifadesini severity veya blocking şartına bağlamaz. Dolayısıyla dört
+karşılanmayan kriter **formal verdict'i doğrudan `FAIL` yapar** (§21).
+
+*Bu satır, raporun ilk sürümündeki "hiçbiri blocking değil → PASS_WITH_RISKS
+ile uyumlu" yorumunun düzeltilmiş hâlidir.*
 
 *Not: RC1 raporunun AC numaralandırmasında AC-28 ve AC-30 hiç tanımlanmamıştır
 (numaralandırma boşluğu); eksik kriter değildir.*
@@ -811,62 +855,103 @@ istisnanın kapsamına **girmez** ve F4R2-MEDIUM-01 olarak kaydedilmiştir (§18
 ## 21. Formal Verdict
 
 ```text
-PASS_WITH_RISKS
+FAIL
 ```
 
-**Gerekçe (verdict-policy):**
+**Gerekçe (verdict-policy, bağlayıcı):**
 
 - **Kural 1 tetiklenmedi:** CRITICAL/BLOCKER bulgu **yoktur**.
-- **Kural 2 (PASS) erişilemez:** açık kayıtlı riskler mevcuttur (üç tarihsel
-  risk + R-4 Node/EOL + dört yeni borç + dokuz açık RC1 bulgusu). Kural 6:
-  "Ertelenmiş riskler de açık risktir; rapora kaydedilen bulgu varken verdict
-  PASS olamaz."
-- **Kural 3 karşılandı:** CRITICAL yok; kalan risklerin **tamamı** tek tek
-  kayıtlı, sahipli ve kabul edilmiştir; **hiçbiri production'ı
-  engellemiyor**. Kayıtsız risk bulunmadı.
-- **Kural 4 tetiklenmedi:** karşılanmayan dört kabul kriteri (AC-26/-29/-32/-33)
-  MEDIUM ve LOW seviyesindedir, **blocking değildir** ve tamamı kayıtlı açık
-  bulgulara karşılık gelir. Blocking FAIL yoktur.
+- **F4-HIGH-01 CLOSED:** RC1'in tek release blocker'ı bağımsız kanıtla
+  kapatılmıştır (§14) ve bu hüküm **değişmemiştir**.
+- **Kural 4 TETİKLENDİ:** *"**FAIL** — kural 1 tetiklendi **VEYA en az bir
+  kabul kriteri karşılanmadı**."* Acceptance Matrix'te **dört** kriter
+  karşılanmamıştır: **AC-26 · AC-29 · AC-32 · AC-33**. Kural 5 tablosu da aynı
+  sonucu verir: *"Karşılanmayan kabul kriteri var → **FAIL**"*.
+- **Politikada "yalnız blocking kriterler FAIL üretir" istisnası YOKTUR.**
+  Kural 4 ve kural 5 tablosu severity veya blocking ayrımı yapmaz; kriterin
+  karşılanmamış olması tek başına yeterlidir.
 
-RC1'de verdict'i FAIL'e taşıyan tek etken F4-HIGH-01'di; bu denetimde
-**bağımsız olarak CLOSED** verilmiştir (§14).
+**Düzeltme kaydı.** Bu raporun ilk sentezi `PASS_WITH_RISKS` demiş ve
+gerekçesinde *"Kural 4 tetiklenmedi: karşılanmayan dört kabul kriteri MEDIUM ve
+LOW seviyesindedir, blocking değildir"* ifadesini kullanmıştı. Bu, politikada
+bulunmayan bir istisnanın uydurulmasıydı ve **canonical olarak yanlıştı**;
+bağımsız incelemede tespit edilerek kaldırılmıştır. Ölçülen test, advisory ve
+F4-HIGH-01 kapanış kanıtları bu düzeltmeden **etkilenmemiştir** — değişen tek
+şey final sentezdir.
+
+**Bu bir kanıt eksikliği değildir.** Bütün zorunlu kanıtlar üretilebilmiştir;
+`NO_GO_EVIDENCE_INCOMPLETE` **geçerli değildir**. Karşılanmayan kriterler
+somut ve adreslenebilirdir (§24).
 
 ## 22. Production-Readiness Disposition
 
 ```text
-CORE_SKELETON_PRODUCTION_READY
+CORE_SKELETON_NOT_PRODUCTION_READY
 ```
 
-Sekiz koşulun tamamı sağlandı: exact RC2 tag denetlendi · bütün zorunlu
-gate'ler temiz clone'da yeniden üretilebildi · **CRITICAL veya HIGH release
-blocker yok** · karşılanmayan kabul kriterlerinin hiçbiri blocking değil ·
-mevcut MEDIUM/LOW riskler kayıtlı, sahipli ve core release'i engellemiyor ·
-optional-module kapsam sınırı doğru ve build düzeyinde teknik olarak zorlanıyor ·
-bootstrap ile üretilen yeni proje kendi gate'ini (8/8) geçiyor ve toolchain
-pinini devralıyor · release identity ve attestation doğrulandı.
+Production-ready hükmü için gereken koşullardan **"karşılanmayan kabul kriteri
+bulunmamış"** koşulu sağlanmamaktadır: AC-26, AC-29, AC-32 ve AC-33 `FAIL`
+durumundadır.
 
-**Bu hüküm yalnız core site-skeleton kapsamı içindir. Dormant optional modules
-(`templates/admin-bff`, `templates/payments`, `templates/e2e`, `templates/db`,
-`templates/operations`) kendi activation hardening süreçleri tamamlanmadan
-production-ready sayılmaz.**
+**Sağlanan koşullar (kayda geçer, değişmemiştir):** exact RC2 tag denetlendi ·
+bütün zorunlu gate'ler temiz clone'da yeniden üretilebildi · **CRITICAL veya
+HIGH release blocker yok** · **F4-HIGH-01 CLOSED** · mevcut riskler kayıtlı ve
+sahipli · optional-module kapsam sınırı doğru ve build düzeyinde zorlanıyor ·
+bootstrap ile üretilen proje kendi gate'ini (8/8) geçiyor ve toolchain pinini
+devralıyor · release identity ve attestation doğrulandı.
+
+Yani iskeletin **teknik kalitesi** değil, **kabul kriteri tamlığı** eksiktir.
+Bu ayrım remediation'ı hedeflemek için önemlidir: kapatılması gereken şey dört
+somut kriterdir (§24), yeni bir mühendislik krizi değil.
 
 ## 23. `v1.0.0` Recommendation
 
 ```text
-GO_FOR_V1_0_0
+NO_GO_REMEDIATION_REQUIRED
 ```
 
-Bağlayıcı eşleme gereği: `PASS_WITH_RISKS` + `CORE_SKELETON_PRODUCTION_READY`
-→ `GO_FOR_V1_0_0` mümkündür ve bu denetimde kanıtla kazanılmıştır. Kanıt
-eksikliği yoktur (`NO_GO_EVIDENCE_INCOMPLETE` değildir): bütün zorunlu kanıtlar
-üretilebilmiştir.
+Bağlayıcı eşleme gereği `FAIL` → `NO_GO_REMEDIATION_REQUIRED`.
+**`NO_GO_EVIDENCE_INCOMPLETE` değildir** — kanıt eksikliği yoktur.
 
-`v1.0.0` etiketi verilirse **`175213d519acf199498a8efa7b307f5b4d5f44cd`**
-commit'ini hedeflemelidir — RC2 ile birebir aynı ağaç.
+**Release target hakkında (düzeltilmiş).** Bu audit mevcut durumda `v1.0.0`
+yayınlanmasına **NO_GO** verir. İleride acceptance-criterion remediation
+tamamlanır, yeni bir immutable release candidate yeniden denetlenir ve GO
+kararı kazanılırsa final release target'ı, **o turun final evidence terminal
+closure merge SHA'sı** olmalıdır.
+
+`175213d519acf199498a8efa7b307f5b4d5f44cd` yalnız **denetlenmiş RC2
+runtime/evidence tabanıdır**; final `v1.0.0` release target'ı **değildir**.
+
+*Düzeltme kaydı: bu raporun ilk sentezi "v1.0.0 verilirse `175213d5…`
+commit'ini hedeflemelidir" demişti. Bu, `docs/operations/release-attestation.md`
+beş aşamalı zamansal modeliyle ve release taslağının kendi
+`V1_RELEASE_TARGET_SHA = V1_FINAL_EVIDENCE_CLOSURE_MERGE_SHA` kuralıyla
+çelişiyordu — o SHA, kendi kanıt paketinin merge'ini, post-merge CI'ını ve
+terminal closure kaydını kapsamaz. İfade kaldırılmıştır. Gelecekteki hiçbir
+SHA tahmin edilmemiştir.*
 
 ## 24. Açık Riskler ve Önerilen Remediation
 
-Hiçbiri `v1.0.0`'ı engellemez; `v1.0.0` sonrası planlanmalıdır.
+**Zorunlu remediation sırası (`NO_GO` kararının doğrudan nedeni).** Aşağıdaki
+dört madde karşılanmayan acceptance criteria'ya birebir karşılık gelir ve
+`v1.0.0` gündeme gelmeden **önce** kapatılmalıdır:
+
+| Sıra | Kriter | Bulgu | Yapılacak |
+|---|---|---|---|
+| 1 | **AC-29** | F4-MEDIUM-01 | Activation gate garantisini gerçek kapsamla eşitle: ya eksik `ACTIVATION.md` + `activationGates` kayıtlarını ekle, ya README/release dilini `admin-bff` ile sınırla |
+| 2 | **AC-32** | F4-MEDIUM-02 | README ve `CLAUDE.md` release durumunu (RC/candidate + dördüncü denetim gerekliliği) doğru bildirsin |
+| 3 | **AC-33** | F4-MEDIUM-03 | Core web security-header politikası kaydedilsin veya uygulansın (CSP/HSTS/X-Frame-Options/Referrer/Permissions) |
+| 4 | **AC-26** | F4-LOW-02 | Tag ↔ manifest version source-of-truth politikası kayda geçsin |
+
+Ardından:
+
+5. **Full gate zinciri yeniden çalıştırılsın.**
+6. **Yeni immutable release candidate oluşturulsun.**
+7. **Dördüncü bağımsız mini-denetim yeni candidate üzerinde yeniden
+   çalıştırılsın** — GO kararı ancak orada kazanılabilir.
+
+Aşağıdaki kalemler bu dört kriterin **dışındadır**; `FAIL` kararının nedeni
+değildirler, fakat açık risk olarak kayıtlı kalır ve hardening planına taşınır.
 
 | # | Madde | Kaynak | Severity |
 |---|---|---|---|
@@ -918,7 +1003,9 @@ Hiçbiri `v1.0.0`'ı engellemez; `v1.0.0` sonrası planlanmalıdır.
 | RC2 attestation | `gh release verify v1.0.0-rc.2` exit 0 · JSON 3860 bayt · 11/11 |
 | RC2 target post-merge CI | run `30393181957` — success |
 | Remediation PR / merge | `#33` · `aed4c9edb613a77ca9e24571a4641de92a103266` · CI `30391043626` |
-| Terminal closure PR / merge | `#34` · `175213d519acf199498a8efa7b307f5b4d5f44cd` · CI `30392688620` |
+| Terminal closure PR **head** CI | `#34` · run `30392688620` — completed / success · **7/7** |
+| Terminal closure PR **merge SHA** | `175213d519acf199498a8efa7b307f5b4d5f44cd` |
+| Terminal closure **post-merge main** CI | run `30393181957` — completed / success · altı aktif job success, `dependency-review` **skipped** |
 | RC1 audit evidence (ağaç içinde) | `docs/audits/2026-07-28-fourth-mini-audit-rc1.md` · SHA-256 `a9897fea…dc9b` |
 | Ruleset | `main-branch-protection` id `18469047` · active · strict · 7 check · bypass 0 |
 | Advisory verisi | GitHub Advisory DB: `affects=pnpm@10.34.4` → 0 · `affects=pnpm@9.15.4` → 10 HIGH |
@@ -930,3 +1017,27 @@ Hiçbiri `v1.0.0`'ı engellemez; `v1.0.0` sonrası planlanmalıdır.
 release/tag/ruleset/Dependabot/memory mutasyonu yok. Audit clone'unda testler
 sonrasında tracked diff **sıfırdır** (`git status --short` boş,
 `git diff --exit-code` = 0).
+
+---
+
+## 27. Nihai Karar (canonical)
+
+```text
+FORMAL VERDICT:
+FAIL
+
+PRODUCTION-READINESS:
+CORE_SKELETON_NOT_PRODUCTION_READY
+
+V1.0.0 RECOMMENDATION:
+NO_GO_REMEDIATION_REQUIRED
+```
+
+```text
+F4_RC2_AUDIT_FAIL_REMEDIATION_REQUIRED
+```
+
+**Nedeni tek cümleyle:** CRITICAL/HIGH release blocker yoktur ve F4-HIGH-01
+kapanmıştır; ancak AC-26, AC-29, AC-32 ve AC-33 karşılanmadığı için
+verdict-policy kural 4 uyarınca formal verdict `FAIL`'dir ve bu nedenle
+`GO_FOR_V1_0_0` verilemez. Kanıt eksikliği yoktur.
