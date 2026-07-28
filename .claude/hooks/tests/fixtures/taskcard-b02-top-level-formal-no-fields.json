@@ -1,0 +1,18 @@
+{
+  "hook": "task-card-validator.js",
+  "name": "top-level schema: formal card with NO risk fields blocks (exit 2)",
+  "stdin": {
+    "session_id": "abc123",
+    "cwd": ".",
+    "permission_mode": "default",
+    "hook_event_name": "TaskCreated",
+    "task_id": "42",
+    "task_subject": "TASK CARD — Refresh token rotasyonu",
+    "task_description": "Kısa düzeltme; risk alanı yok."
+  },
+  "expect": {
+    "exitCode": 2,
+    "noStdout": true,
+    "stderrIncludes": "contract-impact"
+  }
+}

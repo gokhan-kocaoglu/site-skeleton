@@ -1,6 +1,6 @@
 {
   "hook": "task-card-validator.js",
-  "name": "bare N/A without reason blocks with exit 2",
+  "name": "official schema: formal card missing one field blocks (exit 2)",
   "stdin": {
     "session_id": "abc123",
     "cwd": ".",
@@ -8,8 +8,8 @@
     "hook_event_name": "TaskCreated",
     "tool_name": "TaskCreate",
     "tool_input": {
-      "title": "Login formu",
-      "description": "contract-impact: yok\nrace-condition: çift submit debounce ile engelli\nauth-boundary: login akışına dokunur, code-reviewer zorunlu\nrollback-plani: N/A",
+      "title": "TASK CARD — Refresh token rotasyonu",
+      "description": "contract-impact: POST /api/auth/refresh sözleşmesi değişmiyor\nrace-condition: reuse-revoke ile eşzamanlı refresh engelli\nauth-boundary: auth çekirdeği, code-reviewer zorunlu",
       "status": "pending"
     }
   },

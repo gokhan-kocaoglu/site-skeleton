@@ -1,0 +1,17 @@
+{
+  "hook": "task-card-validator.js",
+  "name": "legacy schema: complete card without the marker is accepted silently",
+  "stdin": {
+    "hook_event_name": "TaskCreated",
+    "tool_name": "TaskCreate",
+    "tool_input": {
+      "subject": "Health endpoint dokümantasyonu",
+      "description": "contract-impact: POST /api/auth/refresh sözleşmesi değişmiyor\nrace-condition: reuse-revoke ile eşzamanlı refresh engelli\nauth-boundary: auth çekirdeği, code-reviewer zorunlu\nrollback-plani: önceki token tablosu migration'ı geri alınabilir"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true,
+    "stderrIncludes": "schema=legacy"
+  }
+}

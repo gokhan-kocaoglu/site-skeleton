@@ -1,6 +1,6 @@
 {
   "hook": "task-card-validator.js",
-  "name": "micro-todo gets non-blocking reminder only",
+  "name": "official schema: micro-todo without the marker only gets a reminder",
   "stdin": {
     "session_id": "abc123",
     "cwd": ".",
@@ -9,13 +9,13 @@
     "tool_name": "TaskCreate",
     "tool_input": {
       "title": "README yazım hatası düzelt",
-      "description": "Kısa düzeltme.",
+      "description": "Kısa düzeltme; risk alanı yok.",
       "status": "pending"
     }
   },
   "expect": {
     "exitCode": 0,
-    "stdoutIncludes": "Task-Card",
+    "stdoutIncludes": "TASK CARD",
     "stderrIncludes": "schema=official"
   }
 }

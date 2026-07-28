@@ -40,6 +40,19 @@ riskli git/secret işlemleri).
 - `apps/web`'e dokunan her iş: + SEO gate + frontend-style-audit (risk
   sınıfından bağımsız).
 
+## Task Card Formalitesi (bağlayıcı)
+
+`/start-feature` zincirinde PM'nin ürettiği **her** task card formaldir:
+başlık veya gövde `TASK CARD` işaretini taşır ve
+`00_System/Task-Card-template.md` formatını kullanır. Formal kartta dört risk
+alanı zorunludur (contract-impact · race-condition · auth-boundary ·
+rollback-plani; `N/A — <gerekçe>` geçerli). `task-card-validator` formal kartta
+eksik alan görürse kart oluşturmayı **exit 2** ile reddeder.
+
+İşaretsiz mikro görevler serbesttir — bloklanmaz, yalnız hatırlatma alır.
+Enforcement işarete bağlıdır: kısmi alan taşıyan işaretsiz bir görev formal
+sayılmaz.
+
 ## Küçük Görev Sadeleştirmesi
 
 Tek dosyalık düzeltmede zincir kısalır (specialist → Final review) ama şunlar

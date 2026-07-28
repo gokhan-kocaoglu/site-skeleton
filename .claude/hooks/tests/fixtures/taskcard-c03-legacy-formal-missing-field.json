@@ -1,0 +1,17 @@
+{
+  "hook": "task-card-validator.js",
+  "name": "legacy schema: formal card missing one field blocks (exit 2)",
+  "stdin": {
+    "hook_event_name": "TaskCreated",
+    "tool_name": "TaskCreate",
+    "tool_input": {
+      "subject": "TASK CARD — Refresh token rotasyonu",
+      "description": "contract-impact: POST /api/auth/refresh sözleşmesi değişmiyor\nrace-condition: reuse-revoke ile eşzamanlı refresh engelli\nauth-boundary: auth çekirdeği, code-reviewer zorunlu"
+    }
+  },
+  "expect": {
+    "exitCode": 2,
+    "noStdout": true,
+    "stderrIncludes": "rollback-plani"
+  }
+}

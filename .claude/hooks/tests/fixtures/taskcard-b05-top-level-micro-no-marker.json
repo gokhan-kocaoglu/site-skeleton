@@ -1,0 +1,18 @@
+{
+  "hook": "task-card-validator.js",
+  "name": "top-level schema: micro-todo without the marker only gets a reminder",
+  "stdin": {
+    "session_id": "abc123",
+    "cwd": ".",
+    "permission_mode": "default",
+    "hook_event_name": "TaskCreated",
+    "task_id": "42",
+    "task_subject": "README yazım hatası düzelt",
+    "task_description": "Kısa düzeltme; risk alanı yok."
+  },
+  "expect": {
+    "exitCode": 0,
+    "stdoutIncludes": "TASK CARD",
+    "stderrIncludes": "schema=top-level"
+  }
+}
