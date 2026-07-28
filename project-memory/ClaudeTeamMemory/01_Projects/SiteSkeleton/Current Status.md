@@ -51,4 +51,4 @@ ve LOW-01…-06 audit bulguları** (sonraki audit/remediation planında açık).
 
 ## Memory Closure Commiti
 
-PENDING — closure commit henüz oluşturulmadı
+`chore(memory): close session 2026-07-28` · `30b1276cbf67cb6b729c885790486e85c7e346c5`
