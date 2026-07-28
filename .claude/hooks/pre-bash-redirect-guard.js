@@ -16,8 +16,13 @@
  *   2. The narrower legacy case is reported with extra context: a write
  *      construct aimed at a sensitive file (.env*, .pem, .key, credentials*, …).
  *
- * A line that is clearly a placeholder (PLACEHOLDER, CHANGE_ME, <angle>, …) is
- * ignored — this is what keeps `.env.example` work legal.
+ * A MATCHED credential that is itself a placeholder (PLACEHOLDER, CHANGE_ME,
+ * <angle>, …) is ignored — this is what keeps `.env.example` work legal. The
+ * exemption is match-scoped, NOT line-scoped (Faz 8.3 PR-D): the old rule
+ * skipped any command mentioning "example"/"dummy", so writing a real token
+ * into `docs/example.txt` or `.env.example` disarmed the scan via the target
+ * filename alone. Detection is shared with pre-write-secret-scan through
+ * lib/secret-patterns.js `secretLabelsInText()`.
  *
  * The message reports pattern LABELS only; the matched secret value is never
  * echoed back into the transcript.
@@ -27,24 +32,12 @@
  * Memory single-writer enforcement lives in pre-bash-memory-guard.js.
  */
 const { readStdinJson, safeRun, preToolDecision } = require('./lib/common');
-const { SECRET_PATTERNS, PLACEHOLDER } = require('./lib/secret-patterns');
+const { secretLabelsInText } = require('./lib/secret-patterns');
 
 const WRITER = />>?|\b(?:Out-File|Set-Content|Add-Content|Tee-Object|tee)\b/i;
 
 const SENSITIVE_TARGET =
   /(?:^|[\s"'=/\\])[\w./\\~-]*(?:\.env(?:\.[\w-]+)?|\.pem|\.key|\.p12|\.pfx|\.npmrc|\.pgpass|\.conf|credentials[\w.-]*|config\.(?:json|ya?ml|toml|ini)|settings\.local\.json)(?:$|[\s"'|;&])/i;
-
-/** Pattern labels hit by non-placeholder lines of the command. */
-function secretLabels(command) {
-  const hits = new Set();
-  for (const line of command.split('\n')) {
-    if (PLACEHOLDER.test(line)) continue;
-    for (const { label, re } of SECRET_PATTERNS) {
-      if (re.test(line)) hits.add(label);
-    }
-  }
-  return [...hits];
-}
 
 safeRun('pre-bash-redirect-guard', async () => {
   const input = await readStdinJson();
@@ -56,7 +49,7 @@ safeRun('pre-bash-redirect-guard', async () => {
       : '';
   if (!command) return;
 
-  const hits = secretLabels(command);
+  const hits = secretLabelsInText(command);
   if (hits.length === 0) return;
 
   const sensitive = WRITER.test(command) && SENSITIVE_TARGET.test(command);

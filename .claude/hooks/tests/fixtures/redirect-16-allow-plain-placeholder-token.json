@@ -1,0 +1,15 @@
+{
+  "hook": "pre-bash-redirect-guard.js",
+  "name": "a plain \"placeholder-token\" string matches no secret pattern at all",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "echo \"placeholder-token\" > notes.txt"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

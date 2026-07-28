@@ -352,7 +352,7 @@
     ".claude/commands/finish-session.md": 70,
     "project-memory/ClaudeTeamMemory/_CLAUDE.md": 60,
     ".claude/hooks/lib/common.js": 160,
-    ".claude/hooks/lib/secret-patterns.js": 60,
+    ".claude/hooks/lib/secret-patterns.js": 90,
     ".claude/hooks/lib/closure-guard.js": 280,
     ".claude/hooks/pre-write-secret-scan.js": 120,
     ".claude/hooks/pre-bash-git-guard.js": 120,

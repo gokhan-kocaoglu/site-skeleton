@@ -1,0 +1,15 @@
+{
+  "hook": "pre-bash-redirect-guard.js",
+  "name": "github_pat_<YOUR_TOKEN> angle-bracket placeholder produces no hit",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "echo 'GITHUB_PAT=github_pat_<YOUR_TOKEN>' > apps/web/.env.example"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

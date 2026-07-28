@@ -29,7 +29,44 @@ const SECRET_PATTERNS = [
   { label: 'private key bloğu', re: /BEGIN [A-Z ]*PRIVATE KEY/ },
 ];
 
-/** A matching line is ignored when it is clearly a placeholder. */
+/**
+ * A MATCH is ignored when the matched credential itself is clearly a
+ * placeholder. Scope matters: this is deliberately NOT applied to the whole
+ * line (Faz 8.3 PR-D remediation).
+ */
 const PLACEHOLDER = /placeholder|change[_-]?me|your[_-]|<[^>]*>|xxxx|dummy|example/i;
 
-module.exports = { SECRET_PATTERNS, PLACEHOLDER };
+/**
+ * Single detection routine for every consumer (pre-write-secret-scan,
+ * pre-bash-redirect-guard). Returns the labels of non-placeholder secret
+ * patterns found in `text`; never returns the matched values themselves, so a
+ * caller cannot accidentally echo a secret back into the transcript.
+ *
+ * Match-scoped exemption (the fix): the placeholder test runs against the
+ * MATCHED credential, not the surrounding line. The previous line-scoped test
+ * meant that any line mentioning "example"/"dummy" was skipped entirely — so
+ * `echo ghp_<real> > docs/example.txt`, a write into `.env.example`, or a
+ * trailing `// example` comment silently disarmed the whole scan.
+ *
+ * Every occurrence is examined, not just the first: a line may carry a
+ * placeholder AND a real value for the same pattern. A fresh global clone is
+ * built per pattern so no `lastIndex` state is shared between calls.
+ */
+function secretLabelsInText(text) {
+  const hits = new Set();
+  if (typeof text !== 'string' || text === '') return [];
+  for (const line of text.split(/\r?\n/)) {
+    for (const { label, re } of SECRET_PATTERNS) {
+      if (hits.has(label)) continue;
+      const scanner = new RegExp(re.source, re.flags.includes('g') ? re.flags : `${re.flags}g`);
+      for (const match of line.matchAll(scanner)) {
+        if (PLACEHOLDER.test(match[0])) continue;
+        hits.add(label);
+        break;
+      }
+    }
+  }
+  return [...hits];
+}
+
+module.exports = { SECRET_PATTERNS, PLACEHOLDER, secretLabelsInText };
