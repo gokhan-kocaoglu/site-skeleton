@@ -110,6 +110,35 @@ const scenarios = [
     },
   },
   {
+    // Faz 8.3 PR-D (M3): the pre-PR-D regex matched `[a-z-]+` only, so these
+    // three lines produced NO match at all and shipped as if they were valid.
+    name: 'yer tutucu HANDOFF hedefi FAIL üretir (handoffTargets: <sonraki-rol>)',
+    expectFragments: ['__handoff-placeholder.tmp.md', 'yer tutucu bırakılmış'],
+    setup() {
+      const tmp = path.join(ROOT, '.claude', 'rules', '__handoff-placeholder.tmp.md');
+      writeFileSync(tmp, `# negative fixture\n\nHANDOFF → <${'sonraki'}-rol>\n`);
+      return [tmp];
+    },
+  },
+  {
+    name: 'boş HANDOFF hedefi FAIL üretir (handoffTargets: hedef yok)',
+    expectFragments: ['__handoff-empty.tmp.md', 'HANDOFF hedefi boş'],
+    setup() {
+      const tmp = path.join(ROOT, '.claude', 'rules', '__handoff-empty.tmp.md');
+      writeFileSync(tmp, '# negative fixture\n\nHANDOFF →\n');
+      return [tmp];
+    },
+  },
+  {
+    name: 'geçerli HANDOFF hedefi FAIL ÜRETMEZ (kural aşırı sıkı değil)',
+    expectOk: true,
+    setup() {
+      const tmp = path.join(ROOT, '.claude', 'rules', '__handoff-valid.tmp.md');
+      writeFileSync(tmp, '# positive control\n\n`HANDOFF → project-manager` (ADR linkiyle)\n');
+      return [tmp];
+    },
+  },
+  {
     name: 'ACTIVATION.md olmadan aktive edilen admin-bff FAIL üretir (activationGates)',
     expectFragment: 'ACTIVATION.md olmadan',
     setup() {
@@ -231,7 +260,11 @@ for (const scenario of scenarios) {
     const planted = scenario.setup();
     if (Array.isArray(planted)) cleanup = planted;
     else ({ paths: cleanup = [], restore = null } = planted);
-    const expected = scenario.expectFragments ?? [scenario.expectFragment];
+    // A positive control asserts the opposite: a legitimate construct must NOT
+    // trip the rule, so the gate has to stay green with the fixture in place.
+    const expected = scenario.expectOk
+      ? []
+      : (scenario.expectFragments ?? [scenario.expectFragment]);
     const run = spawnSync(
       process.execPath,
       [path.join(ROOT, 'scripts', 'verify-structure.mjs')],
@@ -239,13 +272,14 @@ for (const scenario of scenarios) {
     );
     const out = `${run.stdout ?? ''}${run.stderr ?? ''}`;
     const missing = expected.filter((fragment) => !out.includes(fragment));
-    if (run.status === 1 && missing.length === 0) {
+    const wantedStatus = scenario.expectOk ? 0 : 1;
+    if (run.status === wantedStatus && missing.length === 0) {
       console.log(`[verify-structure-negative] PASS — ${scenario.name}`);
     } else {
       failed++;
       console.error(
         `[verify-structure-negative] FAIL — ${scenario.name}: ` +
-          `exit=${run.status} (beklenen 1) veya çıktıda yok: ${missing.join(' | ')}`
+          `exit=${run.status} (beklenen ${wantedStatus}) veya çıktıda yok: ${missing.join(' | ')}`
       );
       console.error(out.trim().split('\n').slice(-8).join('\n'));
     }

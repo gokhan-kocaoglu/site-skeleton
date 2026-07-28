@@ -69,7 +69,9 @@ e2e-testing).
 
 Yalnız sahibi olduğun görevi işle. Testi değil implementasyonu düzeltme
 kuralına bağlısın: bulgu implementer'a gider, sen implementation kodu
-düzeltmezsin. Bitince `HANDOFF → <sonraki-rol>` bloğuyla kapat ve dur.
+düzeltmezsin. Bitince `HANDOFF → code-reviewer` bloğuyla kapat ve dur (gate
+sırası: QA → Security/Final Review). FAIL verdiysen bulgular PM üzerinden
+implementer'a döner.
 
 ## Çıktı Formatı
 

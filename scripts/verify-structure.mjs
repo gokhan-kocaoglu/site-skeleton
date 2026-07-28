@@ -180,9 +180,14 @@ for (const entry of manifest.installedBaseline ?? []) {
   }
 }
 
-// 7d. Handoff targets (Faz 8.2, brief 1.1): every `HANDOFF → <target>` in
-// governance markdown must name an agent the manifest declares valid, so a
-// report can never be handed to a non-existent role (team-lead regression).
+// 7d. Handoff targets (Faz 8.2 brief 1.1; widened in Faz 8.3 PR-D / M3): every
+// line containing a literal `HANDOFF →` must name one of the nine valid agents.
+// The original `[a-z-]+` capture silently SKIPPED the cases that actually hurt —
+// `HANDOFF → <sonraki-rol>` and a bare `HANDOFF →` matched nothing, so a
+// placeholder shipped as if it were a real target. The line is now anchored
+// first and the target extracted afterwards, so an empty or `<...>` target is a
+// FAIL, and trailing prose ("HANDOFF → project-manager (ADR linkiyle)") does not
+// leak into the target token.
 if (manifest.handoffTargets) {
   const { dirs, validAgents } = manifest.handoffTargets;
   const valid = new Set(validAgents);
@@ -198,10 +203,23 @@ if (manifest.handoffTargets) {
     if (existsSync(p(dir))) collect(dir);
   }
   for (const rel of mdFiles) {
-    const text = readFileSync(p(rel), 'utf8');
-    for (const m of text.matchAll(/HANDOFF\s*→\s*([a-z-]+)/g)) {
-      check(valid.has(m[1]), `${rel}: HANDOFF hedefi geçersiz ajan: ${m[1]}`);
-    }
+    readFileSync(p(rel), 'utf8').split(/\r?\n/).forEach((line, i) => {
+      if (!/HANDOFF\s*→/.test(line)) return;
+      const where = `${rel}:${i + 1}`;
+      // Everything after the arrow, minus markdown/quoting noise, up to the
+      // first separator: the target must stand alone as one bare token.
+      const rest = line.slice(line.indexOf('→') + 1).replace(/[`*_"']/g, '').trim();
+      const target = rest.split(/[\s,.;:()\]]/)[0] ?? '';
+      if (target === '') {
+        check(false, `${where}: HANDOFF hedefi boş — dokuz geçerli ajandan biri yazılmalı`);
+        return;
+      }
+      check(
+        valid.has(target),
+        `${where}: HANDOFF hedefi geçersiz ajan: ${target}` +
+          (target.startsWith('<') ? ' (yer tutucu bırakılmış)' : '')
+      );
+    });
   }
 }
 

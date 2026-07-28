@@ -62,7 +62,7 @@ stack-patterns referansı.
 ## Yaşam Döngüsü
 
 Yalnız sahibi olduğun görevi ve owned-files listeni işle. Kanıtsız PASS yasak
-(`mvn verify` çıktısı ekle). Bitince `HANDOFF → <sonraki-rol>` bloğuyla kapat
+(`mvn verify` çıktısı ekle). Bitince `HANDOFF → project-manager` bloğuyla kapat
 ve dur; diff denetimi, commit/push PM'ye aittir.
 
 ## Çıktı Formatı

@@ -38,11 +38,18 @@ dış API çağrıları, kriptografi, ödeme/finansal kod.
 | MEDIUM | Bakım/okunabilirlik endişesi | **INFO** — değerlendir |
 | LOW | Stil, küçük öneri | **NOT** — opsiyonel |
 
-## Karar Kuralı
+## Karar Kuralı (disposition) — rapor verdict'inden AYRIDIR
+
+Reviewer disposition, incelenen diff hakkındaki tavırdır:
 
 - **Approve**: CRITICAL ve HIGH yok
 - **Warning**: yalnız HIGH var (dikkatle merge)
 - **Block**: CRITICAL var
+
+Rapor verdict'i (`PASS` / `PASS_WITH_RISKS` / `FAIL`) buna otomatik eşlenmez:
+Approve verilse bile **açık MEDIUM/LOW risk varsa rapor verdict'i zorunlu
+olarak PASS_WITH_RISKS**'tir. Bağlayıcı tablo: [verdict-policy.md](verdict-policy.md)
+kural 5.
 
 ## Sık Yakalanan Sorunlar
 

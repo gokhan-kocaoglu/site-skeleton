@@ -48,9 +48,13 @@ asla atlanmaz: kabul kriteri · kanıt · memory güncellemesi.
 ## Dosya Tabanlı Handoff
 
 Subagent'lar birbirini göremez. Her ajan çıktısını dosyaya/rapora yazar ve
-`HANDOFF → <sonraki-rol>` bloğuyla kapatır; orkestratör sonraki ajanı bu
-dosyaları referans göstererek çağırır. Format:
+somut hedefli bir HANDOFF bloğuyla kapatır (örnek: `HANDOFF → project-manager`);
+orkestratör sonraki ajanı bu dosyaları referans göstererek çağırır. Format:
 `00_System/HANDOFF-template.md`.
+
+Hedef, dokuz geçerli ajandan biri olmak ZORUNDADIR; boş hedef veya
+`<...>` biçiminde yer tutucu `verify-structure` `handoffTargets` kuralıyla
+FAIL üretir.
 
 ## Sahiplik Kuralları
 

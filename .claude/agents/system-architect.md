@@ -68,8 +68,9 @@ Stack desenleri için: `.claude/skills/stack-patterns/references/`.
 ## Yaşam Döngüsü
 
 Yalnız sahibi olduğun görevi işle; kapsam dışına çıkma. Görev bitince
-raporunu `HANDOFF → <sonraki-rol>` bloğuyla kapat ve dur. Memory değişikliği
-her zaman `HANDOFF → memory-steward` ile.
+raporunu `HANDOFF → project-manager` bloğuyla kapat ve dur (contract/ADR kararı
+plan sırasına PM üzerinden döner). Memory değişikliği her zaman
+`HANDOFF → memory-steward` ile.
 
 ## Çıktı Formatı
 
