@@ -9,6 +9,13 @@ paths:
 Başlangıç minimumu %60 (gate eşiği); feature bazında hedef %80;
 auth/ödeme/para hesabı gibi kritik domainlerde %80 zorunlu.
 
+Kritik-domain eşiği **telli**: `apps/web` ve `apps/admin` vitest config'lerinde
+`{auth,payment,billing}` yollarına path-tabanlı %80 (statements/branches/
+functions/lines) eşiği tanımlıdır. Bu yollarda dosya yokken kural sessizdir;
+ilk dosya eklendiği anda bağlayıcı olur. Negatif kanıt (CI'da
+`quality-gate-ubuntu` içinde koşar):
+`node scripts/tests/critical-domain-coverage-negative.mjs`.
+
 Üç test tipi de gereklidir:
 1. **Birim** — fonksiyonlar, util'ler, bileşenler
 2. **Entegrasyon** — API endpoint'leri, veritabanı işlemleri

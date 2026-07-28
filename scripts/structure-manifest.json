@@ -291,7 +291,8 @@
     "docs/audits/seo/2026-07-03-web-home-last-updated.md",
     "scripts/tests/lib/repo-fixture.mjs",
     "scripts/tests/bootstrap-e2e.mjs",
-    "scripts/tests/bootstrap-transaction.mjs"
+    "scripts/tests/bootstrap-transaction.mjs",
+    "scripts/tests/critical-domain-coverage-negative.mjs"
   ],
   "maxLines": {
     "CLAUDE.md": 80,
@@ -380,7 +381,8 @@
     "scripts/bootstrap-project.mjs": 500,
     "scripts/tests/lib/repo-fixture.mjs": 160,
     "scripts/tests/bootstrap-e2e.mjs": 330,
-    "scripts/tests/bootstrap-transaction.mjs": 240
+    "scripts/tests/bootstrap-transaction.mjs": 240,
+    "scripts/tests/critical-domain-coverage-negative.mjs": 140
   },
   "noBom": [
     ".gitignore",
@@ -419,6 +421,7 @@
     "scripts/tests/lib/repo-fixture.mjs",
     "scripts/tests/bootstrap-e2e.mjs",
     "scripts/tests/bootstrap-transaction.mjs",
+    "scripts/tests/critical-domain-coverage-negative.mjs",
     "docs/setup/local-setup-windows.md",
     "docs/adr/ADR-0001-model-routing.md",
     "docs/operations/authority-map.md",

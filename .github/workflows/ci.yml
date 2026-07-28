@@ -38,6 +38,12 @@ jobs:
       - run: pnpm gate
         env:
           SKIP_API: "1"
+      # Kritik-domain %80 teli dormant oldugu icin pnpm gate onu goremez; bu
+      # adim gecici bir test edilmemis auth dosyasi ekleyerek esigin gercekten
+      # isirdigini kanitlar. hooks-and-structure-windows job'una degil buraya
+      # eklendi: o job bagimlilik KURMUYOR, vitest coverage ise node_modules
+      # ister. Check adlari degismedi, yeni harici action yok.
+      - run: node scripts/tests/critical-domain-coverage-negative.mjs
 
   api:
     name: api-verify-testcontainers
