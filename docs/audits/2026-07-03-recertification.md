@@ -168,3 +168,100 @@ CI run URL'si taşır. Faz 8.2 push'unun run'ı:
 **Risk defteri yeni durumu: BOŞ** — R1–R6 kapandı (yukarıdaki tablo);
 Seçenek A uygulandığı için R8 açılmadı. Yazar e-postası bilinçli-kabul notu
 kanıt raporundadır.
+
+---
+
+## Faz 8.3 Eki — Release Hardening Kapanış Tablosu (2026-07-28)
+
+> Bu ek, üçüncü bağımsız denetimden türetilen bağlayıcı brief'in
+> (`docs/source-briefs/faz-8-3-release-hardening-brief.md`) kapanışını işler.
+> Yukarıdaki orijinal Faz 8.1 metni ve Faz 8.2 eki **korunmuştur**; bu bölüm
+> yalnız ektir ve önceki verdict'leri geriye dönük değiştirmez.
+> Kanıt ayrıntıları: `docs/test-reports/2026-07-28-faz8.3-release-hardening.md`.
+
+**Evidence package base SHA:** main `90bbf1205509633c0b1004af57e7ebfcd51327f6`
+**PR-D feature implementation merge:** `cf5226f05848a9e27c8b14877b455c8bdfe5e7e5` (PR #28)
+**PR-D terminal memory closure:** PR #29 → evidence package base `90bbf120…`
+**PR-D closure post-merge main CI:** <https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30350754770> (success)
+
+> `90bbf120…` **release target değildir**; bu kanıt paketinin üzerine inşa
+> edildiği base'dir. RC1 release target'ı, final evidence PR'ı ve onu izleyen
+> terminal closure merge edildikten sonra doğacak
+> `FINAL_EVIDENCE_CLOSURE_MERGE_SHA`'dır
+> (`docs/operations/release-attestation.md`).
+**Ruleset:** `main-branch-protection` (18469047) · active · 7 required check · strict
+
+### HIGH-1…HIGH-4
+
+| ID | Konu | Durum | Kapatan | Kanıt |
+|---|---|---|---|---|
+| HIGH-1 | EOL stack hattı | **CLOSED** | PR #18 · #20 · #23 (+#16/#19/#22/#25) | ADR-0010/0013/0014 ACCEPTED; `mvn verify` BUILD SUCCESS; main CI #37/#41/#47 |
+| HIGH-2 | Gerçek `/new-project` sertifikasyonu | **CLOSED** | PR #27 `dda8342` | bootstrap-transaction 7/7 · bootstrap-e2e PASS · main CI #57 |
+| HIGH-3 | Backend supply-chain gate | **CLOSED** | PR #26 `f5b9eb1` | Trivy repo+JAR · SBOM assert · dependency-review · main CI #54 |
+| HIGH-4 | Post-merge memory closure | **CLOSED** | PR #28 `cf5226f` + fiilî ilk uygulama PR #29 `90bbf12` | closure-guard 11/11 gerçek-Git senaryo · main CI 30348674300 / 30350754770 |
+
+### MEDIUM-1…MEDIUM-10
+
+| ID | Konu | Durum | Kanıt |
+|---|---|---|---|
+| MEDIUM-1 | Production-ready kapsam iddiası — core skeleton ile dormant optional modules sınırının ayrılması | **CLOSED_WITH_ACCEPTED_RISK** | README optional-module kapsam dili + release draft sınırı; `templates/` build/gate kapsamı dışında; enforcement `activationGates`. Provenance: `RECOVERED_WITH_DOCUMENTED_INFERENCE` — `docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md` |
+| MEDIUM-2 | Verdict eşlemesi tekleştirme | CLOSED | verdict-policy kural 5; disposition ≠ rapor verdict'i; baseline review şerhi |
+| MEDIUM-3 | Placeholder handoff kapatma | CLOSED | Somut hedefler + satır-anchor'lı parser; 3 negatif/pozitif senaryo |
+| MEDIUM-4 | Authority map netleştirme | CLOSED | İçerik sahibi / Fiziksel yazar / Onaylayan |
+| MEDIUM-5 | Shell yazım guard'ı | CLOSED_WITH_ACCEPTED_RISK | pre-bash-memory-guard + hedeften bağımsız secret + match-scoped placeholder; sınır belgeli (LOW) |
+| MEDIUM-6 | Actions SHA pinleme | CLOSED | 21/21 full SHA + exact tag yorumu; 3 pin negatifi (PR #26) |
+| MEDIUM-7 | Activation gate güçlendirme | CLOSED | Recursive `apps/**` + üç sinyal; 4 senaryo |
+| MEDIUM-8 | Formal Task Card zorunluluğu | CLOSED | Marker'a bağlı enforcement; 3 şema × 6 senaryo |
+| MEDIUM-9 | Kritik-domain %80 coverage teli | CLOSED | Path eşikleri + gerçek FAIL kanıtı (2/2 workspace) |
+| MEDIUM-10 | Dış immutable attestation | **`PENDING_USER_ACTION`** | Teknik sözleşme ve taslak hazırdır (iki katman + beş aşamalı SHA modeli). GitHub Release/tag, PR #30 merge ve post-merge terminal closure sonrasında **kullanıcı tarafından** oluşturulacaktır. Oluşturulmadan `CLOSED` sayılamaz |
+
+### Yeniden açılan maddeler (Faz 8.1 numaralandırması)
+
+| # | Orijinal madde | Faz 8.3'te kapanış | Kanıt |
+|---|---|---|---|
+| #9 | Memory closure commit döngüsü | Kapanış merge SONRASINA taşındı; terminal closure PR istisnası | PR #28 + fiilî ilk uygulama PR #29 |
+| #11 | Tarama modu (`mode: skeleton-dev`) | `projectSlug` tek doğruluk kaynağı; mode-farkındalı kurallar | PR #27; 4 projectMemory negatifi |
+| #12 | Bootstrap script | Temiz-ağaç ön koşulu + atomik plan + rollback + deterministik memory | PR #27; bootstrap-transaction 7/7 |
+| #15 | Spring Boot 3.5 + sürüm politikası | Boot 4.1.0; ADR-0010 ACCEPTED; ADR-0009 "Active LTS" netleştirmesi | PR #18; mvn verify BUILD SUCCESS |
+| #27 | Uçtan uca pilot | Üretilen projenin **kendi** gate'i CI job olarak koşuyor | PR #27; `bootstrap-e2e` job |
+
+### Risk defteri (Faz 8.3 sonu)
+
+| Risk | Severity | Sahip | Güvenlik ağı |
+|---|---|---|---|
+| Optional module hardening (BFF-1/2/3) | MEDIUM | Aktivasyon-anı implementer | `activationGates` — checklist tamamlanmadan gate FAIL |
+| Hook tam shell parser değildir | LOW | Orkestratör | CI Gitleaks full-history |
+| Type-aware lint derinliği (ADR-0012) | LOW | Orkestratör | Mevcut ESLint seti; kod tabanında 0 ihlal |
+
+CRITICAL: 0 · HIGH: 0.
+
+### Ön verdict
+
+```text
+PASS_WITH_RISKS — READY_FOR_FINAL_EVIDENCE_PR_MERGE
+```
+
+Ayrı durum:
+
+```text
+RC1 external attestation: PENDING_USER_ACTION
+```
+
+**Sıra şerhi (bağlayıcı, brief FİNAL bölümü):** `v1.0.0-rc.1` **dördüncü
+mini-denetimden ÖNCE** yayınlanan release candidate'tır; dördüncü mini-denetim
+o candidate'ı denetler ve yalnız **`v1.0.0`** kararının gate'idir — rc.1'in ön
+koşulu **değildir**. Release/tag, PR #30 merge ve onu izleyen terminal memory
+closure tamamlandıktan sonra kullanıcı tarafından oluşturulur.
+
+**Şerh:** HIGH-1..4 ve MEDIUM-1..10 tabloları eksiksizdir; `NOT_MAPPED` satırı
+kalmamıştır. MEDIUM-1'in kaynak eşleşmesi
+`RECOVERED_WITH_DOCUMENTED_INFERENCE` niteliğindedir (bağlayıcı brief'in
+numarasız kapsam kararı + kullanıcı-onaylı final implementation planındaki
+PR-E mutabakatı); orijinal üçüncü denetim raporunun birebir metni
+bulunmamıştır ve bulunduğu iddia edilmemektedir —
+`docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md`.
+
+Bu ön verdict **production-ready hükmü değildir**; dördüncü mini-denetim
+başlatılmamıştır, Release ve tag oluşturulmamıştır. Yukarıdaki üç risk açık,
+kayıtlı ve sahiplidir — risk defteri **boş değildir**. MEDIUM-10 bir risk değil,
+sırası gelmemiş bir kullanıcı işlemidir ve bu üç riskin arasında sayılmaz.

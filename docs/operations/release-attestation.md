@@ -35,30 +35,103 @@ Feature PR'ı **ve** onu izleyen memory-only closure PR'ı merge edildikten
 sonra, GitHub Release (tag) üzerinde mühürlenir. Release notu değişmez kanıt
 taşıyıcısıdır.
 
+### Beş aşamalı zamansal model (bağlayıcı)
+
+Memory closure merge sonrasına taşındığı (P0-4) **ve** kanıt paketinin kendisi
+de ayrı bir PR ile geldiği için, zincir beş aşamalıdır. Her aşamanın SHA'sı bir
+öncekinin merge'inden **sonra** doğar; bu yüzden release notu, henüz var olmayan
+alanları placeholder olarak taşır:
+
+```text
+feature implementation
+→ feature merge / main CI
+→ feature memory closure
+→ final evidence PR
+→ final evidence merge / main CI
+→ final evidence terminal memory closure
+→ kullanıcı v1.0.0-rc.1 release/tag'i oluşturur
+```
+
+**Bağlayıcı kural:**
+
+```text
+RC1 release target SHA = final evidence terminal memory closure merge SHA
+```
+
+**Neden:** tag daha erken bir SHA'ya verilirse, o SHA kendi kanıt paketini
+(final rapor, resertifikasyon eki, release taslağı) veya paketin kapanış
+kaydını (Current Status + session log) **kapsamaz** — release, kendi kanıt
+zincirinin kapanışını dışarıda bırakır. Daha erken SHA'lar silinmez; her biri
+**ayrı kanıt alanı** olarak korunur.
+
+### Release notu alan tablosu
+
 | Alan | Kaynak |
 |---|---|
 | Tag | `v<sürüm>` (kullanıcı oluşturur) |
-| Release target merge SHA | Feature PR'ının gerçek merge commit'i |
-| Post-merge main CI run URL | Merge sonrası `main` push run'ı |
+| PR-D feature implementation merge SHA | Feature PR'ının gerçek merge commit'i |
+| PR-D feature post-merge main CI | Feature merge sonrası `main` push run'ı |
+| **Evidence package base SHA** | Feature memory closure PR'ının merge commit'i — kanıt paketinin üzerine inşa edildiği base |
+| Final evidence PR numarası / head / PR CI | Kanıt paketi PR'ı |
+| Final evidence PR merge SHA | Kanıt paketi merge edildiğinde doğar |
+| Final evidence post-merge main CI | O merge sonrası `main` push run'ı |
+| Final evidence closure PR | Kanıt paketinin terminal memory closure PR'ı |
+| **Final evidence closure merge SHA** | Closure merge edildiğinde doğar |
+| Final evidence closure post-merge main CI | Closure merge sonrası `main` push run'ı |
+| **RC1 release target SHA** | = final evidence closure merge SHA |
 | Kanıt raporu linkleri | `docs/test-reports/` · `docs/audits/` (tag'e sabitlenmiş) |
 | Resertifikasyon linki | `docs/audits/<tarih>-recertification.md` |
 
 **Zincir burada kapanır.** Katman 1 "bu kod doğrulandı", Katman 2 "doğrulanan
-kod tam olarak bu SHA ile main'e girdi ve orada da yeşil koştu" der.
+kod tam olarak bu SHA ile main'e girdi, orada da yeşil koştu, ve hem kanıt
+paketi hem kapanış kaydı aynı ağaçta" der.
+
+### Dördüncü mini-denetimin yeri
+
+Dördüncü mini-denetim **`v1.0.0-rc.1` yayınlandıktan SONRA** yürütülür ve
+release candidate'ı denetler. `v1.0.0-rc.1`'in ön koşulu **değildir**;
+production-ready hükmü yalnız **`v1.0.0`** kararını etkiler (brief FİNAL §5).
 
 ## Sıra (bağlayıcı)
 
 ```text
 1. Feature branch'te iş biter + repo-içi kanıt raporu yazılır (pre-merge SHA)
-2. PR açılır → yedi required check yeşil → merge
+2. PR açılır → yedi required check yeşil → merge     [feature implementation merge SHA]
 3. Lokal main güncellenir; merge SHA + PR no + post-merge main CI run kaydedilir
-4. chore/memory-close-<tarih>-<slug> dalı → memory closure → seal → closure PR → merge
-5. GitHub Release/tag: dış attestation mühürlenir (Katman 2 tablosu doldurulur)
+4. chore/memory-close-<tarih>-<slug> dalı → memory closure → seal → closure PR
+   → merge                                            [evidence package base SHA]
+5. Final evidence PR (kanıt raporu + resertifikasyon eki + release taslağı)
+   → yedi check → merge                               [final evidence merge SHA]
+6. Final evidence için terminal memory closure PR → merge
+                                                      [final evidence closure merge SHA]
+7. GitHub Release/tag v1.0.0-rc.1: dış attestation mühürlenir;
+   tag target = adım 6'nın SHA'sı
+8. Dördüncü mini-denetim release candidate'ı denetler → yalnız production-ready
+   hükmü çıkarsa v1.0.0 gündeme gelir
 ```
 
-Adım 5 bir **kullanıcı adımıdır**; Claude yalnız taslağı hazırlar
+Adım 7 bir **kullanıcı adımıdır**; Claude yalnız taslağı hazırlar
 (`docs/releases/`). Release oluşturma, tag atma ve ruleset değişikliği
 repository dosyalarıyla yapılamaz.
+
+**Adım 7'nin placeholder'ları yeni bir repository PR'ı ile doldurulmaz** —
+değerler dış immutable GitHub Release üzerinde mühürlenir. Aksi hâlde her
+release yeni bir kanıt PR'ı, o da yeni bir closure gerektirir ve zincir
+kapanmaz.
+
+## Self-reference yasağı
+
+Bir PR'ın **kendi içindeki** belge, o PR'ın güncel head SHA'sını "current"
+değer olarak taşıyamaz: o değeri yazan commit yeni bir head üretir ve yazılan
+değer anında bayatlar.
+
+```text
+Repo-içi snapshot'lar tarihsel certification noktalarıdır.
+Final authoritative identity, merge SHA + post-merge main CI ile doğar.
+```
+
+Bu yüzden attestation tablosundaki PR head/CI satırları **snapshot** olarak
+etiketlenir; merge öncesi güncel durumun otoritesi GitHub PR metadata'sıdır.
 
 ## Uydurma yasağı
 
@@ -68,16 +141,36 @@ yazmak kanıt değil, kanıt taklididir. Faz 8.2 session log'u bunun somut örne
 kapanışta varsayılan "CI #29" numarası, sonradan GitHub kaydından doğrulanınca
 **#30** çıkmıştır (düzeltme şerhi: vault `08_Session_Logs/2026-07-19-session-06.md`).
 
-## Mevcut durum (2026-07-27)
+## Mevcut durum (2026-07-28)
 
 | Öğe | Değer |
 |---|---|
-| Son merge edilmiş PR | #27 (Faz 8.3 PR-C) |
-| Merge SHA | `dda8342489ade958c38293014ed41d681e28e937` |
-| Post-merge main CI run | [30262787137](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30262787137) (CI #57, success) |
-| Ruleset | `main-branch-protection` (id 18469047), enforcement **active** |
-| Required checks | 7 — quality-gate-ubuntu · api-verify-testcontainers · hooks-and-structure-windows · gitleaks-full-history · supply-chain-trivy · dependency-review · bootstrap-e2e |
-| Release | **Henüz oluşturulmadı.** Taslak: `docs/releases/v1.0.0-rc.1.md` |
+| Feature PR | **#28** (Faz 8.3 PR-D) |
+| Feature implementation merge SHA | `cf5226f05848a9e27c8b14877b455c8bdfe5e7e5` |
+| Feature post-merge main CI | [30348674300](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30348674300) — success |
+| Feature terminal memory closure PR | **#29** |
+| **Evidence package base SHA** | `90bbf1205509633c0b1004af57e7ebfcd51327f6` |
+| Feature closure post-merge main CI | [30350754770](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30350754770) — success |
+| Final evidence PR | **#30** |
+| ↳ *Initial package certification snapshot* | `a312cf148e988c50750eb077b1e5afd1e609ed08` · CI [30354440371](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30354440371) |
+| ↳ *RC1 sequence-remediation snapshot* | `dc5737630471a9e1be115ec91593a787e3712244` · CI [30355634333](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30355634333) |
+| ↳ Current pre-merge head/check authority | **GitHub PR #30 metadata ve required check'ler** |
+| Final evidence PR merge SHA | `FINAL_EVIDENCE_MERGE_SHA` *(henüz yok)* |
+| Final evidence post-merge main CI | `FINAL_EVIDENCE_POST_MERGE_CI_RUN_URL` *(henüz yok)* |
+| Final evidence closure PR | `FINAL_EVIDENCE_CLOSURE_PR` *(henüz yok)* |
+| Final evidence closure merge SHA | `FINAL_EVIDENCE_CLOSURE_MERGE_SHA` *(henüz yok)* |
+| Final evidence closure post-merge main CI | `FINAL_EVIDENCE_CLOSURE_POST_MERGE_CI_RUN_URL` *(henüz yok)* |
+| **RC1 release target SHA** | `RC1_RELEASE_TARGET_SHA` = `FINAL_EVIDENCE_CLOSURE_MERGE_SHA` *(henüz yok)* |
+| Ruleset | `main-branch-protection` (id 18469047) · **active** · 7 required check · strict **true** |
+| Required checks | quality-gate-ubuntu · api-verify-testcontainers · hooks-and-structure-windows · gitleaks-full-history · supply-chain-trivy · dependency-review · bootstrap-e2e |
+| Release | **oluşturulmadı** |
+| Tag | **oluşturulmadı** |
+| Kanıt paketi | **`PASS_WITH_RISKS`** — `READY_FOR_FINAL_EVIDENCE_PR_MERGE` |
+| RC1 dış attestation (MEDIUM-10) | **`PENDING_USER_ACTION`** |
+| Dördüncü mini-denetim | **başlatılmadı** — `v1.0.0` gate'i, rc.1'in ön koşulu değil |
+| Kanıt raporu | `docs/test-reports/2026-07-28-faz8.3-release-hardening.md` |
+| Resertifikasyon eki | `docs/audits/2026-07-03-recertification.md` (Faz 8.3 eki) |
+| Release taslağı | `docs/releases/v1.0.0-rc.1.md` |
 
 `v1.0.0` etiketi bu turda gündemde değildir: brief gereği yalnız **dördüncü
 mini-denetim** "production-ready" hükmü verdikten sonra atılır.
