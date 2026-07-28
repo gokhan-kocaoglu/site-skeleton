@@ -11,13 +11,27 @@ koşar. Job'lar paralel çalışır; hepsi yeşil olmadan merge yok.
 
 | Job (check adı) | Runner | Ne koşar | Lokal eşdeğeri |
 |---|---|---|---|
-| `quality-gate-ubuntu` | ubuntu-latest | `pnpm install --frozen-lockfile` + `pnpm gate` (build → typecheck → lint → test → audit → structure → contract-drift; `SKIP_API=1`) | `pnpm gate` |
+| `quality-gate-ubuntu` | ubuntu-latest | `pnpm install --frozen-lockfile` + `pnpm gate` (build → typecheck → lint → test → audit → structure → contract-drift; `SKIP_API=1`) + kritik-domain kapsam negatifi | `pnpm gate` |
 | `api-verify-testcontainers` | ubuntu-latest | `mvn --batch-mode verify` (apps/api; Testcontainers gerçek `postgres:16` konteyneri) | `cd apps/api; mvn verify` |
 | `hooks-and-structure-windows` | windows-latest | `node .claude/hooks/tests/run-tests.js` + `node scripts/verify-structure.mjs` + negatif senaryolar (path/CRLF paritesi) | aynı komutlar |
 | `gitleaks-full-history` | ubuntu-latest | Gitleaks, `fetch-depth: 0` ile TÜM git geçmişini tarar; konfig: `.gitleaks.toml` | `gitleaks git .` (CLI kuruluysa) |
 | `supply-chain-trivy` | ubuntu-latest | JAR build + iki Trivy vuln taraması (repo + JAR) + CycloneDX SBOM + `assert-sbom.mjs` + SBOM artifact | aşağıdaki "Lokal Trivy" bölümü |
 | `bootstrap-e2e` | ubuntu-latest | `bootstrap-transaction.mjs` + `bootstrap-e2e.mjs` — geçici repoda gerçek `--apply` ve **üretilen projenin kendi gate'i** | `pnpm test:bootstrap-e2e` |
 | `dependency-review` | ubuntu-latest | `actions/dependency-review-action`, `fail-on-severity: high` — **yalnız PR'da** | (yok; GitHub tarafı) |
+
+## Kritik-domain kapsam teli (Faz 8.3 PR-D)
+
+`node scripts/tests/critical-domain-coverage-negative.mjs`, `quality-gate-ubuntu`
+job'unda `pnpm gate`'ten SONRA koşar. Geçici, test edilmemiş bir
+`lib/auth` (web) ve `src/auth` (admin) dosyası ekleyip vitest'in
+`{auth,payment,billing}` **%80** eşiğinin gerçekten kırıldığını kanıtlar;
+dosyaları `finally` içinde siler ve çalışma ağacını git snapshot'ıyla
+doğrular.
+
+Neden bu job: `hooks-and-structure-windows` bilinçli olarak bağımlılık
+kurmuyor (`package-manager-cache: false`, `pnpm install` yok), vitest coverage
+ise `node_modules` ister. **Yeni check adı, yeni job ve yeni harici action
+eklenmemiştir.**
 
 ## Supply-chain job'u (ADR-0015)
 
@@ -172,3 +186,9 @@ enforcement kendiliğinden devreye girer; bu not o zaman kaldırılır.
 CI yeşili tek başına verdict değildir; quality-gate raporları
 (`docs/test-reports/`) koşulan run'ın commit hash'ini içerir ve verdict
 `.claude/rules/common/verdict-policy.md` sözlüğüyle verilir.
+
+Repo-içi rapor **pre-merge** koşuyu gösterir (feature commit + PR run URL);
+merge SHA + post-merge main CI run URL **dış attestation**'da, GitHub
+Release/tag üzerinde mühürlenir. Sözleşme:
+`docs/operations/release-attestation.md`. Release/tag oluşturma bir kullanıcı
+adımıdır; taslak `docs/releases/` altında hazırlanır.

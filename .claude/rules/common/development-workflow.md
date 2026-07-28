@@ -37,3 +37,13 @@ paths:
 5. **İnceleme Öncesi Kontroller**
    - Otomatik kontroller yeşil, conflict çözülmüş, dal güncel
    - Kanıtsız PASS bildirimi yasak: komut çıktısı olmadan "geçti" deme
+
+6. **Merge-Sonrası Memory Kapanışı** _(bağlayıcı sıra — main korumalıdır)_
+   - Sıra: implementation dalı → PR → required check'ler → **merge** →
+     lokal main güncellenir → merge SHA + PR no + post-merge main CI run
+     kaydedilir → `chore/memory-close-<YYYY-MM-DD>-<slug>` dalı → memory
+     closure commit'i → seal → memory-only closure PR → merge.
+   - Memory closure implementasyon dalında YAPILMAZ; "memory → commit → push"
+     eski sırası geçersizdir (Faz 8.3 P0-4).
+   - Closure PR terminaldir: kendisi için yeni closure üretmez.
+   - Ayrıntı: `memory-protocol` skill'i · `/finish-session`.

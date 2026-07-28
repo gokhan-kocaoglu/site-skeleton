@@ -1,13 +1,13 @@
 {
   "hook": "task-card-validator.js",
-  "name": "top-level task_subject/task_description schema is accepted and logged",
+  "name": "top-level schema: formal card with all four fields passes silently",
   "stdin": {
     "session_id": "abc123",
     "cwd": ".",
     "permission_mode": "default",
     "hook_event_name": "TaskCreated",
     "task_id": "42",
-    "task_subject": "Refresh token rotasyonu",
+    "task_subject": "TASK CARD — Refresh token rotasyonu",
     "task_description": "contract-impact: POST /api/auth/refresh sözleşmesi değişmiyor\nrace-condition: reuse-revoke ile eşzamanlı refresh engelli\nauth-boundary: auth çekirdeği, code-reviewer zorunlu\nrollback-plani: önceki token tablosu migration'ı geri alınabilir"
   },
   "expect": {

@@ -7,7 +7,7 @@
  *   { "hook": "<file in .claude/hooks>", "name": "...",
  *     "args": [], "stdin": {...} | "stdinRaw": "garbage",
  *     "cwd": "<relative to repo root>", "env": { ... },
- *     "expect": { "exitCode": 0, "noStdout": true,
+ *     "expect": { "exitCode": 0, "noStdout": true, "stdoutExcludes": ["never-echoed"],
  *                 "permissionDecision": "deny|ask", "reasonIncludes": "...",
  *                 "additionalContextIncludes": "...",
  *                 "stopDecision": "block", "stopReasonIncludes": "...",
@@ -27,6 +27,7 @@
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
+const { runGitContextTests } = require('./session-close-git-context');
 
 const TESTS_DIR = __dirname;
 const HOOKS_DIR = path.resolve(TESTS_DIR, '..');
@@ -80,6 +81,10 @@ function runFixture(fixture, fileName) {
   }
   if (exp.stdoutIncludes) {
     assert(stdout.includes(exp.stdoutIncludes), `${id}: stdout missing "${exp.stdoutIncludes}"`);
+  }
+  // Negative assertion: proves a decision never echoes the secret it matched.
+  for (const forbidden of exp.stdoutExcludes ?? []) {
+    assert(!stdout.includes(forbidden), `${id}: stdout must NOT contain "${forbidden}"`);
   }
   if (exp.stderrIncludes) {
     assert(
@@ -154,6 +159,7 @@ const EXPECTED_HOOKS = [
   'task-card-validator.js',
   'session-close-validator.js',
   'graph-first-reminder.js',
+  'pre-bash-memory-guard.js',
 ];
 
 let settings = null;
@@ -207,10 +213,18 @@ if (settings) {
   );
 }
 
+// 3. Real-git closure scenarios (Faz 8.3 PR-D): branch, dirty-path and
+// ancestry semantics cannot be expressed as static JSON, so they run against
+// throwaway repositories under the OS temp dir (see session-close-git-context.js).
+runGitContextTests(assert);
+
 // Report
 if (failures.length > 0) {
   console.error(`FAIL — ${failures.length} of ${assertions} assertions failed:`);
   for (const f of failures) console.error(`  x ${f}`);
   process.exit(1);
 }
-console.log(`PASS — ${assertions} assertions OK (${fixtureFiles.length} fixtures + settings bindings)`);
+console.log(
+  `PASS — ${assertions} assertions OK (${fixtureFiles.length} fixtures + settings bindings` +
+    ' + git closure-context scenarios)'
+);

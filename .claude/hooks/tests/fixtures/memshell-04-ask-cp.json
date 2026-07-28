@@ -1,0 +1,16 @@
+{
+  "hook": "pre-bash-memory-guard.js",
+  "name": "cp with a vault destination asks",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "cp /tmp/status.md project-memory/ClaudeTeamMemory/01_Projects/Demo/status.md"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "permissionDecision": "ask",
+    "reasonIncludes": "project-memory"
+  }
+}

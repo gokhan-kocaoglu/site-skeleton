@@ -1,0 +1,16 @@
+{
+  "hook": "pre-bash-memory-guard.js",
+  "name": "Windows backslash vault path is detected too (redirect form)",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "PowerShell",
+    "tool_input": {
+      "command": "'## Blocker' >> project-memory\\ClaudeTeamMemory\\01_Projects\\Demo\\Current Status.md"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "permissionDecision": "ask",
+    "reasonIncludes": "memory-steward"
+  }
+}

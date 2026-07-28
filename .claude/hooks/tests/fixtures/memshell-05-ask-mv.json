@@ -1,0 +1,16 @@
+{
+  "hook": "pre-bash-memory-guard.js",
+  "name": "mv with a vault destination asks",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "mv /tmp/session-07.md project-memory/ClaudeTeamMemory/01_Projects/Demo/08_Session_Logs/session-07.md"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "permissionDecision": "ask",
+    "reasonIncludes": "project-memory"
+  }
+}

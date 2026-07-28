@@ -19,6 +19,18 @@ commit hash'ini içerir; commit'lenmemiş kodla üretilen kanıt geçersizdir**
 workflow run'ının URL'sini içerir; insan teyidi yalnız URL erişilemezse son
 çaredir** (Faz 8.2, N4 — run URL'sini kullanıcı sağlar).
 
+## İki Kanıt Katmanı (Faz 8.3 P0-4 / MEDIUM-10)
+
+Repo-içi rapor **pre-merge** koşuyu gösterir: feature commit SHA + PR no + PR
+CI run URL. Rapor, henüz oluşmamış merge SHA'yı içermek zorunda DEĞİLDİR —
+içermeye çalışmak uydurma değere veya sonsuz amend'e yol açar.
+
+Final zincir (merge SHA + post-merge main CI run URL + kanıt linkleri) **dış
+immutable attestation**'da, GitHub Release/tag üzerinde mühürlenir. Kanıt
+döngüsü orada biter. Sözleşme ve alan tablosu:
+`docs/operations/release-attestation.md`. Bilinmeyen alan açık placeholder
+bırakılır; tahmini SHA/run numarası yazmak yasaktır.
+
 ## Doğrulama Döngüsü (sırayla; biri kırılırsa dur, düzelt, baştan)
 
 1. **Build** — `pnpm build` (API değiştiyse ayrıca
@@ -50,9 +62,13 @@ Kestirme: `pnpm gate` (scripts/quality/) 1–4'ü tek komutla koşar.
 Severity tanımları ve verdict kuralları TEK kaynaktan gelir:
 `.claude/rules/common/verdict-policy.md`. Özet (bağlayıcı metin oradadır):
 
-- **PASS** — CRITICAL ve HIGH yok; tüm kriterler kanıtla karşılandı.
+- **PASS** — CRITICAL ve HIGH yok, **açık risk de yok**; tüm kriterler
+  kanıtla karşılandı.
 - **PASS_WITH_RISKS** — CRITICAL yok; kalan riskler kayıtlı + sahipli +
-  kabul edilmiş (her risk: açıklama + sahip + takip adımı).
+  kabul edilmiş (her risk: açıklama + sahip + takip adımı). Reviewer
+  disposition **Approve** olsa bile açık MEDIUM/LOW risk varsa verdict
+  budur — disposition ile rapor verdict'i ayrı kavramlardır
+  (verdict-policy kural 5).
 - **FAIL** — HERHANGİ bir gate'te CRITICAL/BLOCKER bulgu VEYA karşılanmayan
   kriter; bulgular implementer'a döner, önceki PASS'ler geçersiz ve tüm
   gate zinciri yeniden koşar (remediation: `feature-workflow` skill'i).

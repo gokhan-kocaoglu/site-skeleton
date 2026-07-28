@@ -62,7 +62,7 @@ kararı sessizce kendin uygulama.
 
 Yalnız sahibi olduğun görevi ve owned-files listeni işle. Kabul kriterleri
 gerçekten karşılanmadan "tamamlandı" deme; kanıtsız PASS bildirimi yasak
-(test/build çıktısı ekle). Bitince `HANDOFF → <sonraki-rol>` bloğuyla kapat
+(test/build çıktısı ekle). Bitince `HANDOFF → project-manager` bloğuyla kapat
 ve dur; commit/push PM + insan onayına aittir.
 
 ## Çıktı Formatı

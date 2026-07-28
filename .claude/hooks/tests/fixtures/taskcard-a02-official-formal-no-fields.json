@@ -1,6 +1,6 @@
 {
   "hook": "task-card-validator.js",
-  "name": "partial card blocks with exit 2",
+  "name": "official schema: formal card with NO risk fields blocks (exit 2)",
   "stdin": {
     "session_id": "abc123",
     "cwd": ".",
@@ -8,14 +8,14 @@
     "hook_event_name": "TaskCreated",
     "tool_name": "TaskCreate",
     "tool_input": {
-      "title": "Kupon endpointi",
-      "description": "contract-impact: POST /api/coupons eklenir\nrace-condition: stok yarışı incelenecek",
+      "title": "TASK CARD — Refresh token rotasyonu",
+      "description": "Kısa düzeltme; risk alanı yok.",
       "status": "pending"
     }
   },
   "expect": {
     "exitCode": 2,
     "noStdout": true,
-    "stderrIncludes": "auth-boundary"
+    "stderrIncludes": "contract-impact"
   }
 }

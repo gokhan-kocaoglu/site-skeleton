@@ -81,9 +81,14 @@ açık risktir → PASS verilemez (verdict-policy kural 6).
 | HIGH | bug, ciddi kalite sorunu | **Warning** |
 | MEDIUM/LOW | bakım, stil | not düş |
 
-**Approve** = CRITICAL+HIGH yok · **Warning** = yalnız HIGH ·
-**Block** = CRITICAL var. HANDOFF status-tag eşlemesi:
-Approve→PASS · Warning→PASS_WITH_RISKS · Block→FAIL.
+**Disposition** (senin diff hakkındaki tavrın): **Approve** = CRITICAL+HIGH yok ·
+**Warning** = yalnız HIGH · **Block** = CRITICAL var.
+
+**Rapor verdict'i bundan AYRI ve bağlayıcıdır** — otomatik eşleme yok
+(verdict-policy kural 5). Raporun `PASS` / `PASS_WITH_RISKS` / `FAIL`
+değerlerinden tam birini taşır: Approve verdiğin bir diffte bile **açık
+MEDIUM/LOW risk varsa verdict PASS_WITH_RISKS**'tir; PASS yalnız hiç açık risk
+yokken verilir. HANDOFF status-tag'i rapor verdict'iyle aynıdır.
 Final Review modunda: önceki tüm gate raporlarını görmeden verdict verme;
 eksik rapor = FAIL (verdict-policy).
 

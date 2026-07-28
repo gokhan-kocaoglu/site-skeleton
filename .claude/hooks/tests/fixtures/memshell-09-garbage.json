@@ -1,0 +1,9 @@
+{
+  "hook": "pre-bash-memory-guard.js",
+  "name": "garbage stdin fails open (exit 0, no decision)",
+  "stdinRaw": "}{not json",
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

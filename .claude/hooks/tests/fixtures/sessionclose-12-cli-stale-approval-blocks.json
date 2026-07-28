@@ -1,0 +1,14 @@
+{
+  "hook": "session-close-validator.js",
+  "name": "stale \"onay bekliyor\" in Sonraki 3 Adım blocks the closure",
+  "args": [
+    "--file",
+    "fixtures/status/stale-status-approval-pending.md"
+  ],
+  "cwd": ".claude/hooks/tests",
+  "stdinRaw": "",
+  "expect": {
+    "exitCode": 1,
+    "stdoutIncludes": "Sonraki 3 Adım"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "hook": "pre-bash-memory-guard.js",
+  "name": "reading the vault is never a write (cat + git diff pass)",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "cat project-memory/ClaudeTeamMemory/01_Projects/Demo/Current Status.md; git diff project-memory/"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

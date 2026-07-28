@@ -5,7 +5,7 @@ yollarını referans göstererek çağırır. Memory değişikliği için hedef 
 zaman `memory-steward`'dır.
 
 ```text
-HANDOFF → <sonraki-rol>
+HANDOFF → project-manager
 - target-file:      <yazılacak/okunacak dosya yolu>
 - target-section:   <dosya içindeki bölüm; yoksa "-">
 - operation:        ADD | UPDATE | DEPRECATE
@@ -15,6 +15,12 @@ HANDOFF → <sonraki-rol>
 - open-risk:        <risk; yoksa "Yok">
 - next-step:        <sonraki somut adım>
 ```
+
+> Yukarıdaki hedef bir **örnektir**. Hedef, dokuz geçerli ajan adından biri
+> olmak zorundadır (project-manager · system-architect · ux-ui-designer ·
+> frontend-developer · backend-developer · seo-specialist · qa-test-specialist ·
+> code-reviewer · memory-steward). Boş hedef veya `<...>` biçiminde yer tutucu
+> bırakılamaz — `verify-structure` `handoffTargets` kuralı FAIL üretir.
 
 ## Kurallar
 

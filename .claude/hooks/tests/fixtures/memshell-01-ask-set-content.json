@@ -1,0 +1,16 @@
+{
+  "hook": "pre-bash-memory-guard.js",
+  "name": "PowerShell Set-Content into the vault asks (single writer)",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "PowerShell",
+    "tool_input": {
+      "command": "Set-Content -Path project-memory/ClaudeTeamMemory/01_Projects/Demo/Current Status.md -Value '## Asama'"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "permissionDecision": "ask",
+    "reasonIncludes": "memory-steward"
+  }
+}

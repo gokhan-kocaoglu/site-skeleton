@@ -23,14 +23,26 @@
  * 4 mandatory risk fields — contract-impact, race-condition, auth-boundary,
  * rollback-plani. "N/A — <gerekçe>" is a valid value; bare "N/A" is not.
  *
+ * Faz 8.3 PR-D (M8): enforcement is keyed to the FORMAL MARKER, not to "some
+ * fields happen to be present". A card whose title/body carries "Task Card"
+ * (case-insensitive) is a formal PM card and MUST carry all four fields; a card
+ * without the marker is a micro-todo and can never be blocked — even if it
+ * carries a partial set. Previously a micro-todo that mentioned one risk field
+ * was blocked while a formal card that mentioned none was only reminded: the
+ * enforcement was attached to the wrong signal.
+ *
  * Decisions:
- *  - all 4 complete            -> silent allow (exit 0)
- *  - some present, some broken -> BLOCK: stderr detail + exit 2
- *  - none present              -> non-blocking systemMessage reminder only
- *                                 (micro-todos are legal; formal cards come
- *                                 from the PM DAG)
+ *  - formal marker + all 4 complete -> silent allow (exit 0)
+ *  - formal marker + any broken      -> BLOCK: stderr detail + exit 2
+ *  - no marker + all 4 complete      -> silent allow (exit 0)
+ *  - no marker, anything else        -> non-blocking systemMessage reminder
+ *                                       (micro-todos are legal; formal cards
+ *                                       come from the PM DAG / /start-feature)
  */
 const { readStdinJson, safeRun, emit } = require('./lib/common');
+
+/** Formal card marker: the Task-Card-template header, in any casing/spacing. */
+const FORMAL_MARKER = /\btask[\s_-]*card\b/i;
 
 const FIELDS = [
   { key: 'contract-impact', re: /contract-impact\s*[:=]\s*(.*)/i },
@@ -81,28 +93,31 @@ safeRun('task-card-validator', async () => {
   process.stderr.write(`[task-card-validator] schema=${schema}\n`);
 
   const statuses = FIELDS.map((f) => ({ key: f.key, status: fieldStatus(text, f) }));
-  const present = statuses.filter((s) => s.status !== 'missing');
   const broken = statuses.filter((s) => s.status !== 'ok');
+  const formal = FORMAL_MARKER.test(text);
 
-  if (present.length === 0) {
+  if (broken.length === 0) return; // complete card, formal or not: silent allow
+
+  if (!formal) {
+    // Micro-todo: reminder only. A partial field set does NOT promote it to a
+    // formal card — the marker is the only enforcement trigger.
     emit({
       systemMessage:
-        '[task-card-validator] Bu görevde risk analizi alanları yok. Formal bir task card ise ' +
-        'vault 00_System/Task-Card-template.md şablonunu kullan: contract-impact, race-condition, ' +
-        'auth-boundary, rollback-plani ("N/A — <gerekçe>" kabul edilir).',
+        '[task-card-validator] Bu görevde risk analizi alanları eksik. Formal bir task card ise ' +
+        'başlığa/gövdeye "TASK CARD" işaretini koy ve vault 00_System/Task-Card-template.md ' +
+        'şablonunu kullan: contract-impact, race-condition, auth-boundary, rollback-plani ' +
+        '("N/A — <gerekçe>" kabul edilir).',
     });
     return;
   }
 
-  if (broken.length > 0) {
-    const detail = broken
-      .map((s) => `${s.key} (${s.status === 'na-without-reason' ? 'N/A gerekçesiz' : s.status})`)
-      .join(', ');
-    process.stderr.write(
-      `[task-card-validator] Task card eksik/bozuk risk alanları içeriyor: ${detail}. ` +
-        'Dört alan da doldurulmalı; geçerli değilse "N/A — <gerekçe>" yaz ' +
-        '(şablon: vault 00_System/Task-Card-template.md).\n'
-    );
-    process.exit(2); // official TaskCreated block: creation is rolled back
-  }
+  const detail = broken
+    .map((s) => `${s.key} (${s.status === 'na-without-reason' ? 'N/A gerekçesiz' : s.status})`)
+    .join(', ');
+  process.stderr.write(
+    `[task-card-validator] Formal task card ("TASK CARD" işaretli) eksik/bozuk risk alanları ` +
+      `içeriyor: ${detail}. Dört alan da doldurulmalı; geçerli değilse "N/A — <gerekçe>" yaz ` +
+      '(şablon: vault 00_System/Task-Card-template.md).\n'
+  );
+  process.exit(2); // official TaskCreated block: creation is rolled back
 });

@@ -1,0 +1,21 @@
+{
+  "hook": "task-card-validator.js",
+  "name": "official schema: formal card with bare N/A blocks (exit 2)",
+  "stdin": {
+    "session_id": "abc123",
+    "cwd": ".",
+    "permission_mode": "default",
+    "hook_event_name": "TaskCreated",
+    "tool_name": "TaskCreate",
+    "tool_input": {
+      "title": "TASK CARD — Refresh token rotasyonu",
+      "description": "contract-impact: POST /api/auth/refresh sözleşmesi değişmiyor\nrace-condition: reuse-revoke ile eşzamanlı refresh engelli\nauth-boundary: auth çekirdeği, code-reviewer zorunlu\nrollback-plani: N/A",
+      "status": "pending"
+    }
+  },
+  "expect": {
+    "exitCode": 2,
+    "noStdout": true,
+    "stderrIncludes": "N/A gerekçesiz"
+  }
+}

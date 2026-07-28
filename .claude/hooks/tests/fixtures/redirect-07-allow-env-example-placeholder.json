@@ -1,0 +1,15 @@
+{
+  "hook": "pre-bash-redirect-guard.js",
+  "name": ".env.example placeholder line stays legal (no false positive)",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "echo 'DATABASE_URL=postgresql://user:change-me@localhost:5432/db' > apps/web/.env.example"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

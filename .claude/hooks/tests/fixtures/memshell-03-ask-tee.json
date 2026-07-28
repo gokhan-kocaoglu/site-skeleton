@@ -1,0 +1,16 @@
+{
+  "hook": "pre-bash-memory-guard.js",
+  "name": "tee into the vault asks",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "echo '## Blocker' | tee project-memory/ClaudeTeamMemory/01_Projects/Demo/Current Status.md"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "permissionDecision": "ask",
+    "reasonIncludes": "memory-steward"
+  }
+}

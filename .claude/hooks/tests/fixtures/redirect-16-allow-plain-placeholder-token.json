@@ -1,11 +1,11 @@
 {
   "hook": "pre-bash-redirect-guard.js",
-  "name": "token redirected to a non-sensitive file passes (hook stays narrow)",
+  "name": "a plain \"placeholder-token\" string matches no secret pattern at all",
   "stdin": {
     "hook_event_name": "PreToolUse",
     "tool_name": "Bash",
     "tool_input": {
-      "command": "echo sk_live_9htK2qWm8ZnR5vB1 > notes.txt"
+      "command": "echo \"placeholder-token\" > notes.txt"
     }
   },
   "expect": {

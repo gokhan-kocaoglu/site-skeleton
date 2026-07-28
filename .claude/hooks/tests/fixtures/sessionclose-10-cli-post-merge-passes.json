@@ -1,0 +1,14 @@
+{
+  "hook": "session-close-validator.js",
+  "name": "post-merge closure status (merge SHA + PR + CI run) passes",
+  "args": [
+    "--file",
+    "fixtures/status/good-status-post-merge.md"
+  ],
+  "cwd": ".claude/hooks/tests",
+  "stdinRaw": "",
+  "expect": {
+    "exitCode": 0,
+    "stdoutIncludes": "PASS"
+  }
+}

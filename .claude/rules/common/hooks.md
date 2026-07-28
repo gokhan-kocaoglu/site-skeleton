@@ -25,11 +25,12 @@ paths:
 |------|-------|-------|
 | pre-write-secret-scan | Write/Edit | Secret deseni → **deny** (pattern seti: `lib/secret-patterns.js`) |
 | pre-bash-git-guard | Bash | Tehlikeli git → **ask** |
-| pre-bash-redirect-guard | Bash/PowerShell | Redirect/writer + hassas dosya + token deseni → **ask** (birinci savunma hattı; gerçek tarama CI Gitleaks) |
+| pre-bash-redirect-guard | Bash/PowerShell | Komut metninde token deseni (hedeften BAĞIMSIZ) → **ask**; hassas dosyaya yazımda ek bağlam (birinci savunma hattı; gerçek tarama CI Gitleaks) |
+| pre-bash-memory-guard | Bash/PowerShell | Yazan komut (`>`, `>>`, Set-Content, Out-File, Add-Content, tee, cp/mv/Copy-Item/Move-Item) + hedef `project-memory/**` → **ask** (tek yazar memory-steward) |
 | post-edit-style-guard | Edit/Write (tsx/css) | Ham hex, inline style, framer-motion → uyarı |
 | memory-writer-guard | Write/Edit (project-memory/**) | Yazar steward değilse → **ask** |
-| task-card-validator | TaskCreated | Kart alanı bozuksa **blok** (stderr + exit 2); hiç yoksa hatırlatma |
-| session-close-validator | Stop / manuel | Current Status başlıkları + commit kanıtı yoksa kapanışı reddet |
+| task-card-validator | TaskCreated | `TASK CARD` işaretli formal kartta 4 risk alanı eksik/bozuksa **blok** (stderr + exit 2); işaretsiz mikro görevde yalnız hatırlatma |
+| session-close-validator | Stop / manuel | Başlık + commit kanıtı + bayat durum ifadesi; `--closure`/armed bayrakta ayrıca closure dalı, dirty-path ve merge-SHA ancestry → kapanışı reddet |
 | graph-first-reminder | Grep/grep-Bash | Graph varsa "graphify query kullan" hatırlatır |
 
 ## İzin Modu

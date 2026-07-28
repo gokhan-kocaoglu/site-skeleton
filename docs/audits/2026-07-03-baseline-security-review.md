@@ -54,3 +54,11 @@ CRITICAL: 0 · HIGH: 0 · Kalan MEDIUM: BFF-1/2/3 (sahip: aktivasyon-anı
 implementer; BFF şablonu kopyalanırken checklist tamamlanmadan deploy yasak).
 verdict-policy kural 2 gereği genel Security gate sonucu PASS; kalan riskler
 kayıtlı ve sahiplidir.
+
+> **Düzeltme şerhi (2026-07-27, Faz 8.3 PR-D):** Yukarıdaki son cümlede
+> kullanılan genel **`PASS`** ifadesi güncel verdict politikasıyla uyumsuzdur.
+> Rapor açık MEDIUM riskler (BFF-1/2/3) taşıdığı için verdict-policy kural 5/6
+> gereği doğru semantik **`PASS_WITH_RISKS`**'tir; reviewer disposition
+> `Approve` olabilir, bu rapor verdict'ini PASS yapmaz. Tarihsel sonuç geriye
+> dönük DEĞİŞTİRİLMEMİŞTİR — orijinal satırlar kanıt bütünlüğü için olduğu gibi
+> korunmuştur; bu şerh yalnız doğru okumayı kayda geçirir.

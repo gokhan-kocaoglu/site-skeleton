@@ -29,7 +29,21 @@ paths:
    kayıtlı, sahipli ve kabul edilmiş; hiçbiri production'ı engellemiyor.
    Kayıtsız risk = FAIL.
 4. **FAIL** — kural 1 tetiklendi VEYA en az bir kabul kriteri karşılanmadı.
-5. code-reviewer eşlemesi: Approve→PASS · Warning→PASS_WITH_RISKS · Block→FAIL.
+5. **Reviewer disposition ≠ rapor verdict'i.** `code-reviewer` kullanıcıya
+   `Approve / Warning / Block` değerlendirmesi vermeye devam eder; bu, o
+   ajanın diff hakkındaki tavrıdır. Final rapor AYRICA bağlayıcı bir verdict
+   taşır ve ikisi otomatik eşlenmez. Bağlayıcı tablo:
+
+   | Durum | Rapor verdict'i |
+   |---|---|
+   | CRITICAL/BLOCKER var | **FAIL** |
+   | CRITICAL/HIGH yok **ve** açık risk yok | **PASS** |
+   | Disposition Approve, ama açık MEDIUM/LOW risk var | **PASS_WITH_RISKS** (zorunlu) |
+   | Kabul edilmiş + kayıtlı + sahipli HIGH/MEDIUM/LOW risk var | **PASS_WITH_RISKS** |
+   | Karşılanmayan kabul kriteri var | **FAIL** |
+
+   "Approve = CRITICAL+HIGH yok → PASS" kestirmesi GEÇERSİZDİR: açık risk
+   varken Approve verilebilir, rapor verdict'i yine PASS_WITH_RISKS olur.
 6. Açık risk YOK → **PASS**. LOW/MEDIUM/HIGH risk bilinçli + kayıtlı + sahipli →
    **PASS_WITH_RISKS**. CRITICAL/BLOCKER → **FAIL**. **Ertelenmiş riskler de
    açık risktir**: rapora "sonraya bırakıldı" diye kaydedilen bulgu varken

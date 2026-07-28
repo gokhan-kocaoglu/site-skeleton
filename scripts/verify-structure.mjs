@@ -17,6 +17,10 @@ const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));
 // branch on it, and the first of those runs well before the repo-wide scan.
 const MODE = manifest.mode ?? 'skeleton-dev';
 
+// Also up front: the recursive activation scan (7f) needs the same directory
+// exclusions as the repo-wide forbidden-pattern scan further down.
+const EXCLUDE_DIRS = new Set(manifest.scanExcludeDirs ?? []);
+
 const failures = [];
 let checks = 0;
 
@@ -180,9 +184,14 @@ for (const entry of manifest.installedBaseline ?? []) {
   }
 }
 
-// 7d. Handoff targets (Faz 8.2, brief 1.1): every `HANDOFF → <target>` in
-// governance markdown must name an agent the manifest declares valid, so a
-// report can never be handed to a non-existent role (team-lead regression).
+// 7d. Handoff targets (Faz 8.2 brief 1.1; widened in Faz 8.3 PR-D / M3): every
+// line containing a literal `HANDOFF →` must name one of the nine valid agents.
+// The original `[a-z-]+` capture silently SKIPPED the cases that actually hurt —
+// `HANDOFF → <sonraki-rol>` and a bare `HANDOFF →` matched nothing, so a
+// placeholder shipped as if it were a real target. The line is now anchored
+// first and the target extracted afterwards, so an empty or `<...>` target is a
+// FAIL, and trailing prose ("HANDOFF → project-manager (ADR linkiyle)") does not
+// leak into the target token.
 if (manifest.handoffTargets) {
   const { dirs, validAgents } = manifest.handoffTargets;
   const valid = new Set(validAgents);
@@ -198,38 +207,80 @@ if (manifest.handoffTargets) {
     if (existsSync(p(dir))) collect(dir);
   }
   for (const rel of mdFiles) {
-    const text = readFileSync(p(rel), 'utf8');
-    for (const m of text.matchAll(/HANDOFF\s*→\s*([a-z-]+)/g)) {
-      check(valid.has(m[1]), `${rel}: HANDOFF hedefi geçersiz ajan: ${m[1]}`);
-    }
+    readFileSync(p(rel), 'utf8').split(/\r?\n/).forEach((line, i) => {
+      if (!/HANDOFF\s*→/.test(line)) return;
+      const where = `${rel}:${i + 1}`;
+      // Everything after the arrow, minus markdown/quoting noise, up to the
+      // first separator: the target must stand alone as one bare token.
+      const rest = line.slice(line.indexOf('→') + 1).replace(/[`*_"']/g, '').trim();
+      const target = rest.split(/[\s,.;:()\]]/)[0] ?? '';
+      if (target === '') {
+        check(false, `${where}: HANDOFF hedefi boş — dokuz geçerli ajandan biri yazılmalı`);
+        return;
+      }
+      check(
+        valid.has(target),
+        `${where}: HANDOFF hedefi geçersiz ajan: ${target}` +
+          (target.startsWith('<') ? ' (yer tutucu bırakılmış)' : '')
+      );
+    });
   }
 }
 
-// 7f. Activation gates (Faz 8.2, brief 3.2/R5): a template activated under
-// apps/ must carry a fully ticked ACTIVATION.md hardening checklist (zero
-// "- [ ]", exactly the declared number of "- [x]"). Detection is deliberately
-// limited to apps/ — the pristine, unticked template under templates/ never
-// trips this rule.
+// 7f. Activation gates (Faz 8.2 brief 3.2/R5; made recursive in Faz 8.3 PR-D /
+// M7): a template activated under apps/ must carry a fully ticked ACTIVATION.md
+// hardening checklist (zero "- [ ]", exactly the declared number of "- [x]").
+//
+// The Faz 8.2 version only looked one level deep and only at exact names, so
+// `apps/auth-bff/` or a nested `apps/services/admin-bff/` slipped past. Detection
+// now walks apps/ at ANY depth and fires on any ONE of three signals:
+//   1. directory name contains the fragment (e.g. "bff")
+//   2. the directory's package.json name contains the fragment ("@x/admin-bff")
+//   3. a file in that directory carries the template signature constant, which
+//      survives copy + rename (server.mjs `ADMIN_BFF_TEMPLATE_MARKER`)
+// A root found by several signals is verified exactly once (Set).
+//
+// Scope stays apps/ ONLY: the pristine, unticked template under templates/ is
+// dormant by definition and must never trip this rule.
 for (const gate of manifest.activationGates ?? []) {
-  const appsDir = p('apps');
-  if (!existsSync(appsDir)) continue;
-  for (const entry of readdirSync(appsDir, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
-    let activated = entry.name === gate.name;
-    if (!activated) {
-      const pkgPath = path.join(appsDir, entry.name, 'package.json');
-      if (existsSync(pkgPath)) {
-        try {
-          activated = JSON.parse(readFileSync(pkgPath, 'utf8')).name === gate.name;
-        } catch {
-          /* invalid package.json is caught by its own checks */
-        }
+  const appsRel = 'apps';
+  if (!existsSync(p(appsRel))) continue;
+  const roots = new Set();
+
+  const packageNameHas = (dirRel, fragment) => {
+    const pkgPath = p(`${dirRel}/package.json`);
+    if (!existsSync(pkgPath)) return false;
+    try {
+      return String(JSON.parse(readFileSync(pkgPath, 'utf8')).name ?? '')
+        .toLowerCase()
+        .includes(fragment);
+    } catch {
+      return false; // invalid package.json is caught by its own checks
+    }
+  };
+
+  const scan = (dirRel) => {
+    const fragment = (gate.nameFragment ?? '').toLowerCase();
+    const base = dirRel.slice(dirRel.lastIndexOf('/') + 1).toLowerCase();
+    if (fragment && base.includes(fragment)) roots.add(dirRel);
+    if (fragment && packageNameHas(dirRel, fragment)) roots.add(dirRel);
+    for (const entry of readdirSync(p(dirRel), { withFileTypes: true })) {
+      const rel = `${dirRel}/${entry.name}`;
+      if (entry.isDirectory()) {
+        if (EXCLUDE_DIRS.has(entry.name) || EXCLUDE_DIRS.has(rel)) continue;
+        scan(rel);
+      } else if (entry.isFile() && gate.marker) {
+        const buf = readFileSync(p(rel));
+        if (!buf.includes(0) && buf.toString('utf8').includes(gate.marker)) roots.add(dirRel);
       }
     }
-    if (!activated) continue;
-    const actRel = `apps/${entry.name}/ACTIVATION.md`;
+  };
+  scan(appsRel);
+
+  for (const root of roots) {
+    const actRel = `${root}/ACTIVATION.md`;
     if (!existsSync(p(actRel))) {
-      check(false, `apps/${entry.name}: aktive şablon ACTIVATION.md olmadan (hardening checklist zorunlu)`);
+      check(false, `${root}: aktive şablon ACTIVATION.md olmadan (hardening checklist zorunlu)`);
       continue;
     }
     const text = readFileSync(p(actRel), 'utf8');
@@ -418,7 +469,7 @@ for (const pattern of manifest.trackedForbidden ?? []) {
 // 8. Forbidden patterns (repo-wide scan of text files). A rule with a
 // "modes" array only runs when manifest.mode matches (Faz 8.1, audit #11:
 // the skeleton-dev guard patterns must not fire in bootstrapped projects).
-const EXCLUDE_DIRS = new Set(manifest.scanExcludeDirs ?? []);
+// EXCLUDE_DIRS is declared at the top of this file (shared with rule 7f).
 
 function* walk(dir) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {

@@ -22,9 +22,9 @@ description: >
 → Security gate (auth/ödeme/veri işiyse zorunlu)
 → (web işiyse) SEO gate + frontend-style-audit
 → Final review (code-reviewer)
-→ memory-steward: memory closure
-→ PM: memory diff denetimi → commit/push    [İNSAN ONAYI: push]
-→ Final kanıt raporu
+→ Final kanıt raporu (pre-merge commit + PR run URL)
+→ feature PR → required check'ler → MERGE      [İNSAN ONAYI: push]
+→ MERGE SONRASI: closure dalı → memory-steward → PM memory diff → closure PR
 ```
 
 İnsan onayı yalnız 3 noktada: **brief, plan, push** (+ hook'ların yakaladığı
@@ -40,6 +40,19 @@ riskli git/secret işlemleri).
 - `apps/web`'e dokunan her iş: + SEO gate + frontend-style-audit (risk
   sınıfından bağımsız).
 
+## Task Card Formalitesi (bağlayıcı)
+
+`/start-feature` zincirinde PM'nin ürettiği **her** task card formaldir:
+başlık veya gövde `TASK CARD` işaretini taşır ve
+`00_System/Task-Card-template.md` formatını kullanır. Formal kartta dört risk
+alanı zorunludur (contract-impact · race-condition · auth-boundary ·
+rollback-plani; `N/A — <gerekçe>` geçerli). `task-card-validator` formal kartta
+eksik alan görürse kart oluşturmayı **exit 2** ile reddeder.
+
+İşaretsiz mikro görevler serbesttir — bloklanmaz, yalnız hatırlatma alır.
+Enforcement işarete bağlıdır: kısmi alan taşıyan işaretsiz bir görev formal
+sayılmaz.
+
 ## Küçük Görev Sadeleştirmesi
 
 Tek dosyalık düzeltmede zincir kısalır (specialist → Final review) ama şunlar
@@ -48,9 +61,13 @@ asla atlanmaz: kabul kriteri · kanıt · memory güncellemesi.
 ## Dosya Tabanlı Handoff
 
 Subagent'lar birbirini göremez. Her ajan çıktısını dosyaya/rapora yazar ve
-`HANDOFF → <sonraki-rol>` bloğuyla kapatır; orkestratör sonraki ajanı bu
-dosyaları referans göstererek çağırır. Format:
+somut hedefli bir HANDOFF bloğuyla kapatır (örnek: `HANDOFF → project-manager`);
+orkestratör sonraki ajanı bu dosyaları referans göstererek çağırır. Format:
 `00_System/HANDOFF-template.md`.
+
+Hedef, dokuz geçerli ajandan biri olmak ZORUNDADIR; boş hedef veya
+`<...>` biçiminde yer tutucu `verify-structure` `handoffTargets` kuralıyla
+FAIL üretir.
 
 ## Sahiplik Kuralları
 
@@ -72,10 +89,16 @@ Herhangi bir gate FAIL verirse **önceki PASS'ler geçersizdir**:
    (yalnız FAIL veren gate'i koşmak yetmez — verdict-policy).
 4. Ancak o zaman kapanışa geçilir. Gate ajanı kendi düzeltmesine PASS veremez.
 
-## Memory-Last (kapanış tek yönlü)
+## Memory-Last (kapanış tek yönlü, MERGE SONRASI)
 
-QA + Security + Final Review hepsi PASS
-→ memory-steward yazar → PM memory diff denetimi → commit/push → final sentez.
+Ruleset main'e doğrudan push'u reddeder; memory closure implementasyon dalında
+YAPILMAZ. QA + Security + Final Review hepsi PASS → feature PR merge edilir →
+lokal main güncellenir → merge SHA + PR no + post-merge main CI run kaydedilir →
+güncel main'den `chore/memory-close-<yyyy-mm-dd>-<project-slug>` dalı açılır →
+memory-steward yazar → PM memory diff denetimi → memory-only closure PR.
+
+Closure PR **terminaldir**: kendisi için yeni closure üretmez (sonsuz döngü
+yasağı). Ayrıntı ve bayat-durum kalıpları: `memory-protocol` skill'i.
 
 ## Kanıt Kuralı
 

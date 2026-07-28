@@ -1,6 +1,6 @@
 {
   "hook": "task-card-validator.js",
-  "name": "complete card passes silently (official schema)",
+  "name": "official schema: complete card without the marker is accepted silently",
   "stdin": {
     "session_id": "abc123",
     "cwd": ".",
@@ -9,7 +9,7 @@
     "tool_name": "TaskCreate",
     "tool_input": {
       "title": "Health endpoint dokümantasyonu",
-      "description": "contract-impact: GET /api/health yanıt şeması değişmiyor\nrace-condition: N/A — tek yazarlı statik doküman işi\nauth-boundary: Yok, public endpoint\nrollback-plani: git revert yeterli",
+      "description": "contract-impact: POST /api/auth/refresh sözleşmesi değişmiyor\nrace-condition: reuse-revoke ile eşzamanlı refresh engelli\nauth-boundary: auth çekirdeği, code-reviewer zorunlu\nrollback-plani: önceki token tablosu migration'ı geri alınabilir",
       "status": "pending"
     }
   },

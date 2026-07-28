@@ -1,0 +1,15 @@
+{
+  "hook": "pre-bash-redirect-guard.js",
+  "name": "sk-PLACEHOLDER is a placeholder INSIDE the match, so it stays allowed",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "echo OPENAI_API_KEY=sk-PLACEHOLDER > apps/web/.env.example"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}

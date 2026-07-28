@@ -5,6 +5,12 @@
 > The structural gate (`verify-structure` **activationGates**) FAILs the build
 > while an activated copy under `apps/` still has unticked boxes; the pristine
 > template under `templates/` is never checked.
+>
+> Detection is recursive over `apps/**` and fires on any ONE of three signals:
+> directory name contains `bff` · `package.json` name contains `bff` · a file
+> carries the `ADMIN_BFF_TEMPLATE_MARKER` signature from `server.mjs`.
+> **Renaming the directory, the package, or both does not disable this gate** —
+> keep this file next to the copied `server.mjs`.
 
 ## Checklist (12 items — tick each one as you complete it)
 
