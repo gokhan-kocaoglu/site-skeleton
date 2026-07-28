@@ -71,8 +71,12 @@ function writeStatus(root, implLine, closureLine = 'f0e9d8c chore(memory): close
   return writeFile(root, [...VAULT, 'Current Status.md'], STATUS_BODY(implLine, closureLine));
 }
 
-/** Repo with a real feature merge on main; returns { root, mergeSha, straySha }. */
-function buildMergedRepo() {
+/**
+ * Repo with a real feature merge on main; returns { root, mergeSha, straySha }.
+ * `extraFiles` are tracked from the baseline commit, so a later `git mv` in the
+ * closure branch produces a real rename record instead of add+delete.
+ */
+function buildMergedRepo({ extraFiles = [] } = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'closure-guard-'));
   git(root, ['init', '--quiet']);
   git(root, ['symbolic-ref', 'HEAD', 'refs/heads/main']);
@@ -81,6 +85,7 @@ function buildMergedRepo() {
   git(root, ['config', 'commit.gpgsign', 'false']);
 
   writeFile(root, ['README.md'], '# demo\n');
+  for (const rel of extraFiles) writeFile(root, rel.split('/'), `# ${rel}\n`);
   git(root, ['add', '-A']);
   git(root, ['commit', '--quiet', '-m', 'chore: baseline']);
 
@@ -195,6 +200,97 @@ function runGitContextTests(assert) {
         'git-context: fail-safe warning missing'
       );
       assert((r.stdout || '').includes('PASS'), 'git-context: heading checks must still run');
+    } finally {
+      rmRepo(root);
+    }
+  }
+
+  // --- Rename / exact-path regression set (post-CI remediation) -------------
+  // A rename is TWO paths. Judging only the destination let a closure branch
+  // delete a non-memory file as long as the file landed inside the vault, and a
+  // prefix-based allowlist let `.session-close-pending-extra` through.
+
+  // 7. Rename FROM outside the vault INTO it: the source side must still block.
+  {
+    const { root, mergeSha } = buildMergedRepo({ extraFiles: ['docs/outside.md'] });
+    try {
+      git(root, ['checkout', '--quiet', '-b', CLOSURE_BRANCH]);
+      writeStatus(root, `\`${mergeSha} Merge pull request #41\``);
+      git(root, ['mv', 'docs/outside.md', `${VAULT.join('/')}/outside.md`]);
+      const r = runValidator(root);
+      const out = `${r.stdout || ''}${r.stderr || ''}`;
+      assert(r.status === 1, `git-context: outside->memory rename must BLOCK, got exit ${r.status}`);
+      assert(out.includes('memory dışı değişiklik'), 'git-context: rename dirty-path message missing');
+      assert(out.includes('docs/outside.md'), 'git-context: rename SOURCE path must be named');
+    } finally {
+      rmRepo(root);
+    }
+  }
+
+  // 8. Rename entirely INSIDE the vault: both sides allowed, no false positive.
+  {
+    const inside = `${VAULT.join('/')}/notes.md`;
+    const { root, mergeSha } = buildMergedRepo({ extraFiles: [inside] });
+    try {
+      git(root, ['checkout', '--quiet', '-b', CLOSURE_BRANCH]);
+      writeStatus(root, `\`${mergeSha} Merge pull request #41\``);
+      git(root, ['mv', inside, `${VAULT.join('/')}/08_Session_Logs-notes.md`]);
+      const r = runValidator(root);
+      assert(
+        r.status === 0,
+        `git-context: memory->memory rename must PASS, got exit ${r.status} [${(r.stdout || '').trim()}]`
+      );
+    } finally {
+      rmRepo(root);
+    }
+  }
+
+  // 9. The session-close flag itself is a governance artefact: exact path allowed.
+  {
+    const { root, mergeSha } = buildMergedRepo();
+    try {
+      git(root, ['checkout', '--quiet', '-b', CLOSURE_BRANCH]);
+      writeStatus(root, `\`${mergeSha} Merge pull request #41\``);
+      writeFile(root, ['.claude', 'hooks', '.session-close-pending'], 'DemoProje\n');
+      const r = runValidator(root);
+      assert(
+        r.status === 0,
+        `git-context: exact session flag must PASS, got exit ${r.status} [${(r.stdout || '').trim()}]`
+      );
+    } finally {
+      rmRepo(root);
+    }
+  }
+
+  // 10. A sibling that merely SHARES the flag's prefix is not the flag.
+  {
+    const { root, mergeSha } = buildMergedRepo();
+    try {
+      git(root, ['checkout', '--quiet', '-b', CLOSURE_BRANCH]);
+      writeStatus(root, `\`${mergeSha} Merge pull request #41\``);
+      writeFile(root, ['.claude', 'hooks', '.session-close-pending-extra'], 'smuggled\n');
+      const r = runValidator(root);
+      const out = `${r.stdout || ''}${r.stderr || ''}`;
+      assert(r.status === 1, `git-context: flag prefix sibling must BLOCK, got exit ${r.status}`);
+      assert(out.includes('memory dışı değişiklik'), 'git-context: prefix sibling message missing');
+      assert(out.includes('.session-close-pending-extra'), 'git-context: sibling path must be named');
+    } finally {
+      rmRepo(root);
+    }
+  }
+
+  // 11. Paths with spaces survive parsing (porcelain -z is unquoted).
+  {
+    const spaced = 'docs/outside evidence.md';
+    const { root, mergeSha } = buildMergedRepo({ extraFiles: [spaced] });
+    try {
+      git(root, ['checkout', '--quiet', '-b', CLOSURE_BRANCH]);
+      writeStatus(root, `\`${mergeSha} Merge pull request #41\``);
+      git(root, ['mv', spaced, `${VAULT.join('/')}/outside evidence.md`]);
+      const r = runValidator(root);
+      const out = `${r.stdout || ''}${r.stderr || ''}`;
+      assert(r.status === 1, `git-context: spaced-path rename must BLOCK, got exit ${r.status}`);
+      assert(out.includes(spaced), 'git-context: spaced SOURCE path must be named intact');
     } finally {
       rmRepo(root);
     }

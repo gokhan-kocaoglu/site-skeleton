@@ -52,11 +52,23 @@ const OPERATIONAL_SECTIONS = [
 
 const CLOSURE_BRANCH_RE = /^chore\/memory-close-\d{4}-\d{2}-\d{2}-[a-z0-9-]+$/;
 
-/** Dirty paths a memory-only closure may legitimately carry. */
-const ALLOWED_DIRTY = [
-  'project-memory/',
+/** The one directory a memory-only closure may touch. */
+const ALLOWED_DIRTY_PREFIX = 'project-memory/';
+
+/**
+ * Exact paths (never prefixes) a closure may additionally carry. Prefix
+ * matching was wrong here: `.session-close-pending-extra` /
+ * `.session-close-pending.backup` share the flag's prefix but are ordinary
+ * files, and a startsWith() allowlist smuggled them into a memory-only PR.
+ */
+const ALLOWED_DIRTY_EXACT = [
   '.claude/hooks/.session-close-pending', // governance artefact, not a code change
 ];
+
+/** Single, explicit allow rule for closure dirty paths. */
+function isAllowedClosurePath(rel) {
+  return rel.startsWith(ALLOWED_DIRTY_PREFIX) || ALLOWED_DIRTY_EXACT.includes(rel);
+}
 
 /** Text of one "## ..." section (heading -> next "## "). */
 function sectionOf(text, heading) {
@@ -120,20 +132,65 @@ function branchProblems(root) {
   return [];
 }
 
+/**
+ * Parses `git status --porcelain=v1 -z --untracked-files=all`.
+ *
+ * Record shape, verified empirically against git 2.51 (not assumed):
+ *   ordinary     "XY <path>\0"
+ *   rename/copy  "XY <NEW-path>\0<ORIG-path>\0"
+ * Note the order — with `-z` the DESTINATION comes first and the ORIGINAL
+ * follows as its own NUL-terminated field, the reverse of the human-readable
+ * `orig -> new` rendering. `-z` also disables path quoting, so paths containing
+ * spaces or quotes survive intact instead of being mangled by a text split.
+ *
+ * BOTH sides of a rename/copy are returned. A rename is two paths, and judging
+ * only the destination hid the real danger: `git mv docs/x.md
+ * project-memory/x.md` deletes a non-memory file, yet the destination alone
+ * looks like a legitimate memory write.
+ *
+ * A record that does not match the expected shape produces an explicit problem
+ * (fail-closed): an unparseable status is not evidence of a clean tree.
+ */
+function parsePorcelainZ(stdout) {
+  const fields = stdout.split('\0');
+  const paths = [];
+  const problems = [];
+  for (let i = 0; i < fields.length; i++) {
+    const record = fields[i];
+    if (record === '') continue; // trailing NUL
+    if (record.length < 4 || record[2] !== ' ') {
+      problems.push(`Çözümlenemeyen git status kaydı: ${JSON.stringify(record.slice(0, 60))}`);
+      continue;
+    }
+    paths.push(record.slice(3));
+    if (/[RC]/.test(record.slice(0, 2))) {
+      const origin = fields[++i];
+      if (!origin) {
+        problems.push(`Rename/copy kaydının kaynak yolu eksik: ${JSON.stringify(record.slice(0, 60))}`);
+      } else {
+        paths.push(origin);
+      }
+    }
+  }
+  return { paths, problems };
+}
+
 function dirtyPathProblems(root) {
-  const status = git(root, ['status', '--porcelain=v1', '--untracked-files=all']);
+  const status = git(root, ['status', '--porcelain=v1', '-z', '--untracked-files=all']);
   if (status.status !== 0) return [];
-  const paths = status.stdout
-    .split(/\r?\n/)
-    .filter(Boolean)
-    .map((line) => line.slice(3).replace(/^"|"$/g, '').split(' -> ').pop().trim());
-  const offenders = paths.filter((rel) => !ALLOWED_DIRTY.some((ok) => rel.startsWith(ok)));
-  if (offenders.length === 0) return [];
-  return [
-    `Memory-only closure'da memory dışı değişiklik var: ${offenders.slice(0, 8).join(', ')}` +
-      `${offenders.length > 8 ? ` (+${offenders.length - 8})` : ''}. ` +
-      'Closure PR yalnız project-memory/** taşır; implementasyon değişikliği feature PR\'ına aittir.',
+  const { paths, problems } = parsePorcelainZ(status.stdout);
+  const offenders = [
+    ...new Set(paths.map((rel) => rel.replace(/\\/g, '/')).filter((rel) => !isAllowedClosurePath(rel))),
   ];
+  if (offenders.length > 0) {
+    problems.push(
+      `Memory-only closure'da memory dışı değişiklik var: ${offenders.slice(0, 8).join(', ')}` +
+        `${offenders.length > 8 ? ` (+${offenders.length - 8})` : ''}. ` +
+        'Closure PR yalnız project-memory/** taşır; implementasyon değişikliği feature PR\'ına aittir. ' +
+        '(Rename\'in her iki tarafı da denetlenir.)'
+    );
+  }
+  return problems;
 }
 
 /**
@@ -188,7 +245,10 @@ module.exports = {
   STALE_PATTERNS,
   OPERATIONAL_SECTIONS,
   CLOSURE_BRANCH_RE,
-  ALLOWED_DIRTY,
+  ALLOWED_DIRTY_PREFIX,
+  ALLOWED_DIRTY_EXACT,
+  isAllowedClosurePath,
+  parsePorcelainZ,
   sectionOf,
   staleProblems,
   closureContextProblems,
