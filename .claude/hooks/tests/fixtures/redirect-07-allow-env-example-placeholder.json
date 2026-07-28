@@ -1,11 +1,11 @@
 {
   "hook": "pre-bash-redirect-guard.js",
-  "name": "token redirected to a non-sensitive file passes (hook stays narrow)",
+  "name": ".env.example placeholder line stays legal (no false positive)",
   "stdin": {
     "hook_event_name": "PreToolUse",
     "tool_name": "Bash",
     "tool_input": {
-      "command": "echo sk_live_9htK2qWm8ZnR5vB1 > notes.txt"
+      "command": "echo 'DATABASE_URL=postgresql://user:change-me@localhost:5432/db' > apps/web/.env.example"
     }
   },
   "expect": {

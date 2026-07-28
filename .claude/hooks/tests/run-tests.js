@@ -7,7 +7,7 @@
  *   { "hook": "<file in .claude/hooks>", "name": "...",
  *     "args": [], "stdin": {...} | "stdinRaw": "garbage",
  *     "cwd": "<relative to repo root>", "env": { ... },
- *     "expect": { "exitCode": 0, "noStdout": true,
+ *     "expect": { "exitCode": 0, "noStdout": true, "stdoutExcludes": ["never-echoed"],
  *                 "permissionDecision": "deny|ask", "reasonIncludes": "...",
  *                 "additionalContextIncludes": "...",
  *                 "stopDecision": "block", "stopReasonIncludes": "...",
@@ -82,6 +82,10 @@ function runFixture(fixture, fileName) {
   if (exp.stdoutIncludes) {
     assert(stdout.includes(exp.stdoutIncludes), `${id}: stdout missing "${exp.stdoutIncludes}"`);
   }
+  // Negative assertion: proves a decision never echoes the secret it matched.
+  for (const forbidden of exp.stdoutExcludes ?? []) {
+    assert(!stdout.includes(forbidden), `${id}: stdout must NOT contain "${forbidden}"`);
+  }
   if (exp.stderrIncludes) {
     assert(
       (result.stderr || '').includes(exp.stderrIncludes),
@@ -155,6 +159,7 @@ const EXPECTED_HOOKS = [
   'task-card-validator.js',
   'session-close-validator.js',
   'graph-first-reminder.js',
+  'pre-bash-memory-guard.js',
 ];
 
 let settings = null;

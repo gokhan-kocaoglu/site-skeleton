@@ -1,0 +1,16 @@
+{
+  "hook": "pre-bash-redirect-guard.js",
+  "name": "token redirected to a NON-sensitive file also asks (target-independent since PR-D)",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "echo sk_live_9htK2qWm8ZnR5vB1 > notes.txt"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "permissionDecision": "ask",
+    "reasonIncludes": "Stripe"
+  }
+}

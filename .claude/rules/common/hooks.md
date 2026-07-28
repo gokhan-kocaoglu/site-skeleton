@@ -25,7 +25,8 @@ paths:
 |------|-------|-------|
 | pre-write-secret-scan | Write/Edit | Secret deseni → **deny** (pattern seti: `lib/secret-patterns.js`) |
 | pre-bash-git-guard | Bash | Tehlikeli git → **ask** |
-| pre-bash-redirect-guard | Bash/PowerShell | Redirect/writer + hassas dosya + token deseni → **ask** (birinci savunma hattı; gerçek tarama CI Gitleaks) |
+| pre-bash-redirect-guard | Bash/PowerShell | Komut metninde token deseni (hedeften BAĞIMSIZ) → **ask**; hassas dosyaya yazımda ek bağlam (birinci savunma hattı; gerçek tarama CI Gitleaks) |
+| pre-bash-memory-guard | Bash/PowerShell | Yazan komut (`>`, `>>`, Set-Content, Out-File, Add-Content, tee, cp/mv/Copy-Item/Move-Item) + hedef `project-memory/**` → **ask** (tek yazar memory-steward) |
 | post-edit-style-guard | Edit/Write (tsx/css) | Ham hex, inline style, framer-motion → uyarı |
 | memory-writer-guard | Write/Edit (project-memory/**) | Yazar steward değilse → **ask** |
 | task-card-validator | TaskCreated | Kart alanı bozuksa **blok** (stderr + exit 2); hiç yoksa hatırlatma |

@@ -1,0 +1,16 @@
+{
+  "hook": "pre-bash-memory-guard.js",
+  "name": "Out-File into the vault asks",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "PowerShell",
+    "tool_input": {
+      "command": "\"## Blocker\" | Out-File project-memory/ClaudeTeamMemory/01_Projects/Demo/Current Status.md"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "permissionDecision": "ask",
+    "reasonIncludes": "tek-yazar"
+  }
+}

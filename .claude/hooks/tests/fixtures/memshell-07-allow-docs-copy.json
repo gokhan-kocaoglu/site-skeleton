@@ -1,0 +1,15 @@
+{
+  "hook": "pre-bash-memory-guard.js",
+  "name": "ordinary copy outside the vault passes silently (no false positive)",
+  "stdin": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "cp normal.txt docs/normal.txt"
+    }
+  },
+  "expect": {
+    "exitCode": 0,
+    "noStdout": true
+  }
+}
