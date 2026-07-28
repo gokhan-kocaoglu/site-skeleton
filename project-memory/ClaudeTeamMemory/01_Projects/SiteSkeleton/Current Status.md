@@ -17,20 +17,18 @@ PR #33 post-merge main CI run 30391043626 — success (altı aktif job success,
 PR #33 merge edildi (F4-HIGH-01 pnpm blocker remediation). Pnpm `9.15.4 → 10.34.4`
 exact pin · `gate-toolchain` guard ilk defans · 12/12 negatif suite ·
 lockfileVersion 9.0 (pnpm 10 uyumlu) · root override'lar korundu.
-Reviewer düzeltmesi: CVE-2026-59195/-59196 kimliği çıkarıldı; packageManager
-kusuru bitmiş (R-4'ün Node/EOL kısmı açık borç kalır). PR #33 · head
-`8ed07866d3e65cfe64f37b521bc34bb7213e033e` · head CI 30390258046 success ·
-merge `aed4c9edb613a77ca9e24571a4641de92a103266` (gerçek merge commit) ·
-post-merge main CI 30391043626 success.
+Reviewer düzeltmesi: CVE-2026-59195/-59196 kimliği çıkarıldı. F4-HIGH-01'in pnpm
+blocker kısmı kapandı. R-4'ün Node sürüm/EOL kısmı açık, non-blocking borç olarak
+kaldı. PR #33 · head `8ed07866d3e65cfe64f37b521bc34bb7213e033e` · head CI
+30390258046 success · merge `aed4c9edb613a77ca9e24571a4641de92a103266`
+(gerçek merge commit) · post-merge main CI 30391043626 success.
 
 ## Aktif Görev
 
-Terminal memory closure ve `v1.0.0-rc.2` hazırlık zinciri. Memory-only
-closure PR quality gate geçtikten sonra main'e alınmalı. Post-merge main CI
-run kaydedildikten sonra `v1.0.0-rc.2` immutable release oluşturulacak ve
-attestation doğrulanacak. Dördüncü mini-denetim exact `v1.0.0-rc.2` etiketi
-üzerinde yeniden koşulacak; yalnız production-ready verdict rc.2'de çıkarsa
-`v1.0.0` kararı değerlendirilir.
+v1.0.0-rc.2 release ve attestation hazırlığı. Terminal memory-only closure PR
+(#34) — merge sonrası immutable `v1.0.0-rc.2` release oluşturulacak, attestation
+doğrulanacak ve dördüncü mini-denetim exact `v1.0.0-rc.2` etiketi üzerinde
+yeniden koşulacaktır.
 
 ## Blocker
 
@@ -40,10 +38,10 @@ ve LOW-01…-06 audit bulguları** (sonraki audit/remediation planında açık).
 
 ## Sonraki 3 Adım
 
-1. Terminal memory-only closure PR'ını quality gate geçirdikten sonra main'e al.
-2. Closure merge SHA ve post-merge main CI run kaydedildikten sonra immutable
-   `v1.0.0-rc.2` oluştur ve attestation doğrula.
-3. Dördüncü mini-denetimi exact `v1.0.0-rc.2` etiketi üzerinde yeniden koştur.
+1. Terminal closure merge SHA'sını ve closure sonrası main CI run'ını doğrula.
+2. Closure merge commit'ini hedefleyen immutable `v1.0.0-rc.2` release'ini
+   oluştur ve attestation'ı doğrula.
+3. Dördüncü mini-denetimi exact `v1.0.0-rc.2` etiketi üzerinde yeniden çalıştır.
 
 ## Son Uygulama Commiti
 
