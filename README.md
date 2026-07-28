@@ -117,6 +117,14 @@ After `--apply`: `pnpm install`, then `pnpm gate` and `mvn verify` to re-verify.
 
 ### Optional modules (copy to activate — never part of the build)
 
+> **Core skeleton production-ready baseline. Optional modules require
+> activation hardening before production use.** The templates below are not
+> built, not tested by the gate chain and not covered by any production-ready
+> claim. Copying one under `apps/` arms the structural activation gate: its
+> `ACTIVATION.md` hardening checklist must be fully ticked or
+> `verify-structure` FAILs. Detection is recursive over `apps/**` and survives
+> renaming the directory *and* the package.
+
 | Template | Purpose |
 |---|---|
 | `templates/db/` | Hierarchical categories + single-use coupon SQL (copy as next Flyway `V<n>__`) |
@@ -133,9 +141,10 @@ create it under `packages/` when the project needs a shared component library.
 | `.claude/agents/` | 9 file-based subagents (PM, architect, UX, FE/BE devs, SEO, QA, reviewer, memory steward) |
 | `.claude/skills/` | 10 skills (workflow, quality gate, stack patterns, graphify, ...) |
 | `.claude/rules/` | Common + TypeScript rule sets |
-| `.claude/hooks/` | 8 fail-safe Node hooks + self-test harness |
+| `.claude/hooks/` | 9 fail-safe Node hooks + self-test harness |
 | `docs/adr/` | Architecture decision records (`ADR-0000-template.md`) |
-| `docs/operations/authority-map.md` | Agent × write-path authority matrix |
+| `docs/operations/authority-map.md` | Content owner × physical writer × approver matrix |
+| `docs/operations/release-attestation.md` | Evidence layers: in-repo (pre-merge) vs. external release attestation |
 | `project-memory/` | Obsidian-compatible team memory vault (single writer: memory-steward) |
 
 ## Build phases

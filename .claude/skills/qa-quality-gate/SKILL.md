@@ -19,6 +19,18 @@ commit hash'ini içerir; commit'lenmemiş kodla üretilen kanıt geçersizdir**
 workflow run'ının URL'sini içerir; insan teyidi yalnız URL erişilemezse son
 çaredir** (Faz 8.2, N4 — run URL'sini kullanıcı sağlar).
 
+## İki Kanıt Katmanı (Faz 8.3 P0-4 / MEDIUM-10)
+
+Repo-içi rapor **pre-merge** koşuyu gösterir: feature commit SHA + PR no + PR
+CI run URL. Rapor, henüz oluşmamış merge SHA'yı içermek zorunda DEĞİLDİR —
+içermeye çalışmak uydurma değere veya sonsuz amend'e yol açar.
+
+Final zincir (merge SHA + post-merge main CI run URL + kanıt linkleri) **dış
+immutable attestation**'da, GitHub Release/tag üzerinde mühürlenir. Kanıt
+döngüsü orada biter. Sözleşme ve alan tablosu:
+`docs/operations/release-attestation.md`. Bilinmeyen alan açık placeholder
+bırakılır; tahmini SHA/run numarası yazmak yasaktır.
+
 ## Doğrulama Döngüsü (sırayla; biri kırılırsa dur, düzelt, baştan)
 
 1. **Build** — `pnpm build` (API değiştiyse ayrıca

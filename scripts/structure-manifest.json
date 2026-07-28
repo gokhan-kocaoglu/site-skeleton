@@ -38,6 +38,7 @@
     "docs/test-reports",
     "docs/audits/seo",
     "docs/operations",
+    "docs/releases",
     "docs/setup",
     "docs/source-briefs",
     "project-memory/ClaudeTeamMemory",
@@ -60,6 +61,8 @@
     "docs/operations/authority-map.md",
     "docs/operations/ci.md",
     "docs/operations/deployment.md",
+    "docs/operations/release-attestation.md",
+    "docs/releases/v1.0.0-rc.1.md",
     "docs/source-briefs/skeleton-brief.md",
     ".claude/mcp/README.md",
     ".claude/mcp/21st-dev-magic.example.json",
@@ -335,7 +338,7 @@
     ".claude/skills/memory-protocol/SKILL.md": 130,
     ".claude/skills/feature-workflow/SKILL.md": 115,
     ".claude/skills/adr-decision/SKILL.md": 90,
-    ".claude/skills/qa-quality-gate/SKILL.md": 90,
+    ".claude/skills/qa-quality-gate/SKILL.md": 110,
     ".claude/skills/token-optimization/SKILL.md": 90,
     ".claude/skills/frontend-design-gate/SKILL.md": 90,
     ".claude/skills/frontend-style-audit/SKILL.md": 90,
@@ -425,6 +428,8 @@
     "docs/setup/local-setup-windows.md",
     "docs/adr/ADR-0001-model-routing.md",
     "docs/operations/authority-map.md",
+    "docs/operations/release-attestation.md",
+    "docs/releases/v1.0.0-rc.1.md",
     "README.md"
   ],
   "validJson": [
@@ -586,7 +591,13 @@
     }
   ],
   "handoffTargets": {
-    "dirs": [".claude/agents", ".claude/skills", ".claude/commands", ".claude/rules"],
+    "dirs": [
+      ".claude/agents",
+      ".claude/skills",
+      ".claude/commands",
+      ".claude/rules",
+      "project-memory/ClaudeTeamMemory/00_System"
+    ],
     "validAgents": [
       "project-manager",
       "system-architect",

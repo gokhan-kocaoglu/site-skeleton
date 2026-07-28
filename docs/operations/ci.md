@@ -186,3 +186,9 @@ enforcement kendiliğinden devreye girer; bu not o zaman kaldırılır.
 CI yeşili tek başına verdict değildir; quality-gate raporları
 (`docs/test-reports/`) koşulan run'ın commit hash'ini içerir ve verdict
 `.claude/rules/common/verdict-policy.md` sözlüğüyle verilir.
+
+Repo-içi rapor **pre-merge** koşuyu gösterir (feature commit + PR run URL);
+merge SHA + post-merge main CI run URL **dış attestation**'da, GitHub
+Release/tag üzerinde mühürlenir. Sözleşme:
+`docs/operations/release-attestation.md`. Release/tag oluşturma bir kullanıcı
+adımıdır; taslak `docs/releases/` altında hazırlanır.
