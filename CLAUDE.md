@@ -1,7 +1,7 @@
 # Site Skeleton — Çalışma Anayasası
 
 ## Kimlik — Üç Liste (drift kontrolü: verify-structure `installedBaseline`)
-Monorepo: pnpm 9 + Turborepo + Node 22.12+.
+Monorepo: pnpm 10 + Turborepo + Node 22.12+.
 
 **Installed baseline** (package dosyalarında gerçekten var):
 - apps/web: Next.js 16, React 19, TS strict, Tailwind v4 (CSS-first);

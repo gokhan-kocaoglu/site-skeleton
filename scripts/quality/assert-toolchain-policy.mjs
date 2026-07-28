@@ -1,8 +1,10 @@
 // Toolchain policy guard (Faz 8.3 F4 remediation, audit R-4 / AC-31).
 //
 // Why this exists: the fourth mini-audit found that the repository pinned
-// pnpm@9.15.4, a line affected by CVE-2026-50015 / -55487 / -55698 / -59195 /
-// -59196 with no fix ever published for 9.x. None of the existing gates saw it:
+// pnpm@9.15.4, a line affected by CVE-2026-50015 / -55487 / -55698 and by
+// GHSA-qrv3-253h-g69c / GHSA-fr4h-3cph-29xv (both HIGH, no CVE id assigned in
+// the GitHub Advisory DB), with no fix ever published for 9.x. None of the
+// existing gates saw it:
 // `pnpm audit` scans project dependencies, Trivy scans the repo and the API jar,
 // and Dependabot ignores semver-major updates — so the package manager itself
 // was an unguarded surface. This script closes that hole.

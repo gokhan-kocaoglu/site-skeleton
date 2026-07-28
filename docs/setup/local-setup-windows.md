@@ -3,15 +3,21 @@
 One-time machine setup for working on projects created from this skeleton.
 Run the commands in PowerShell; installs use `winget` where possible.
 
-## 1. Node 22 (minimum 22.12.0) + pnpm 9
+## 1. Node 22 (minimum 22.12.0) + pnpm 10
 
 ```powershell
-winget install OpenJS.NodeJS.LTS        # Node 22.x
+winget install OpenJS.NodeJS.LTS         # Node 22.x
 node -v                                  # expect v22.12.0 or newer (Vite 8 engines floor)
 corepack enable
-corepack prepare pnpm@9.15.4 --activate  # exact version pinned in package.json
-pnpm -v                                  # expect 9.15.4
+corepack prepare pnpm@10.34.4 --activate # exact version pinned in package.json
+pnpm -v                                  # expect 10.34.4
 ```
+
+> pnpm 10.34.4 is a **security floor**, not a preference: pnpm < 10.34.4 is
+> affected by CVE-2026-50015 / -55487 / -55698 and by GHSA-qrv3-253h-g69c /
+> GHSA-fr4h-3cph-29xv, and the 9.x line never received a fix. The
+> `gate-toolchain` step of `pnpm gate` fails the build below this version. See
+> `docs/source-briefs/f4-pnpm-toolchain-remediation-brief.md`.
 
 ## 2. Java 21 (Temurin) + Maven
 

@@ -346,7 +346,7 @@ ADR ile yapılır; iskelet sağlayıcı-bağımsız kalır.
 
 ```powershell
 node -v        # 22.x olmalı (değilse nodejs.org LTS)
-corepack enable && corepack prepare pnpm@9.15.4 --activate
+corepack enable && corepack prepare pnpm@10.34.4 --activate
 java -version  # 21 olmalı (yoksa Temurin 21)
 mvn -v         # yoksa Maven kur
 git --version  # Git for Windows şart (Claude Code Bash tool'u için)
