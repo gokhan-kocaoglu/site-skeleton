@@ -6,62 +6,47 @@
 
 ## Aşama
 
-Faz 8.3 Release Hardening'in repository içi implementation, final evidence
-package ve terminal memory closure kayıtları tamamlandı. Final evidence package
-PR #30 ile main'e alındı: merge `a9df4232e93c92c85573560341e73152c02f873b`,
-post-merge main CI run 30357983558 — success (altı aktif job success,
-`dependency-review` main push semantiğinde skipped).
-`main-branch-protection` ruleset'i Active, strict, yedi required check ile
-korunuyor. Bu Current Status, terminal closure PR merge edildikten sonra da
-canonical ve güncel kalacak şekilde hazırlanmıştır.
+Faz 8.3 Release Hardening final evidence package (PR #30) ve F4 remediation
+(PR #33 pnpm blocker) merge edildi. Terminal memory closure zinciri başlamıştır.
+`main-branch-protection` ruleset Active, yedi required check ile korumalı.
+PR #33 post-merge main CI run 30391043626 — success (altı aktif job success,
+`dependency-review` skipped).
 
 ## Son Tamamlanan Görev
 
-Faz 8.3 final evidence package: PR-A/PR-B/PR-C/PR-D gerçek kanıt zinciri ·
-HIGH-1…HIGH-4 kapanış tablosu · MEDIUM-1…MEDIUM-10 tablosu · yeniden açılan
-#9/#11/#12/#15/#27 maddeleri · MEDIUM-1 `RECOVERED_WITH_DOCUMENTED_INFERENCE`
-provenance'ı · MEDIUM-10 `PENDING_USER_ACTION` · beş aşamalı attestation SHA
-modeli · RC1/v1.0.0 sıralaması · non-self-referential snapshot modeli.
-Kanıt:
-`docs/test-reports/2026-07-28-faz8.3-release-hardening.md` ·
-`docs/audits/2026-07-03-recertification.md` (Faz 8.3 eki) ·
-`docs/operations/release-attestation.md` ·
-`docs/releases/v1.0.0-rc.1.md` ·
-`docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md`.
+PR #33 merge edildi (F4-HIGH-01 pnpm blocker remediation). Pnpm `9.15.4 → 10.34.4`
+exact pin · `gate-toolchain` guard ilk defans · 12/12 negatif suite ·
+lockfileVersion 9.0 (pnpm 10 uyumlu) · root override'lar korundu.
+Reviewer düzeltmesi: CVE-2026-59195/-59196 kimliği çıkarıldı. F4-HIGH-01'in pnpm
+blocker kısmı kapandı. R-4'ün Node sürüm/EOL kısmı açık, non-blocking borç olarak
+kaldı. PR #33 · head `8ed07866d3e65cfe64f37b521bc34bb7213e033e` · head CI
+30390258046 success · merge `aed4c9edb613a77ca9e24571a4641de92a103266`
+(gerçek merge commit) · post-merge main CI 30391043626 success.
 
 ## Aktif Görev
 
-Repository içi Faz 8.3 evidence ve terminal memory closure zinciri
-tamamlanmıştır. Sıradaki işlem kullanıcı tarafından `v1.0.0-rc.1` GitHub
-Release/tag'inin oluşturulmasıdır. Release oluşturma anında terminal closure
-PR'ın gerçek merge SHA'sı ve closure sonrası main CI run'ı GitHub'dan
-doğrulanacak; closure merge SHA'sı RC1 release target olarak kullanılacaktır.
-MEDIUM-10 dış immutable attestation oluşturulana kadar `PENDING_USER_ACTION`
-durumundadır. Dördüncü mini-denetim rc.1 yayınlandıktan sonra yürütülür ve
-yalnız `v1.0.0` kararının gate'idir.
+v1.0.0-rc.2 release ve attestation hazırlığı. Terminal memory-only closure PR
+(#34) — merge sonrası immutable `v1.0.0-rc.2` release oluşturulacak, attestation
+doğrulanacak ve dördüncü mini-denetim exact `v1.0.0-rc.2` etiketi üzerinde
+yeniden koşulacaktır.
 
 ## Blocker
 
-Yok. MEDIUM-10 teknik blocker değildir; sahibi kullanıcı olan sıralı bir
-`PENDING_USER_ACTION` kaydıdır.
+Yok. Açık, non-blocking borç: **R-4 Node sürüm/EOL kapısı** (packageManager
+kısmı PR #33'te kapandı, Node/platform sürüm kısmı yapılmadı) · **F4 MEDIUM-01…-03
+ve LOW-01…-06 audit bulguları** (sonraki audit/remediation planında açık).
 
 ## Sonraki 3 Adım
 
-1. `v1.0.0-rc.1` oluşturma anında terminal closure PR'ın GitHub'daki gerçek
-   merge SHA'sını ve closure sonrası main CI run'ını doğrula; closure merge
-   SHA'sını RC1 release target olarak kullan.
-2. Kullanıcı GitHub Release/tag `v1.0.0-rc.1`'i oluşturur, dış immutable
-   attestation alanlarını gerçek değerlerle doldurur ve MEDIUM-10 kapanır.
-3. `v1.0.0-rc.1` üzerinde dördüncü mini-denetimi yürüt; yalnız production-ready
-   verdict'i çıkarsa `v1.0.0` kararını değerlendir.
+1. Terminal closure merge SHA'sını ve closure sonrası main CI run'ını doğrula.
+2. Closure merge commit'ini hedefleyen immutable `v1.0.0-rc.2` release'ini
+   oluştur ve attestation'ı doğrula.
+3. Dördüncü mini-denetimi exact `v1.0.0-rc.2` etiketi üzerinde yeniden çalıştır.
 
 ## Son Uygulama Commiti
 
-`a9df4232e93c92c85573560341e73152c02f873b Merge pull request #30 from
-gokhan-kocaoglu/docs/faz-8-3-final-evidence` — PR #30 · post-merge main CI run
-30357983558
-(https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30357983558)
+`PR #33` · `Merge SHA: aed4c9edb613a77ca9e24571a4641de92a103266` · `Post-merge main CI: 30391043626` · `Sonuç: success`. (`dependency-review` main push'ta skipped.)
 
 ## Memory Closure Commiti
 
-`5ff711a14953583367c7f9dbbec28be1e811fceb chore(memory): close session 2026-07-28`
+`chore(memory): close session 2026-07-28` · `30b1276cbf67cb6b729c885790486e85c7e346c5`
