@@ -35,25 +35,50 @@ Feature PR'ı **ve** onu izleyen memory-only closure PR'ı merge edildikten
 sonra, GitHub Release (tag) üzerinde mühürlenir. Release notu değişmez kanıt
 taşıyıcısıdır.
 
+### Üçlü SHA modeli (bağlayıcı — Faz 8.3'te netleşti)
+
+Final zincir **iki ayrı merge commit** içerir, çünkü memory closure merge
+sonrasına taşınmıştır (P0-4). Tek bir "merge SHA" alanı bu yüzden yetersizdir:
+
+| Kavram | Ne kanıtlar |
+|---|---|
+| **Feature implementation merge SHA** | Implementation'ın main'e girdiği commit |
+| **Terminal closure / final main SHA** | Implementation **+** post-merge memory closure zincirinin birlikte bulunduğu final main durumu |
+| **Release tag target SHA** | Tag'in işaret ettiği commit — **terminal closure SHA'sı olmalıdır** |
+
+**Tag target neden closure SHA'sıdır:** tag feature merge SHA'ya verilirse,
+sonradan merge edilen terminal closure kayıtları (Current Status'un gerçek
+merge/CI kanıtı + session log) tag'in dışında kalır — release, kendi kanıt
+zincirinin kapanışını kapsamaz. Feature merge SHA silinmez; **ayrı bir kanıt
+alanı** olarak korunur.
+
+### Release notu alan tablosu
+
 | Alan | Kaynak |
 |---|---|
 | Tag | `v<sürüm>` (kullanıcı oluşturur) |
-| Release target merge SHA | Feature PR'ının gerçek merge commit'i |
-| Post-merge main CI run URL | Merge sonrası `main` push run'ı |
+| **Feature implementation merge SHA** | Feature PR'ının gerçek merge commit'i |
+| **Feature post-merge main CI run URL** | Feature merge sonrası `main` push run'ı |
+| **Terminal closure / final main SHA** | Memory-only closure PR'ının merge commit'i |
+| **Final main CI run URL** | Closure merge sonrası `main` push run'ı |
+| **Release target SHA** | = terminal closure / final main SHA |
 | Kanıt raporu linkleri | `docs/test-reports/` · `docs/audits/` (tag'e sabitlenmiş) |
 | Resertifikasyon linki | `docs/audits/<tarih>-recertification.md` |
 
 **Zincir burada kapanır.** Katman 1 "bu kod doğrulandı", Katman 2 "doğrulanan
-kod tam olarak bu SHA ile main'e girdi ve orada da yeşil koştu" der.
+kod tam olarak bu SHA ile main'e girdi, orada da yeşil koştu ve kapanış kaydı
+da aynı ağaçta" der.
 
 ## Sıra (bağlayıcı)
 
 ```text
 1. Feature branch'te iş biter + repo-içi kanıt raporu yazılır (pre-merge SHA)
-2. PR açılır → yedi required check yeşil → merge
+2. PR açılır → yedi required check yeşil → merge     [feature implementation merge SHA]
 3. Lokal main güncellenir; merge SHA + PR no + post-merge main CI run kaydedilir
-4. chore/memory-close-<tarih>-<slug> dalı → memory closure → seal → closure PR → merge
-5. GitHub Release/tag: dış attestation mühürlenir (Katman 2 tablosu doldurulur)
+4. chore/memory-close-<tarih>-<slug> dalı → memory closure → seal → closure PR
+   → merge                                            [terminal closure / final main SHA]
+5. GitHub Release/tag: dış attestation mühürlenir (Katman 2 tablosu doldurulur);
+   tag target = adım 4'ün SHA'sı
 ```
 
 Adım 5 bir **kullanıcı adımıdır**; Claude yalnız taslağı hazırlar
@@ -68,16 +93,24 @@ yazmak kanıt değil, kanıt taklididir. Faz 8.2 session log'u bunun somut örne
 kapanışta varsayılan "CI #29" numarası, sonradan GitHub kaydından doğrulanınca
 **#30** çıkmıştır (düzeltme şerhi: vault `08_Session_Logs/2026-07-19-session-06.md`).
 
-## Mevcut durum (2026-07-27)
+## Mevcut durum (2026-07-28)
 
 | Öğe | Değer |
 |---|---|
-| Son merge edilmiş PR | #27 (Faz 8.3 PR-C) |
-| Merge SHA | `dda8342489ade958c38293014ed41d681e28e937` |
-| Post-merge main CI run | [30262787137](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30262787137) (CI #57, success) |
-| Ruleset | `main-branch-protection` (id 18469047), enforcement **active** |
-| Required checks | 7 — quality-gate-ubuntu · api-verify-testcontainers · hooks-and-structure-windows · gitleaks-full-history · supply-chain-trivy · dependency-review · bootstrap-e2e |
-| Release | **Henüz oluşturulmadı.** Taslak: `docs/releases/v1.0.0-rc.1.md` |
+| Feature PR | **#28** (Faz 8.3 PR-D) |
+| Feature implementation merge SHA | `cf5226f05848a9e27c8b14877b455c8bdfe5e7e5` |
+| Feature post-merge main CI | [30348674300](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30348674300) — success |
+| Terminal memory closure PR | **#29** |
+| Final main / closure merge SHA | `90bbf1205509633c0b1004af57e7ebfcd51327f6` |
+| Final main CI | [30350754770](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30350754770) — success |
+| Release tag target SHA (planlanan) | `90bbf1205509633c0b1004af57e7ebfcd51327f6` |
+| Ruleset | `main-branch-protection` (id 18469047) · **active** · 7 required check · strict **true** |
+| Required checks | quality-gate-ubuntu · api-verify-testcontainers · hooks-and-structure-windows · gitleaks-full-history · supply-chain-trivy · dependency-review · bootstrap-e2e |
+| Release | **oluşturulmadı** |
+| Tag | **oluşturulmadı** |
+| Dördüncü mini-denetim | **bekleniyor** |
+| Kanıt raporu | `docs/test-reports/2026-07-28-faz8.3-release-hardening.md` |
+| Release taslağı | `docs/releases/v1.0.0-rc.1.md` |
 
 `v1.0.0` etiketi bu turda gündemde değildir: brief gereği yalnız **dördüncü
 mini-denetim** "production-ready" hükmü verdikten sonra atılır.
