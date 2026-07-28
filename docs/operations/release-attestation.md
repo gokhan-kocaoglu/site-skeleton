@@ -119,6 +119,20 @@ değerler dış immutable GitHub Release üzerinde mühürlenir. Aksi hâlde her
 release yeni bir kanıt PR'ı, o da yeni bir closure gerektirir ve zincir
 kapanmaz.
 
+## Self-reference yasağı
+
+Bir PR'ın **kendi içindeki** belge, o PR'ın güncel head SHA'sını "current"
+değer olarak taşıyamaz: o değeri yazan commit yeni bir head üretir ve yazılan
+değer anında bayatlar.
+
+```text
+Repo-içi snapshot'lar tarihsel certification noktalarıdır.
+Final authoritative identity, merge SHA + post-merge main CI ile doğar.
+```
+
+Bu yüzden attestation tablosundaki PR head/CI satırları **snapshot** olarak
+etiketlenir; merge öncesi güncel durumun otoritesi GitHub PR metadata'sıdır.
+
 ## Uydurma yasağı
 
 Bilinmeyen alan **açık placeholder** olarak bırakılır
@@ -137,8 +151,10 @@ kapanışta varsayılan "CI #29" numarası, sonradan GitHub kaydından doğrulan
 | Feature terminal memory closure PR | **#29** |
 | **Evidence package base SHA** | `90bbf1205509633c0b1004af57e7ebfcd51327f6` |
 | Feature closure post-merge main CI | [30350754770](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30350754770) — success |
-| Final evidence PR | **#30** · head `a312cf148e988c50750eb077b1e5afd1e609ed08` |
-| Final evidence PR CI | [30354440371](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30354440371) — success (7/7) |
+| Final evidence PR | **#30** |
+| ↳ *Initial package certification snapshot* | `a312cf148e988c50750eb077b1e5afd1e609ed08` · CI [30354440371](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30354440371) |
+| ↳ *RC1 sequence-remediation snapshot* | `dc5737630471a9e1be115ec91593a787e3712244` · CI [30355634333](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30355634333) |
+| ↳ Current pre-merge head/check authority | **GitHub PR #30 metadata ve required check'ler** |
 | Final evidence PR merge SHA | `FINAL_EVIDENCE_MERGE_SHA` *(henüz yok)* |
 | Final evidence post-merge main CI | `FINAL_EVIDENCE_POST_MERGE_CI_RUN_URL` *(henüz yok)* |
 | Final evidence closure PR | `FINAL_EVIDENCE_CLOSURE_PR` *(henüz yok)* |

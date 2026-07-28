@@ -179,10 +179,16 @@ kanıt raporundadır.
 > yalnız ektir ve önceki verdict'leri geriye dönük değiştirmez.
 > Kanıt ayrıntıları: `docs/test-reports/2026-07-28-faz8.3-release-hardening.md`.
 
-**Final baseline:** main `90bbf1205509633c0b1004af57e7ebfcd51327f6`
-**Feature implementation merge:** `cf5226f05848a9e27c8b14877b455c8bdfe5e7e5` (PR #28)
-**Terminal memory closure:** PR #29 → final main `90bbf120…`
-**Final main CI:** <https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30350754770> (success)
+**Evidence package base SHA:** main `90bbf1205509633c0b1004af57e7ebfcd51327f6`
+**PR-D feature implementation merge:** `cf5226f05848a9e27c8b14877b455c8bdfe5e7e5` (PR #28)
+**PR-D terminal memory closure:** PR #29 → evidence package base `90bbf120…`
+**PR-D closure post-merge main CI:** <https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30350754770> (success)
+
+> `90bbf120…` **release target değildir**; bu kanıt paketinin üzerine inşa
+> edildiği base'dir. RC1 release target'ı, final evidence PR'ı ve onu izleyen
+> terminal closure merge edildikten sonra doğacak
+> `FINAL_EVIDENCE_CLOSURE_MERGE_SHA`'dır
+> (`docs/operations/release-attestation.md`).
 **Ruleset:** `main-branch-protection` (18469047) · active · 7 required check · strict
 
 ### HIGH-1…HIGH-4
