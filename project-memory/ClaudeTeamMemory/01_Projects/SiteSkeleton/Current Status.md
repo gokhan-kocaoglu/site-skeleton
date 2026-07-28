@@ -6,28 +6,31 @@
 
 ## Aşama
 
-Faz 8.3 Release Hardening — PR-A/PR-B/PR-C merge edildi. PR-C (bootstrap
-sertifikasyonu) PR #27 ile main'e alındı; post-merge main CI run 30262787137
-(CI #57) yeşil. `main-branch-protection` ruleset'i Active ve yedi required
-check aktif: quality-gate-ubuntu · api-verify-testcontainers ·
-hooks-and-structure-windows · gitleaks-full-history · supply-chain-trivy ·
-dependency-review · bootstrap-e2e.
+Faz 8.3 Release Hardening — PR-A, PR-B, PR-C ve PR-D implementation'larının
+tamamı main'e alındı. PR-D, PR #28 ile merge edildi (gerçek merge commit
+`cf5226f05848a9e27c8b14877b455c8bdfe5e7e5`); post-merge main CI run
+30348674300 başarılı (altı aktif job success, `dependency-review` main push
+semantiğinde skipped). `main-branch-protection` ruleset'i Active, yedi required
+check aktif. Bu kayıt, Faz 8.3'ün terminal memory-only governance kapanışıdır.
 
 ## Son Tamamlanan Görev
 
-Faz 8.3 PR-C — transactional `/new-project` sertifikasyonu: projectSlug
-kaydı, temiz-ağaç ön koşulu, plan-sonra-uygula atomikliği + rollback,
-deterministik memory üretimi, mode-farkındalı yapısal kurallar ve
-`bootstrap-e2e` CI job'u. Kanıt:
-`docs/test-reports/2026-07-27-faz8.3-pr-c-bootstrap-certification.md`.
+Faz 8.3 PR-D — governance mühürleri: merge-sonrası memory closure workflow'u ve
+terminal closure-PR istisnası · bayat-durum + closure-bağlamı (dal / dirty-path
+/ merge-SHA ancestry) validator'ı · verdict-disposition ayrımı · somut handoff
+hedefleri ve genişletilmiş parser · authority map (içerik sahibi / fiziksel
+yazar / onaylayan) · shell memory ve hedeften bağımsız secret guard'ı ·
+recursive activation gate (üç sinyal) · kritik-domain %80 kapsam teli · formal
+Task Card zorunluluğu · dış release attestation sözleşmesi. Ayrıca bağımsız
+inceleme sonrası iki remediation: memory-closure rename kaynak-tarafı bypass'ı
+ve satır-kapsamlı secret placeholder bypass'ı kapatıldı.
+Kanıt: `docs/test-reports/2026-07-27-faz8.3-pr-d-governance-seals.md`.
 
 ## Aktif Görev
 
-Faz 8.3 PR-D — memory governance mühürleri (P0-4 + P1.1–P1.4, P1.6–P1.8):
-merge-sonrası memory closure akışı, stale-state validator, dış release
-attestation sözleşmesi, verdict/handoff hizalaması, authority map semantiği,
-shell memory/secret guard, recursive activation gate, kritik-domain %80
-kapsam teli ve formal task card zorunluluğu.
+Faz 8.3 feature implementation tamamlandı. Sıradaki governance safhası, final
+release-hardening attestation kanıtlarının tamamlanması ve dördüncü
+mini-denetimdir. GitHub Release veya tag henüz oluşturulmamıştır.
 
 ## Blocker
 
@@ -35,20 +38,19 @@ Yok.
 
 ## Sonraki 3 Adım
 
-1. PR-D lokal sertifikasyonu tamamlanır; kanıt raporu yazılır.
-2. PR-D feature PR'ı yedi required check ile main'e alınır.
-3. Merge sonrası closure dalında bu dosyanın ilk gerçek post-merge kapanışı
-   yapılır (yeni akışın ilk tam uygulaması).
+1. Final release-hardening kanıt zincirini merge ve post-merge CI verileriyle
+   tamamla (`docs/operations/release-attestation.md` Katman 2 tablosu).
+2. Dördüncü mini-denetimi yürüt ve production-ready verdict'ini belirle.
+3. Yalnız açık insan onayı ve uygun verdict sonrasında `v1.0.0-rc.1`
+   release/tag kararını uygula veya ertele (taslak: `docs/releases/v1.0.0-rc.1.md`).
 
 ## Son Uygulama Commiti
 
-`dda8342489ade958c38293014ed41d681e28e937 Merge pull request #27 from
-gokhan-kocaoglu/feat/faz-8-3-bootstrap-certification` — PR #27 · post-merge
-main CI run 30262787137
-(https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30262787137)
+`cf5226f05848a9e27c8b14877b455c8bdfe5e7e5 Merge pull request #28 from
+gokhan-kocaoglu/feat/faz-8-3-memory-governance-seals` — PR #28 · post-merge
+main CI run 30348674300
+(https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30348674300)
 
 ## Memory Closure Commiti
 
-`eb1d876 chore(memory): close session 2026-07-19 (session 06)` — son geçerli
-closure mührü. PR-D'nin kendi post-merge closure hash'i merge sonrası
-oluşacağı için burada yer almaz.
+PENDING — closure commit henüz oluşturulmadı
