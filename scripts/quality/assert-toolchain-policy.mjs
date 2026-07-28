@@ -1,4 +1,10 @@
-// Toolchain policy guard (Faz 8.3 F4 remediation, audit R-4 / AC-31).
+// Toolchain policy guard (Faz 8.3 F4 remediation, audit AC-31 / R-4 partial).
+//
+// Scope, stated honestly: audit R-4 asks for a gate over "packageManager + Node"
+// version/EOL. This file implements the packageManager/pnpm half only. There is
+// deliberately NO Node version or EOL check here -- that half of R-4 is an open,
+// non-blocking debt, tracked in
+// docs/source-briefs/f4-pnpm-toolchain-remediation-brief.md.
 //
 // Why this exists: the fourth mini-audit found that the repository pinned
 // pnpm@9.15.4, a line affected by CVE-2026-50015 / -55487 / -55698 and by
@@ -105,8 +111,10 @@ export function checkToolchainPolicy(pkg) {
         code: 'BELOW_SECURITY_FLOOR',
         message:
           `pnpm@${found.join('.')} < ${MIN_PNPM} — güvenlik tabanının altında. ` +
-          'CVE-2026-50015 / -55487 / -55698 / -59195 / -59196 kapsamındaki ' +
-          'sürümler kabul edilmez (denetim bulgusu F4-HIGH-01).',
+          'CVE-2026-50015 / CVE-2026-55487 / CVE-2026-55698 ile ' +
+          'GHSA-qrv3-253h-g69c / GHSA-fr4h-3cph-29xv kapsamındaki sürümler ' +
+          'kabul edilmez (denetim bulgusu F4-HIGH-01). Son iki madde GHSA ' +
+          'kimliğiyle anılır: Advisory DB onlar için CVE id taşımıyor.',
       };
     }
   }

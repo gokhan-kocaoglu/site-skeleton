@@ -2,7 +2,14 @@
 
 > Bağlayıcı kapsam kaynağı: `docs/audits/2026-07-28-fourth-mini-audit-rc1.md`
 > (SHA-256 `A9897FEA2D5E30A01E7DEB8121794108194221F9A8E12D09368166C85226DC9B`).
-> Bu brief o raporun **R-1…R-4** maddelerini uygular; rapor metni değiştirilmez.
+> Bu brief o raporun **R-1, R-2, R-3** maddelerini tam olarak, **R-4**'ü ise
+> **kısmen** uygular; rapor metni değiştirilmez.
+>
+> **Kapsam gerçeği (bağlayıcı):** R-4 iki yüzey ister —
+> `packageManager` **ve** Node sürüm/EOL kontrolü. Bu PR yalnız
+> **packageManager/pnpm** regresyon korumasını uygular.
+> **Node sürüm/EOL kontrolü UYGULANMADI** ve non-blocking **açık borç**
+> olarak kaydedilir. "R-1…R-4 eksiksiz uygulandı" iddiası **geçersizdir**.
 
 ## Kaynak Denetim
 
@@ -126,7 +133,33 @@ kapsamı dışındadır (tek yazar: memory-steward).
 ADR-0009 kural 5 gereği yükseltme yeşil kanıtsız commit'lenemez. Koşulan
 komutlar ve sonuçları: `docs/test-reports/2026-07-28-f4-pnpm-toolchain-remediation.md`.
 
-## R-4 — Toolchain regression koruması
+## R-4 — Toolchain regression koruması (**KISMEN** uygulandı)
+
+Denetim raporundaki R-4 birebir şudur:
+
+```text
+Toolchain sürüm/EOL kontrolünü kapılara ekle (packageManager + Node);
+mevcut `pnpm audit`/Trivy bu yüzeyi taramıyor
+```
+
+Yani **iki** yüzey ister. Bu PR'ın durumu:
+
+| R-4 alt kalemi | Durum |
+|---|---|
+| `packageManager` / pnpm sürüm regresyon koruması | **UYGULANDI** (aşağıdaki guard) |
+| **Node sürüm / EOL kontrolü** | **UYGULANMADI — açık borç (non-blocking)** |
+
+Node kısmı bilinçli olarak kapsam dışı bırakıldı: bu görev yalnız F4-HIGH-01
+blocker'ını kapatır ve Node hattı **şu an blocker değildir** (Node 22
+Maintenance LTS, EOL 2027-04-30 — denetim raporunun "Gözlemler" bölümü, bulgu
+değil gözlem olarak kaydeder). EOL kontrolü ayrıca bir tarih/veri kaynağı
+kararı gerektirir (sabit tablo mu, ağ sorgusu mu) ve bu guard'ın bilinçli
+"ağsız ve deterministik" tasarımıyla birlikte ayrıca değerlendirilmelidir.
+
+**Kayıt (bağlayıcı):** R-4 kapanmamıştır. Kapanan kısım
+packageManager/pnpm'dir. Node sürüm/EOL kapısı, ADR-0009'un zaten kayıtlı
+"otomatik EOL kontrolü ileriye dönük borçtur" maddesiyle birlikte ele alınacak
+**açık, non-blocking** kalemdir.
 
 Denetimin tespiti: `packageManager` yüzeyini **hiçbir kapı taramıyordu**.
 Eklenen koruma:

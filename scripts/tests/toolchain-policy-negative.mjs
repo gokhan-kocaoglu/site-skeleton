@@ -28,10 +28,18 @@ const CASES = [
     expectCode: 'MAJOR_NOT_REVIEWED',
   },
   {
-    name: 'tabanın bir patch altı pnpm@10.34.3 reddedilir',
+    // This scenario carries a second duty: it is the only place the security
+    // floor message is actually produced, so it also pins the advisory
+    // identifiers. GHSA-qrv3-253h-g69c and GHSA-fr4h-3cph-29xv have NO CVE id
+    // in the GitHub Advisory DB; earlier drafts called them CVE-2026-59195 /
+    // -59196. Asserting their absence stops those unverifiable ids from
+    // creeping back into a user-facing failure message.
+    name: 'tabanın bir patch altı pnpm@10.34.3 reddedilir (+ advisory kimlik bütünlüğü)',
     pkg: { packageManager: 'pnpm@10.34.3' },
     expectOk: false,
     expectCode: 'BELOW_SECURITY_FLOOR',
+    expectMessageIncludes: ['GHSA-qrv3-253h-g69c', 'GHSA-fr4h-3cph-29xv'],
+    expectMessageExcludes: ['CVE-2026-59195', 'CVE-2026-59196'],
   },
   {
     name: 'aralık belirteci pnpm@^10.34.4 reddedilir (exact pin zorunlu)',
@@ -94,15 +102,30 @@ const CASES = [
 let failures = 0;
 for (const c of CASES) {
   const got = checkToolchainPolicy(c.pkg);
-  const ok = got.ok === c.expectOk && got.code === c.expectCode;
-  if (ok) {
+  const problems = [];
+
+  if (got.ok !== c.expectOk || got.code !== c.expectCode) {
+    problems.push(
+      `beklenen ok=${c.expectOk} code=${c.expectCode}; bulunan ok=${got.ok} code=${got.code}`,
+    );
+  }
+  for (const needle of c.expectMessageIncludes ?? []) {
+    if (!got.message.includes(needle)) problems.push(`mesajda "${needle}" YOK`);
+  }
+  for (const needle of c.expectMessageExcludes ?? []) {
+    if (got.message.includes(needle)) {
+      problems.push(`mesajda doğrulanamayan tanımlayıcı "${needle}" VAR`);
+    }
+  }
+
+  if (problems.length === 0) {
     console.log(`[toolchain-policy] PASS — ${c.name}`);
   } else {
     failures += 1;
     console.error(
       `[toolchain-policy] FAIL — ${c.name}\n` +
-        `    beklenen: ok=${c.expectOk} code=${c.expectCode}\n` +
-        `    bulunan : ok=${got.ok} code=${got.code} (${got.message})`,
+        problems.map((p) => `    ${p}`).join('\n') +
+        `\n    mesaj: ${got.message}`,
     );
   }
 }

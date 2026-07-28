@@ -137,6 +137,14 @@ tedarik zinciri yüzeyini yeniden açardı.
 
 ## Toolchain Guard
 
+> **R-4 kapsam beyanı (dürüst daraltma).** Denetimin R-4 maddesi
+> "Toolchain sürüm/EOL kontrolünü kapılara ekle (**packageManager + Node**)"
+> der. Bu PR **yalnız packageManager/pnpm** yarısını uygular;
+> **Node sürüm/EOL kontrolü UYGULANMAMIŞTIR** ve non-blocking açık borçtur
+> (bkz. "Kalan Riskler"). Dolayısıyla **"R-1…R-4 eksiksiz uygulandı" iddiası
+> bu raporda yer almaz**: R-1, R-2, R-3 tamamlandı; R-4 kısmen tamamlandı.
+> F4-HIGH-01'in **pnpm blocker kısmı** kapatılmıştır — bu hüküm korunur.
+
 `scripts/quality/assert-toolchain-policy.mjs` — saf, **offline**, stdlib-only.
 `MIN_PNPM = '10.34.4'`, `ALLOWED_MAJOR = 10`. `gate-toolchain` `pnpm gate`
 sırasının **ilk** adımıdır ve iki şey yapar: canlı pini doğrular **ve** negatif
@@ -259,6 +267,7 @@ Bu PR'ın eklediği kayıtlı riskler/borçlar:
 
 | Öğe | Severity | Not |
 |---|---|---|
+| **R-4'ün Node sürüm/EOL kontrolü uygulanmadı** | **MEDIUM** | **Açık borç, non-blocking.** R-4 "packageManager **+ Node**" ister; bu PR yalnız packageManager/pnpm yarısını kapatır. Node 22 şu an Maintenance LTS (EOL 2027-04-30) ve blocker değildir |
 | Guard `hooks-and-structure-windows` job'unda koşmuyor | LOW | Politika platformdan bağımsız; alternatif tasarım kayıtlı |
 | `MIN_PNPM` elle güncellenir (bot güncellemez) | LOW | Yeni advisory geldiğinde tek satır + kanıt |
 | pnpm 10 lifecycle-script bloğu (`msw`) | LOW | Gate yeşil; `onlyBuiltDependencies` bilinçli olarak eklenmedi |
