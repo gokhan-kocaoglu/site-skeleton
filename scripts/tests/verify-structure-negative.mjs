@@ -161,6 +161,58 @@ const scenarios = [
     },
   },
   {
+    // Faz 8.3 PR-D (M7): the three activation signals, one scenario each.
+    name: 'ismi değişmiş *bff* dizini ACTIVATION.md olmadan FAIL üretir (sinyal 1: dizin adı)',
+    expectFragments: ['apps/auth-bff', 'ACTIVATION.md olmadan'],
+    setup() {
+      const dir = path.join(ROOT, 'apps', 'auth-bff');
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(path.join(dir, 'server.mjs'), '// renamed copy\n');
+      return [dir];
+    },
+  },
+  {
+    name: 'paket adı *bff* olan dizin ACTIVATION.md olmadan FAIL üretir (sinyal 2: package name)',
+    expectFragments: ['apps/gateway', 'ACTIVATION.md olmadan'],
+    setup() {
+      const dir = path.join(ROOT, 'apps', 'gateway');
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(path.join(dir, 'package.json'), '{ "name": "@x/admin-bff", "private": true }\n');
+      return [dir];
+    },
+  },
+  {
+    name: 'tamamen yeniden adlandırılmış kopya marker ile yakalanır (sinyal 3: şablon imzası)',
+    expectFragments: ['apps/renamed-service', 'ACTIVATION.md olmadan'],
+    setup() {
+      const dir = path.join(ROOT, 'apps', 'renamed-service');
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(
+        path.join(dir, 'server.mjs'),
+        `// copied template\n// ${'ADMIN_BFF'}_TEMPLATE_MARKER\n`
+      );
+      return [dir];
+    },
+  },
+  {
+    // Positive control: a fully ticked activation passes, AND the pristine
+    // templates/admin-bff copy (0/12 ticked) stays out of scope — otherwise
+    // this green run would be impossible.
+    name: 'nested + 12/12 işaretli ACTIVATION.md FAIL ÜRETMEZ (templates/ dormant kalır)',
+    expectOk: true,
+    setup() {
+      const dir = path.join(ROOT, 'apps', 'services', 'probe-bff');
+      mkdirSync(dir, { recursive: true });
+      const ticked = Array.from({ length: 12 }, (_, i) => `- [x] item ${i + 1}`).join('\n');
+      writeFileSync(path.join(dir, 'ACTIVATION.md'), `# checklist\n\n${ticked}\n`);
+      writeFileSync(
+        path.join(dir, 'server.mjs'),
+        `// nested activated copy\n// ${'ADMIN_BFF'}_TEMPLATE_MARKER\n`
+      );
+      return [path.join(ROOT, 'apps', 'services')];
+    },
+  },
+  {
     name: 'tag referanslı action FAIL üretir (githubActionsPins: hareketli tag)',
     expectFragments: ['__action-pin-negative-tag.tmp.yml', 'tam 40-hex commit SHA değil'],
     setup: () => [plantWorkflow('tag', 'actions/checkout@v6')],

@@ -1,5 +1,10 @@
 // Admin BFF skeleton — HttpOnly refresh-cookie bridge (Node 22 stdlib only).
 // NOT PRODUCTION-READY: work through the README hardening checklist first.
+// ADMIN_BFF_TEMPLATE_MARKER
+// ^ Inert signature constant. It survives copy + rename, so the activation gate
+// (verify-structure `activationGates`) still recognises an activated copy under
+// apps/ even when the directory and the package have been renamed. It has no
+// runtime effect.
 // The refresh token never reaches browser JS: it lives in an HttpOnly cookie
 // scoped to /auth; the SPA keeps the access token in memory only.
 import http from 'node:http';

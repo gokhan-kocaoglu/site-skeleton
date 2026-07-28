@@ -360,7 +360,7 @@
     ".claude/hooks/graph-first-reminder.js": 120,
     ".claude/hooks/tests/run-tests.js": 250,
     ".claude/hooks/tests/session-close-git-context.js": 250,
-    "templates/admin-bff/server.mjs": 120,
+    "templates/admin-bff/server.mjs": 130,
     "docs/adr/ADR-0007-payment-provider.md": 60,
     "docs/adr/ADR-0001-model-routing.md": 60,
     "docs/adr/ADR-0002-memory-namespaces.md": 60,
@@ -574,7 +574,14 @@
     ]
   },
   "trackedForbidden": ["*.tsbuildinfo", "apps/web/next-env.d.ts"],
-  "activationGates": [{ "name": "admin-bff", "checklistItems": 12 }],
+  "activationGates": [
+    {
+      "id": "admin-bff",
+      "nameFragment": "bff",
+      "marker": "ADMIN_BFF_TEMPLATE_MARKER",
+      "checklistItems": 12
+    }
+  ],
   "handoffTargets": {
     "dirs": [".claude/agents", ".claude/skills", ".claude/commands", ".claude/rules"],
     "validAgents": [
