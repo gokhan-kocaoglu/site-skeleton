@@ -389,9 +389,9 @@
     "scripts/tests/bootstrap-e2e.mjs": 330,
     "scripts/tests/bootstrap-transaction.mjs": 240,
     "scripts/tests/critical-domain-coverage-negative.mjs": 140,
-    "docs/test-reports/2026-07-28-faz8.3-release-hardening.md": 300,
+    "docs/test-reports/2026-07-28-faz8.3-release-hardening.md": 340,
     "docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md": 200,
-    "docs/operations/release-attestation.md": 150,
+    "docs/operations/release-attestation.md": 180,
     "docs/releases/v1.0.0-rc.1.md": 160,
     "docs/audits/2026-07-03-recertification.md": 280
   },

@@ -207,7 +207,7 @@ kanıt raporundadır.
 | MEDIUM-7 | Activation gate güçlendirme | CLOSED | Recursive `apps/**` + üç sinyal; 4 senaryo |
 | MEDIUM-8 | Formal Task Card zorunluluğu | CLOSED | Marker'a bağlı enforcement; 3 şema × 6 senaryo |
 | MEDIUM-9 | Kritik-domain %80 coverage teli | CLOSED | Path eşikleri + gerçek FAIL kanıtı (2/2 workspace) |
-| MEDIUM-10 | Dış immutable attestation | CLOSED_WITH_ACCEPTED_RISK | İki katman + üçlü SHA modeli; **Release/tag henüz oluşturulmadı** (kullanıcı adımı) |
+| MEDIUM-10 | Dış immutable attestation | **`PENDING_USER_ACTION`** | Teknik sözleşme ve taslak hazırdır (iki katman + beş aşamalı SHA modeli). GitHub Release/tag, PR #30 merge ve post-merge terminal closure sonrasında **kullanıcı tarafından** oluşturulacaktır. Oluşturulmadan `CLOSED` sayılamaz |
 
 ### Yeniden açılan maddeler (Faz 8.1 numaralandırması)
 
@@ -232,8 +232,20 @@ CRITICAL: 0 · HIGH: 0.
 ### Ön verdict
 
 ```text
-PASS_WITH_RISKS — READY_FOR_FOURTH_MINI_AUDIT
+PASS_WITH_RISKS — READY_FOR_FINAL_EVIDENCE_PR_MERGE
 ```
+
+Ayrı durum:
+
+```text
+RC1 external attestation: PENDING_USER_ACTION
+```
+
+**Sıra şerhi (bağlayıcı, brief FİNAL bölümü):** `v1.0.0-rc.1` **dördüncü
+mini-denetimden ÖNCE** yayınlanan release candidate'tır; dördüncü mini-denetim
+o candidate'ı denetler ve yalnız **`v1.0.0`** kararının gate'idir — rc.1'in ön
+koşulu **değildir**. Release/tag, PR #30 merge ve onu izleyen terminal memory
+closure tamamlandıktan sonra kullanıcı tarafından oluşturulur.
 
 **Şerh:** HIGH-1..4 ve MEDIUM-1..10 tabloları eksiksizdir; `NOT_MAPPED` satırı
 kalmamıştır. MEDIUM-1'in kaynak eşleşmesi
@@ -243,6 +255,7 @@ PR-E mutabakatı); orijinal üçüncü denetim raporunun birebir metni
 bulunmamıştır ve bulunduğu iddia edilmemektedir —
 `docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md`.
 
-Bu ön verdict **production-ready hükmü değildir**; dördüncü mini-denetim henüz
-yürütülmemiştir, Release ve tag oluşturulmamıştır. Yukarıdaki üç risk açık,
-kayıtlı ve sahiplidir — risk defteri **boş değildir**.
+Bu ön verdict **production-ready hükmü değildir**; dördüncü mini-denetim
+başlatılmamıştır, Release ve tag oluşturulmamıştır. Yukarıdaki üç risk açık,
+kayıtlı ve sahiplidir — risk defteri **boş değildir**. MEDIUM-10 bir risk değil,
+sırası gelmemiş bir kullanıcı işlemidir ve bu üç riskin arasında sayılmaz.
