@@ -63,4 +63,4 @@ oldukları gerekçesiyle GO olarak yorumlanamaz.
 
 ## Memory Closure Commiti
 
-`PENDING — closure commit henüz oluşturulmadı`
+`chore(memory): close session 2026-07-29` · `b562fc52338803de32537800221ee2daaa5e2d76`
