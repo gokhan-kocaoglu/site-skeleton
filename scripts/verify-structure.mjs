@@ -242,10 +242,29 @@ if (manifest.handoffTargets) {
 //
 // Scope stays apps/ ONLY: the pristine, unticked template under templates/ is
 // dormant by definition and must never trip this rule.
+// F4-LOW-05 (ADR-0017): a marker found deep inside a copy used to make its OWN
+// directory the activation root, so `apps/x/src/server.mjs` demanded
+// `apps/x/src/ACTIVATION.md` — the right FAIL pointed at the wrong place. The
+// root is now the NEAREST ancestor carrying a package.json (the hardening unit
+// is the package boundary), never `apps` itself or anything above it: the repo
+// root has a package.json, so an unbounded walk would collapse every copy onto
+// it. Directory-name and package-name signals are untouched.
 for (const gate of manifest.activationGates ?? []) {
   const appsRel = 'apps';
   if (!existsSync(p(appsRel))) continue;
-  const roots = new Set();
+  const signalRoots = new Set();
+  const markerRoots = new Map(); // activation root -> first marker file seen
+
+  const resolveMarkerRoot = (dirRel) => {
+    let cur = dirRel;
+    while (cur !== appsRel) {
+      if (existsSync(p(`${cur}/package.json`))) return cur;
+      const cut = cur.lastIndexOf('/');
+      if (cut === -1) break;
+      cur = cur.slice(0, cut);
+    }
+    return dirRel; // no package boundary above it -> previous behaviour
+  };
 
   const packageNameHas = (dirRel, fragment) => {
     const pkgPath = p(`${dirRel}/package.json`);
@@ -262,8 +281,8 @@ for (const gate of manifest.activationGates ?? []) {
   const scan = (dirRel) => {
     const fragment = (gate.nameFragment ?? '').toLowerCase();
     const base = dirRel.slice(dirRel.lastIndexOf('/') + 1).toLowerCase();
-    if (fragment && base.includes(fragment)) roots.add(dirRel);
-    if (fragment && packageNameHas(dirRel, fragment)) roots.add(dirRel);
+    if (fragment && base.includes(fragment)) signalRoots.add(dirRel);
+    if (fragment && packageNameHas(dirRel, fragment)) signalRoots.add(dirRel);
     for (const entry of readdirSync(p(dirRel), { withFileTypes: true })) {
       const rel = `${dirRel}/${entry.name}`;
       if (entry.isDirectory()) {
@@ -271,16 +290,35 @@ for (const gate of manifest.activationGates ?? []) {
         scan(rel);
       } else if (entry.isFile() && gate.marker) {
         const buf = readFileSync(p(rel));
-        if (!buf.includes(0) && buf.toString('utf8').includes(gate.marker)) roots.add(dirRel);
+        if (!buf.includes(0) && buf.toString('utf8').includes(gate.marker)) {
+          const markerRoot = resolveMarkerRoot(dirRel);
+          if (!markerRoots.has(markerRoot)) markerRoots.set(markerRoot, rel);
+        }
       }
     }
   };
   scan(appsRel);
 
-  for (const root of roots) {
+  // A marker-derived root that is a strict ancestor of another root is a
+  // grouping workspace, not the activated module itself: the more specific root
+  // already carries the demand, so drop the ancestor. Signal roots never drop.
+  const candidates = new Set([...signalRoots, ...markerRoots.keys()]);
+  for (const root of [...markerRoots.keys()]) {
+    for (const other of candidates) {
+      if (other !== root && other.startsWith(`${root}/`)) {
+        markerRoots.delete(root);
+        break;
+      }
+    }
+  }
+
+  for (const root of [...new Set([...signalRoots, ...markerRoots.keys()])].sort()) {
+    const via = markerRoots.has(root) && !signalRoots.has(root)
+      ? ` [marker: ${markerRoots.get(root)}]`
+      : '';
     const actRel = `${root}/ACTIVATION.md`;
     if (!existsSync(p(actRel))) {
-      check(false, `${root}: aktive şablon ACTIVATION.md olmadan (hardening checklist zorunlu)`);
+      check(false, `${root}: aktive şablon ACTIVATION.md olmadan (hardening checklist zorunlu)${via}`);
       continue;
     }
     const text = readFileSync(p(actRel), 'utf8');
@@ -292,6 +330,187 @@ for (const gate of manifest.activationGates ?? []) {
       `${actRel}: ${ticked} işaretli madde (beklenen ${gate.checklistItems})`
     );
   }
+}
+
+// 7j. Optional-module activation registry (AC-29 / F4-MEDIUM-01, ADR-0017).
+//
+// The repo ships five optional templates but only ONE of them is protected by a
+// structural gate, while README generalised that guarantee to every copied
+// template. The registry below makes the enforcement scope explicit and — this
+// is the point — machine-checked: the declared module set, the enforcement mode
+// of each module and the README/CLAUDE prose must agree with each other and
+// with the real templates/ tree.
+//
+// Two deliberate design rules:
+//   * The gate loop above (7f) is NOT driven by this registry. Deleting a
+//     registry entry can never switch the admin-bff gate off; it only produces
+//     a named FAIL here.
+//   * The automatic-gate module set and the admin-bff checklist size are pinned
+//     in CODE, not in the manifest. Weakening the claim therefore needs a
+//     scripts/** change (orchestrator authority + review), not a data edit.
+const AUTOMATIC_GATE_MODULES = ['admin-bff'];
+const ADMIN_BFF_CHECKLIST_ITEMS = 12;
+const ACTIVATION_SECTION_RE =
+  /<!--\s*activation-modules:start\s*-->\r?\n([\s\S]*?)<!--\s*activation-modules:end\s*-->/;
+// One documented module = a templatePath code span followed by an
+// enforcementMode code span with no other code span in between, on one line.
+const ACTIVATION_ROW_RE =
+  /`(templates\/[a-z0-9][a-z0-9-]*\/)`[^`\n]*`(automatic-gate|manual-hardening)`/g;
+const CANONICAL_MANUAL_PHRASES = [
+  'no automatic activation gate',
+  'outside the core production-ready claim until project-specific hardening',
+];
+
+const activationModules = manifest.activationModules;
+check(
+  Array.isArray(activationModules) && activationModules.length > 0,
+  "scripts/structure-manifest.json: activationModules yok veya dizi değil — opsiyonel modül registry'si zorunlu"
+);
+const registry = Array.isArray(activationModules) ? activationModules : [];
+const registryIds = new Set();
+const registryPaths = new Set();
+
+for (const [i, mod] of registry.entries()) {
+  const id = mod?.id;
+  const label = typeof id === 'string' ? id : `#${i}`;
+  const idOk = typeof id === 'string' && /^[a-z0-9][a-z0-9-]*$/.test(id) && !registryIds.has(id);
+  check(idOk, `activationModules[${label}]: id geçersiz veya yinelenmiş (${JSON.stringify(id)})`);
+  if (typeof id === 'string') registryIds.add(id);
+
+  const tp = mod?.templatePath;
+  const pathOk =
+    typeof tp === 'string' && tp === `templates/${id}/` && !registryPaths.has(tp);
+  check(
+    pathOk,
+    `activationModules[${label}]: templatePath geçersiz, id ile uyumsuz veya yinelenmiş (${JSON.stringify(tp)})`
+  );
+  if (typeof tp === 'string') registryPaths.add(tp);
+
+  check(
+    typeof tp === 'string' && existsSync(p(tp)) && statSync(p(tp)).isDirectory(),
+    `activationModules[${label}]: templatePath yok veya dizin değil: ${tp}`
+  );
+
+  const doc = mod?.activationDocument;
+  check(
+    typeof doc === 'string' && existsSync(p(doc)) && statSync(p(doc)).isFile(),
+    `activationModules[${label}]: activationDocument yok veya dosya değil: ${doc}`
+  );
+
+  check(
+    typeof mod?.activationTarget === 'string' && mod.activationTarget.length > 0,
+    `activationModules[${label}]: activationTarget eksik (kopyanın gerçek hedefi kayıtlı olmalı)`
+  );
+
+  const mode = mod?.enforcementMode;
+  const gid = mod?.activationGateId;
+  let modeOk;
+  let modeMsg;
+  if (mode === 'automatic-gate') {
+    modeOk = typeof gid === 'string' && gid.length > 0;
+    modeMsg = `activationModules[${label}]: enforcementMode=automatic-gate ama activationGateId yok`;
+  } else if (mode === 'manual-hardening') {
+    modeOk = gid === undefined;
+    modeMsg =
+      `activationModules[${label}]: manual-hardening kayıt activationGateId taşıyor (${JSON.stringify(gid)})` +
+      ' — manual-hardening modülde otomatik aktivasyon kapısı YOKTUR';
+  } else {
+    modeOk = false;
+    modeMsg =
+      `activationModules[${label}]: geçersiz enforcementMode ${JSON.stringify(mode)}` +
+      ' — "automatic-gate" | "manual-hardening"';
+  }
+  check(modeOk, modeMsg);
+}
+
+// Driven by the file system, not by the registry: a new templates/<module>
+// directory must be classified before it can ship.
+const templatesRel = 'templates';
+let templateDirs = null;
+if (existsSync(p(templatesRel)) && statSync(p(templatesRel)).isDirectory()) {
+  templateDirs = readdirSync(p(templatesRel), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => `${templatesRel}/${entry.name}/`)
+    .sort();
+  for (const tp of templateDirs) {
+    check(
+      registryPaths.has(tp),
+      `${tp}: activationModules registry'sinde kayıtlı değil — manifest + README/CLAUDE bölümlerine ekle`
+    );
+  }
+} else {
+  check(false, "templates/ dizini yok — opsiyonel modül registry'si doğrulanamıyor");
+}
+check(
+  templateDirs !== null && templateDirs.join(',') === [...registryPaths].sort().join(','),
+  `activationModules: registry kümesi gerçek templates/ dizin kümesiyle eşit değil` +
+    ` — registry: [${[...registryPaths].sort().join(', ')}]` +
+    ` · dosya sistemi: [${(templateDirs ?? []).join(', ')}]`
+);
+
+const gateIds = new Set((manifest.activationGates ?? []).map((g) => g.id));
+for (const mod of registry.filter((m) => m?.enforcementMode === 'automatic-gate')) {
+  check(
+    gateIds.has(mod.activationGateId),
+    `activationModules[${mod.id}]: activationGateId ${JSON.stringify(mod.activationGateId)} activationGates içinde yok`
+  );
+}
+for (const gate of manifest.activationGates ?? []) {
+  const refs = registry.filter((m) => m?.activationGateId === gate.id).length;
+  check(
+    refs === 1,
+    `activationGates["${gate.id}"]: ${refs} automatic-gate modül referansı (tam 1 olmalı) — orphan veya çift referanslı gate`
+  );
+}
+const automaticIds = registry
+  .filter((m) => m?.enforcementMode === 'automatic-gate')
+  .map((m) => m.id)
+  .sort();
+check(
+  automaticIds.join(',') === AUTOMATIC_GATE_MODULES.join(','),
+  `activationModules: automatic-gate modül kümesi [${automaticIds.join(', ')}]` +
+    ` — beklenen [${AUTOMATIC_GATE_MODULES.join(', ')}]`
+);
+const adminBffGate = (manifest.activationGates ?? []).find((g) => g.id === 'admin-bff');
+check(
+  adminBffGate?.checklistItems === ADMIN_BFF_CHECKLIST_ITEMS,
+  `activationGates["admin-bff"]: checklistItems=${adminBffGate?.checklistItems}` +
+    ` (beklenen ${ADMIN_BFF_CHECKLIST_ITEMS} — templates/admin-bff/ACTIVATION.md madde sayısı)`
+);
+
+// Declaration <-> enforcement: both documents must list exactly the registered
+// modules with exactly the registered enforcement mode. Comparison is on
+// sorted rows, so a duplicated or missing row fails too.
+const expectedRows = registry
+  .filter((m) => typeof m?.templatePath === 'string' && typeof m?.enforcementMode === 'string')
+  .map((m) => `${m.templatePath} ${m.enforcementMode}`)
+  .sort()
+  .join(' | ');
+for (const docFile of ['README.md', 'CLAUDE.md']) {
+  const text = existsSync(p(docFile)) ? readFileSync(p(docFile), 'utf8') : '';
+  const starts = (text.match(/<!--\s*activation-modules:start\s*-->/g) ?? []).length;
+  const ends = (text.match(/<!--\s*activation-modules:end\s*-->/g) ?? []).length;
+  const section = text.match(ACTIVATION_SECTION_RE);
+  check(
+    starts === 1 && ends === 1 && section !== null,
+    `${docFile}: activation-modules bölümü yok veya marker çifti bozuk (<!-- activation-modules:start/end -->)`
+  );
+  const rows = [...(section?.[1] ?? '').matchAll(ACTIVATION_ROW_RE)]
+    .map((m) => `${m[1]} ${m[2]}`)
+    .sort()
+    .join(' | ');
+  check(
+    rows === expectedRows,
+    `${docFile}: activation-modules bölümü registry ile uyuşmuyor` +
+      ` — bölüm: [${rows}] · registry: [${expectedRows}]`
+  );
+}
+const readmeText = existsSync(p('README.md')) ? readFileSync(p('README.md'), 'utf8') : '';
+for (const phrase of CANONICAL_MANUAL_PHRASES) {
+  check(
+    readmeText.includes(phrase),
+    `README.md: manual-hardening semantiği için canonical ifade eksik: "${phrase}"`
+  );
 }
 
 // 7g. GitHub Actions SHA pins (Faz 8.3 PR-B, ADR-0015): a moving tag can be
