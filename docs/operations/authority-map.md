@@ -28,6 +28,9 @@ GELMEZ; fiziksel yazar olması da onaylayan olduğu anlamına gelmez.
 | `apps/api/` (Flyway migration'ları dahil) | backend-developer | backend-developer | QA + code-reviewer |
 | `docs/audits/seo/` | seo-specialist | seo-specialist | project-manager |
 | Test dosyaları + `docs/test-reports/` | qa-test-specialist | qa-test-specialist (Final Gate Mode'da salt-okunur) | project-manager |
+| `scripts/tests/**` | qa-test-specialist | **orkestratör** | QA final-gate instance + code-reviewer + project-manager |
+| `docs/test-reports/**` | qa-test-specialist | qa-test-specialist | project-manager + code-reviewer |
+| `docs/operations/release-attestation.md`, `docs/releases/**` | system-architect | orkestratör | project-manager + insan |
 | `docs/audits/` (güvenlik/final inceleme) | code-reviewer | orkestratör (ajan kod tarafında read-only) | insan (kapanış) |
 | `project-memory/**` | ilgili specialist (HANDOFF içeriği) | **memory-steward — TEK fiziksel yazar** | QA + Security + Final Review PASS |
 | `.claude/**`, `scripts/**`, kök konfigler (governance) | **orkestratör** | orkestratör | insan (plan onayı) |
@@ -50,6 +53,10 @@ GELMEZ; fiziksel yazar olması da onaylayan olduğu anlamına gelmez.
 
 ## Kurallar
 
+- **Daha spesifik yol satırı, genel `scripts/**` veya genel test-dosyası
+  satırına göre önceliklidir.** Örnek: `scripts/tests/**` içeriğinin sahibi
+  qa-test-specialist'tir, byte'ını orkestratör yazar; böylece QA final gate,
+  fiziksel olarak yazdığı bir değişikliğe PASS vermez.
 - Bir dosya yoluna birden fazla ajan **fiziksel yazar** olamaz; kesişim
   gerekirse iş PM üzerinden bölünür.
 - `project-memory/**` yazımı iki hook'la korunur: `memory-writer-guard`
