@@ -16,7 +16,7 @@
 
 | Alan | Değer |
 |---|---|
-| Repo | `D:\Kodlar\Claude\site-skeleton` |
+| Repository | `gokhan-kocaoglu/site-skeleton` |
 | Dal | `fix/f4-activation-scope-registry` |
 | Base SHA (main) | `f43709351e1f9b43b39054482fd6429cf8f251c6` |
 | Implementation SHA (testlerin koştuğu commit) | `d9c23317741a4e1bf216ff66e400361ff65031ae` |
