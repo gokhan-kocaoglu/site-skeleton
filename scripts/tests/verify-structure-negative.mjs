@@ -53,6 +53,27 @@ function patchTextFile(relPath, mutate) {
   return () => writeFileSync(file, original);
 }
 
+/** Drops one release-state field row from a document's bounded section. */
+function dropReleaseStateField(text, label) {
+  return text
+    .split('\n')
+    .filter((line) => !line.startsWith(`- ${label}:`))
+    .join('\n');
+}
+
+/** mode=project fixture: patches the manifest and plants the project vault. */
+function asProjectMode(mutate = () => {}) {
+  const dir = plantMemoryProject(NEG_SLUG);
+  return {
+    paths: [dir],
+    restore: patchManifest((m) => {
+      m.mode = 'project';
+      m.projectSlug = NEG_SLUG;
+      mutate(m);
+    }),
+  };
+}
+
 /** Drops every line carrying one module's templatePath code span. */
 function dropActivationRow(text, templatePath) {
   return text
@@ -434,6 +455,303 @@ const scenarios = [
     name: 'dokunulmamış templates/ + senkron beyan FAIL ÜRETMEZ (registry taban kontrolü)',
     expectOk: true,
     setup: () => [],
+  },
+  // AC-32 / ADR-0018: audited upstream release provenance. Every rule below is
+  // mode-explicit — the suite also runs inside a bootstrapped project, where
+  // README/CLAUDE must NOT carry the upstream section at all.
+  {
+    name: 'README release-state alanı silinirse FAIL üretir (auditedState)',
+    modes: ['skeleton-dev'],
+    expectFragments: ['README.md: release-state alanları registry ile uyuşmuyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) => dropReleaseStateField(text, 'recommendation')),
+    }),
+  },
+  {
+    name: 'CLAUDE.md release-state alanı silinirse FAIL üretir (auditedState)',
+    modes: ['skeleton-dev'],
+    expectFragments: ['CLAUDE.md: release-state alanları registry ile uyuşmuyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('CLAUDE.md', (text) => dropReleaseStateField(text, 'verdict')),
+    }),
+  },
+  {
+    name: 'ledger audited-state alanı silinirse FAIL üretir (auditedState)',
+    expectFragments: ['docs/releases/README.md: release-state alanları registry ile uyuşmuyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/README.md', (text) =>
+        dropReleaseStateField(text, 'audit report')
+      ),
+    }),
+  },
+  {
+    name: 'ledger release-history kaydı değişirse FAIL üretir (auditedImmutableReleases)',
+    expectFragments: ['audited release history registry ile uyuşmuyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/README.md', (text) =>
+        text.replace('`361113458`', '`999999999`')
+      ),
+    }),
+  },
+  {
+    // Cryptographic tie: the canonical audit bytes cannot drift silently.
+    name: 'audit digest saptırılırsa FAIL üretir (auditSha256)',
+    expectFragments: ['canonical audit dosyasıyla eşleşmiyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.upstreamReleaseProvenance.auditedState.auditSha256 = 'a'.repeat(64);
+      }),
+    }),
+  },
+  {
+    name: 'audit raporu yolu kaybolursa FAIL üretir (auditReport)',
+    expectFragments: ['docs/audits/ altında bir dosya değil'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.upstreamReleaseProvenance.auditedState.auditReport = 'docs/audits/__nope.md';
+      }),
+    }),
+  },
+  {
+    name: 'yinelenen release tag FAIL üretir (auditedImmutableReleases)',
+    expectFragments: ['tag geçersiz veya yinelenmiş'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        const list = m.upstreamReleaseProvenance.auditedImmutableReleases;
+        list[1].tag = list[0].tag;
+      }),
+    }),
+  },
+  {
+    name: 'yinelenen release ID FAIL üretir (auditedImmutableReleases)',
+    expectFragments: ['releaseId pozitif integer değil veya yinelenmiş'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        const list = m.upstreamReleaseProvenance.auditedImmutableReleases;
+        list[1].releaseId = list[0].releaseId;
+      }),
+    }),
+  },
+  {
+    name: 'publication sırası bozulursa FAIL üretir (auditedImmutableReleases)',
+    expectFragments: ['publication sırası artan olmalı'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.upstreamReleaseProvenance.auditedImmutableReleases.reverse();
+      }),
+    }),
+  },
+  {
+    name: 'RC1 historical-note kimliği saptırılırsa FAIL üretir',
+    expectFragments: ['historical-note bloğu registry kimliğiyle eşleşmiyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
+        text.replace('361113458', '361113459')
+      ),
+    }),
+  },
+  {
+    // The sealed RC1 attestation table may never be "completed" after the fact.
+    name: 'RC1 korunan placeholder tablosu değişirse FAIL üretir (protected digest)',
+    expectFragments: ['korunan attestation/placeholder bölümü değişmiş'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
+        text.replace('`RC1_RELEASE_TARGET_SHA`', '`0123456789abcdef0123456789abcdef01234567`')
+      ),
+    }),
+  },
+  {
+    name: 'README release-state marker\'ı silinirse FAIL üretir',
+    modes: ['skeleton-dev'],
+    expectFragments: ['README.md: release-state bölümü yok veya marker çifti bozuk'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) => text.replace('<!-- release-state:end -->', '')),
+    }),
+  },
+  {
+    name: 'README release-state marker\'ı ikizlenirse FAIL üretir',
+    modes: ['skeleton-dev'],
+    expectFragments: ['README.md: release-state bölümü yok veya marker çifti bozuk'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text.replace('<!-- release-state:start -->', '<!-- release-state:start -->\n<!-- release-state:start -->')
+      ),
+    }),
+  },
+  {
+    name: 'CLAUDE.md release-state marker\'ı silinirse FAIL üretir',
+    modes: ['skeleton-dev'],
+    expectFragments: ['CLAUDE.md: release-state bölümü yok veya marker çifti bozuk'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('CLAUDE.md', (text) => text.replace('<!-- release-state:end -->', '')),
+    }),
+  },
+  {
+    name: 'ledger release-state marker\'ı silinirse FAIL üretir',
+    expectFragments: ['docs/releases/README.md: release-state bölümü yok veya marker çifti bozuk'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/README.md', (text) =>
+        text.replace('<!-- release-state:end -->', '')
+      ),
+    }),
+  },
+  {
+    // Self-reference guard: the section may not carry a commit SHA.
+    name: 'bounded section\'a 40-hex SHA eklenirse FAIL üretir (self-reference)',
+    modes: ['skeleton-dev'],
+    expectFragments: ['README.md: release-state bölümünde yasak token'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text.replace('- verdict: `FAIL`', '- verdict: `FAIL`\n- merge: `0123456789abcdef0123456789abcdef01234567`')
+      ),
+    }),
+  },
+  {
+    name: 'bounded section\'a skeleton kimlik token\'ı eklenirse FAIL üretir',
+    modes: ['skeleton-dev'],
+    expectFragments: ['CLAUDE.md: release-state bölümünde yasak token'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('CLAUDE.md', (text) =>
+        text.replace('- verdict: `FAIL`', '- verdict: `FAIL`\n- repo: `site-skeleton`')
+      ),
+    }),
+  },
+  {
+    name: 'release-attestation bayat durum tablosu geri konursa FAIL üretir',
+    expectFragments: ["bayat current-state token'ı taşıyor"],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/operations/release-attestation.md', (text) =>
+        `${text}\n## Mevcut durum (2026-07-28)\n\n| Release | oluşturulmadı |\n`
+      ),
+    }),
+  },
+  {
+    name: 'indekssiz release snapshot dosyası FAIL üretir (docs/releases)',
+    expectFragments: ['snapshot dosya kümesi registry ile eşit değil', 'v9.9.9.md'],
+    setup() {
+      const tmp = path.join(ROOT, 'docs', 'releases', 'v9.9.9.md');
+      writeFileSync(tmp, '# negative fixture\n');
+      return [tmp];
+    },
+  },
+  {
+    // A substitutable identity token inside the registry would be rewritten by
+    // bootstrap and would silently falsify upstream provenance.
+    name: 'manifest provenance\'ına skeleton kimlik token\'ı eklenirse FAIL üretir',
+    expectFragments: ["ikame edilebilir skeleton kimlik token'ı taşıyor"],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.upstreamReleaseProvenance.auditedImmutableReleases[1].releaseName = 'site-skeleton v1.0.0-rc.2';
+      }),
+    }),
+  },
+  {
+    name: 'dokunulmamış release provenance FAIL ÜRETMEZ (registry taban kontrolü)',
+    expectOk: true,
+    setup: () => [],
+  },
+  {
+    // Project mode simulated from the skeleton: the sections exist here, so
+    // flipping the mode alone is the planted violation.
+    name: 'project modda README upstream release-state bölümü FAIL üretir',
+    modes: ['skeleton-dev'],
+    expectFragments: ['README.md: project modda upstream release-state bölümü bulunmamalı'],
+    setup: () => asProjectMode(),
+  },
+  {
+    name: 'project modda CLAUDE.md upstream release-state bölümü FAIL üretir',
+    modes: ['skeleton-dev'],
+    expectFragments: ['CLAUDE.md: project modda upstream release-state bölümü bulunmamalı'],
+    setup: () => asProjectMode(),
+  },
+  {
+    // Inside a real bootstrapped project the section is already gone, so the
+    // violation has to be planted for the rule to have something to bite.
+    name: 'generated README\'ye upstream release-state bölümü geri konursa FAIL üretir',
+    modes: ['project'],
+    expectFragments: ['README.md: project modda upstream release-state bölümü bulunmamalı'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        `${text}\n<!-- release-state:start -->\n- verdict: \`FAIL\`\n<!-- release-state:end -->\n`
+      ),
+    }),
+  },
+  {
+    name: 'generated CLAUDE.md\'ye upstream release-state bölümü geri konursa FAIL üretir',
+    modes: ['project'],
+    expectFragments: ['CLAUDE.md: project modda upstream release-state bölümü bulunmamalı'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('CLAUDE.md', (text) =>
+        `${text}\n<!-- release-state:start -->\n- verdict: \`FAIL\`\n<!-- release-state:end -->\n`
+      ),
+    }),
+  },
+  {
+    name: 'generated RC1 snapshot korunan bölümü değişirse FAIL üretir',
+    modes: ['project'],
+    expectFragments: ['korunan attestation/placeholder bölümü değişmiş'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
+        text.replace('`RC1_RELEASE_TARGET_SHA`', '`0123456789abcdef0123456789abcdef01234567`')
+      ),
+    }),
+  },
+  {
+    name: 'project modda ledger manifestten saparsa FAIL üretir',
+    expectFragments: ['docs/releases/README.md: release-state alanları registry ile uyuşmuyor'],
+    setup() {
+      const restoreDoc = patchTextFile('docs/releases/README.md', (text) =>
+        text.replace('- verdict: `FAIL`', '- verdict: `PASS_WITH_RISKS`')
+      );
+      const planted = asProjectMode();
+      return {
+        paths: planted.paths,
+        restore: () => {
+          planted.restore();
+          restoreDoc();
+        },
+      };
+    },
+  },
+  {
+    name: 'RC1 snapshot project kimliğiyle yeniden yazılırsa FAIL üretir',
+    modes: ['skeleton-dev'],
+    expectFragments: ['korunan attestation/placeholder bölümü değişmiş'],
+    setup() {
+      const restoreDoc = patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
+        text.split('site-skeleton').join('negative-demo')
+      );
+      const planted = asProjectMode();
+      return {
+        paths: planted.paths,
+        restore: () => {
+          planted.restore();
+          restoreDoc();
+        },
+      };
+    },
   },
   {
     name: 'tag referanslı action FAIL üretir (githubActionsPins: hareketli tag)',
