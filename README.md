@@ -120,19 +120,45 @@ After `--apply`: `pnpm install`, then `pnpm gate` and `mvn verify` to re-verify.
 > **Core skeleton production-ready baseline. Optional modules require
 > activation hardening before production use.** The templates below are not
 > built, not tested by the gate chain and not covered by any production-ready
-> claim. Copying one under `apps/` arms the structural activation gate: its
-> `ACTIVATION.md` hardening checklist must be fully ticked or
-> `verify-structure` FAILs. Detection is recursive over `apps/**` and survives
-> renaming the directory *and* the package.
+> claim.
 
-| Template | Purpose |
-|---|---|
-| `templates/db/` | Hierarchical categories + single-use coupon SQL (copy as next Flyway `V<n>__`) |
-| `templates/payments/` | Provider-agnostic payment port + empty Iyzico/Stripe adapters (see ADR-0007) |
-| `templates/admin-bff/` | HttpOnly refresh-cookie bridge for the admin SPA (Node stdlib) |
+Enforcement is **not** uniform, and the table below says which is which. Only
+`automatic-gate` modules are protected by a structural check; every other module
+has **no automatic activation gate**. Such a module stays
+outside the core production-ready claim until project-specific hardening is done.
+Decision and rationale: `docs/adr/ADR-0017-activation-enforcement-scope.md`.
+
+The table is machine-checked against `scripts/structure-manifest.json`
+(`activationModules`) — the module set and its enforcement mode must match, or
+`verify-structure` FAILs. Keep the `Enforcement` column directly after
+`Template`; the parser reads those two code spans per row.
+
+<!-- activation-modules:start -->
+
+| Template | Enforcement | Purpose | Copy target |
+|---|---|---|---|
+| `templates/admin-bff/` | `automatic-gate` | HttpOnly refresh-cookie bridge for the admin SPA (Node stdlib) | `apps/**` |
+| `templates/db/` | `manual-hardening` | Hierarchical categories + single-use coupon SQL | next Flyway `V<n>__` migration |
+| `templates/e2e/` | `manual-hardening` | Playwright end-to-end harness | a new `apps/e2e/` workspace |
+| `templates/operations/` | `manual-hardening` | Production checklist (ticked item by item, each in its own PR) | `docs/operations/production-checklist.md` |
+| `templates/payments/` | `manual-hardening` | Provider-agnostic payment port + empty Iyzico/Stripe adapters (see ADR-0007) | `apps/api/.../api/payments/` |
+
+<!-- activation-modules:end -->
+
+`automatic-gate` (today: `templates/admin-bff/` only) means copying it under
+`apps/` arms the structural gate: the copy's `ACTIVATION.md` hardening checklist
+must be fully ticked or `verify-structure` FAILs. Detection is recursive over
+`apps/**`, survives renaming the directory *and* the package, and resolves a
+marker found in a subdirectory to the enclosing package root. Adding a second
+automatic gate requires a `scripts/verify-structure.mjs` change, not just a
+manifest edit.
+
+Removing a template is a four-surface edit in one change: the `activationModules`
+record, its `requiredDirs`/`requiredFiles` lines and both documented sections.
 
 `packages/ui-primitives` is a reserved activation point (not present in the skeleton):
-create it under `packages/` when the project needs a shared component library.
+create it under `packages/` when the project needs a shared component library. It is
+not a `templates/` module and is not part of the registry above.
 
 ## Governance layout
 

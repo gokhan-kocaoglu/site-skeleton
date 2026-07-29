@@ -17,9 +17,17 @@ Monorepo: pnpm 10 + Turborepo + Node 22.12+.
 - api: Spring Security 6, JJWT, Bucket4j, springdoc.
 Kurulunca ilgili paket bu listeden Installed baseline'a taşınır (manifest'i de güncelle).
 
-**Optional activation** (templates/, kopyala-etkinleştir; build'e dahil değil):
-payments (Iyzico/Stripe portu) · admin-bff (HttpOnly refresh köprüsü) ·
-e2e (Playwright) · db (kategori/kupon SQL).
+**Optional activation** (templates/, kopyala-etkinleştir; build'e dahil değil).
+Enforcement modu registry ile makine-doğrulanır (ADR-0017):
+<!-- activation-modules:start -->
+- `templates/admin-bff/` · `automatic-gate` — HttpOnly refresh köprüsü (ACTIVATION.md 12/12)
+- `templates/db/` · `manual-hardening` — kategori/kupon SQL
+- `templates/e2e/` · `manual-hardening` — Playwright
+- `templates/operations/` · `manual-hardening` — production checklist
+- `templates/payments/` · `manual-hardening` — Iyzico/Stripe portu
+<!-- activation-modules:end -->
+`manual-hardening` = otomatik aktivasyon kapısı YOK; proje-özel sertleştirme
+yapılana kadar core production-ready iddiasının dışındadır.
 
 ## Mutlak Kurallar
 - Hibernate DDL: validate. Şema değişikliği YALNIZ Flyway `V<n>__desc.sql`.
