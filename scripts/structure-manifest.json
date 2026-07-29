@@ -62,6 +62,7 @@
     "docs/operations/ci.md",
     "docs/operations/deployment.md",
     "docs/operations/release-attestation.md",
+    "docs/releases/README.md",
     "docs/releases/v1.0.0-rc.1.md",
     "docs/source-briefs/skeleton-brief.md",
     "docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md",
@@ -401,7 +402,8 @@
     "scripts/tests/toolchain-policy-negative.mjs": 170,
     "docs/test-reports/2026-07-28-faz8.3-release-hardening.md": 380,
     "docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md": 200,
-    "docs/operations/release-attestation.md": 180,
+    "docs/operations/release-attestation.md": 165,
+    "docs/releases/README.md": 120,
     "docs/releases/v1.0.0-rc.1.md": 190,
     "docs/audits/2026-07-03-recertification.md": 280
   },
