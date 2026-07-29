@@ -45,6 +45,42 @@ function patchManifest(mutate) {
   return () => writeFileSync(MANIFEST, original);
 }
 
+/** Rewrites a tracked text file and hands back a byte-exact restore. */
+function patchTextFile(relPath, mutate) {
+  const file = path.join(ROOT, relPath);
+  const original = readFileSync(file);
+  writeFileSync(file, mutate(original.toString('utf8')));
+  return () => writeFileSync(file, original);
+}
+
+/** Drops every line carrying one module's templatePath code span. */
+function dropActivationRow(text, templatePath) {
+  return text
+    .split('\n')
+    .filter((line) => !line.includes(`\`${templatePath}\``))
+    .join('\n');
+}
+
+const tickedList = (n) => Array.from({ length: n }, (_, i) => `- [x] item ${i + 1}`).join('\n');
+
+/**
+ * Plants an activated copy whose marker sits in a SUBDIRECTORY of the package
+ * root (F4-LOW-05). The name carries no `bff` fragment on purpose: only the
+ * marker signal may fire, so the scenario measures marker-root resolution and
+ * nothing else.
+ */
+function plantNestedMarkerCopy({ activation = null } = {}) {
+  const dir = path.join(ROOT, 'apps', 'probe-root');
+  mkdirSync(path.join(dir, 'src'), { recursive: true });
+  writeFileSync(path.join(dir, 'package.json'), '{ "name": "probe-root", "private": true }\n');
+  writeFileSync(
+    path.join(dir, 'src', 'server.mjs'),
+    `// copied template\n// ${'ADMIN_BFF'}_TEMPLATE_MARKER\n`
+  );
+  if (activation !== null) writeFileSync(path.join(dir, 'ACTIVATION.md'), activation);
+  return [dir];
+}
+
 /** Plants a throwaway project-memory folder; `omit` leaves one file out. */
 function plantMemoryProject(slug, { omit = null } = {}) {
   const base = path.join(MEMORY_ROOT, slug);
@@ -211,6 +247,193 @@ const scenarios = [
       );
       return [path.join(ROOT, 'apps', 'services')];
     },
+  },
+  {
+    // AC-29 / ADR-0017: the registry is driven by the file system, so a new
+    // template directory cannot ship until it is classified.
+    name: 'registry\'de olmayan templates/ dizini FAIL üretir (activationModules)',
+    expectFragments: ['templates/__probe-module/', "registry'sinde kayıtlı değil"],
+    setup() {
+      const dir = path.join(ROOT, 'templates', '__probe-module');
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(path.join(dir, 'README.md'), '# negative fixture\n');
+      return [dir];
+    },
+  },
+  {
+    name: 'registry templatePath gerçekte yoksa FAIL üretir (activationModules)',
+    expectFragments: ['templatePath yok veya dizin değil', 'templates/__missing/'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.activationModules.find((mod) => mod.id === 'db').templatePath = 'templates/__missing/';
+      }),
+    }),
+  },
+  {
+    name: 'yinelenen registry id FAIL üretir (activationModules)',
+    expectFragments: ['id geçersiz veya yinelenmiş', 'admin-bff'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.activationModules.find((mod) => mod.id === 'db').id = 'admin-bff';
+      }),
+    }),
+  },
+  {
+    // A manual-hardening module must never look automatically protected.
+    name: 'manual-hardening kayıtta activationGateId FAIL üretir (activationModules)',
+    expectFragments: ['manual-hardening kayıt activationGateId taşıyor', 'payments'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.activationModules.find((mod) => mod.id === 'payments').activationGateId = 'admin-bff';
+      }),
+    }),
+  },
+  {
+    name: 'automatic-gate kaydın geçersiz gate id\'si FAIL üretir (activationModules)',
+    expectFragments: ['activationGates içinde yok', 'orphan veya çift referanslı gate'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.activationModules.find((mod) => mod.id === 'admin-bff').activationGateId = '__nope';
+      }),
+    }),
+  },
+  {
+    name: 'README bölümünden modül silinirse FAIL üretir (beyan ↔ registry)',
+    expectFragments: ['README.md: activation-modules bölümü registry ile uyuşmuyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) => dropActivationRow(text, 'templates/e2e/')),
+    }),
+  },
+  {
+    name: 'CLAUDE.md bölümünden modül silinirse FAIL üretir (beyan ↔ registry)',
+    expectFragments: ['CLAUDE.md: activation-modules bölümü registry ile uyuşmuyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('CLAUDE.md', (text) => dropActivationRow(text, 'templates/e2e/')),
+    }),
+  },
+  {
+    // Silently upgrading a manual module's claim is the exact drift AC-29 found.
+    name: 'README\'de enforcement modu değiştirilirse FAIL üretir (beyan ↔ registry)',
+    expectFragments: ['README.md: activation-modules bölümü registry ile uyuşmuyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text
+          .split('\n')
+          .map((line) =>
+            line.startsWith('| `templates/payments/` |')
+              ? line.replace('`manual-hardening`', '`automatic-gate`')
+              : line
+          )
+          .join('\n')
+      ),
+    }),
+  },
+  {
+    // F4-LOW-05: the marker lives in src/, the demand must land on the package
+    // root — and the message must name the marker file that caused it.
+    name: 'alt dizindeki marker paket kökünü işaret eder (F4-LOW-05)',
+    expectFragments: [
+      'apps/probe-root: aktive şablon',
+      'marker: apps/probe-root/src/server.mjs',
+    ],
+    setup: () => plantNestedMarkerCopy(),
+  },
+  {
+    // Positive control for the same correction: before it, ACTIVATION.md at the
+    // package root could not satisfy a marker sitting one level deeper.
+    name: 'alt dizin marker + kökte 12/12 ACTIVATION.md FAIL ÜRETMEZ (F4-LOW-05)',
+    expectOk: true,
+    setup: () => plantNestedMarkerCopy({ activation: `# checklist\n\n${tickedList(12)}\n` }),
+  },
+  {
+    // Security-gate regression (HIGH): an interim revision dropped a marker
+    // root whenever ANY deeper candidate existed, so a decoy directory whose
+    // name carries the fragment and whose checklist is fully ticked silenced
+    // the real, unhardened copy above it. Base behaviour FAILed; the interim
+    // code returned exit 0. This scenario nails the demand to the package root.
+    name: 'derindeki decoy ACTIVATION.md üstteki sertleştirilmemiş kopyayı gizleyemez (marker kökü)',
+    expectFragments: [
+      'apps/probe-gw: aktive şablon',
+      'marker: apps/probe-gw/src/server.mjs',
+    ],
+    setup() {
+      const dir = path.join(ROOT, 'apps', 'probe-gw');
+      mkdirSync(path.join(dir, 'src'), { recursive: true });
+      mkdirSync(path.join(dir, 'tools', 'decoy-bff'), { recursive: true });
+      writeFileSync(path.join(dir, 'package.json'), '{ "name": "probe-gw", "private": true }\n');
+      writeFileSync(
+        path.join(dir, 'src', 'server.mjs'),
+        `// copied template\n// ${'ADMIN_BFF'}_TEMPLATE_MARKER\n`
+      );
+      writeFileSync(
+        path.join(dir, 'tools', 'decoy-bff', 'ACTIVATION.md'),
+        `# checklist\n\n${tickedList(12)}\n`
+      );
+      return [dir];
+    },
+  },
+  {
+    // Data-only bypass: blanking the detection signals used to disarm the gate
+    // while verify-structure stayed green.
+    name: 'manifest\'te tespit sinyallerini boşaltmak FAIL üretir (gate sinyalleri kodda sabit)',
+    expectFragments: ['tespit sinyalleri kodda sabitlenen değerlerle uyuşmuyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        const gate = m.activationGates.find((g) => g.id === 'admin-bff');
+        gate.nameFragment = '';
+        gate.marker = '';
+      }),
+    }),
+  },
+  {
+    // The documented table must keep Enforcement next to Template: a reordered
+    // table let arbitrary prose sit where the enforcement mode belongs.
+    name: 'README tablosunda kolon sırası bozulursa FAIL üretir (beyan yapısı)',
+    expectFragments: ['README.md: activation-modules'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text
+          .split('\n')
+          .map((line) =>
+            /^\| `templates\/[a-z0-9-]+\/` \| `(automatic-gate|manual-hardening)` \|/.test(line)
+              ? line.replace(
+                  /^(\| `templates\/[a-z0-9-]+\/` )\| (`(?:automatic-gate|manual-hardening)`) \| ([^|]*)\|/,
+                  '$1| $3| $2 |'
+                )
+              : line
+          )
+          .join('\n')
+      ),
+    }),
+  },
+  {
+    // The strict equality is a security property: extra ticks must not be able
+    // to cover a missing mandatory item.
+    name: '13 işaretli madde (beklenen 12) FAIL üretir (ticked === checklistItems)',
+    expectFragments: ['13 işaretli madde', 'beklenen 12'],
+    setup() {
+      const dir = path.join(ROOT, 'apps', 'admin-bff');
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(path.join(dir, 'package.json'), '{ "name": "admin-bff", "private": true }\n');
+      writeFileSync(path.join(dir, 'ACTIVATION.md'), `# checklist\n\n${tickedList(13)}\n`);
+      return [dir];
+    },
+  },
+  {
+    // Baseline control: the shipped tree (pristine templates/, five registered
+    // modules, both documents in sync) must be green with no fixture at all.
+    name: 'dokunulmamış templates/ + senkron beyan FAIL ÜRETMEZ (registry taban kontrolü)',
+    expectOk: true,
+    setup: () => [],
   },
   {
     name: 'tag referanslı action FAIL üretir (githubActionsPins: hareketli tag)',

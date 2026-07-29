@@ -263,6 +263,7 @@
     "docs/adr/ADR-0013-vite-8-migration.md",
     "docs/adr/ADR-0014-next-16-migration.md",
     "docs/adr/ADR-0015-supply-chain-hardening.md",
+    "docs/adr/ADR-0017-activation-enforcement-scope.md",
     "scripts/bootstrap-project.mjs",
     "scripts/quality/gate-build.mjs",
     "scripts/quality/gate-typecheck.mjs",
@@ -385,6 +386,7 @@
     "docs/adr/ADR-0013-vite-8-migration.md": 60,
     "docs/adr/ADR-0014-next-16-migration.md": 65,
     "docs/adr/ADR-0015-supply-chain-hardening.md": 170,
+    "docs/adr/ADR-0017-activation-enforcement-scope.md": 170,
     "scripts/quality/assert-sbom.mjs": 130,
     "scripts/quality/assert-toolchain-policy.mjs": 180,
     "scripts/quality/gate-toolchain.mjs": 80,
@@ -431,6 +433,7 @@
     "templates/admin-bff/server.mjs",
     "docs/adr/ADR-0007-payment-provider.md",
     "docs/adr/ADR-0015-supply-chain-hardening.md",
+    "docs/adr/ADR-0017-activation-enforcement-scope.md",
     "scripts/quality/run-gates.mjs",
     "scripts/quality/gate-audit.mjs",
     "scripts/quality/assert-sbom.mjs",
@@ -602,6 +605,44 @@
     ]
   },
   "trackedForbidden": ["*.tsbuildinfo", "apps/web/next-env.d.ts"],
+  "activationModules": [
+    {
+      "id": "admin-bff",
+      "templatePath": "templates/admin-bff/",
+      "enforcementMode": "automatic-gate",
+      "activationGateId": "admin-bff",
+      "activationTarget": "apps/**",
+      "activationDocument": "templates/admin-bff/ACTIVATION.md"
+    },
+    {
+      "id": "db",
+      "templatePath": "templates/db/",
+      "enforcementMode": "manual-hardening",
+      "activationTarget": "apps/api/src/main/resources/db/migration/",
+      "activationDocument": "templates/db/README.md"
+    },
+    {
+      "id": "e2e",
+      "templatePath": "templates/e2e/",
+      "enforcementMode": "manual-hardening",
+      "activationTarget": "apps/e2e/",
+      "activationDocument": "templates/e2e/README.md"
+    },
+    {
+      "id": "operations",
+      "templatePath": "templates/operations/",
+      "enforcementMode": "manual-hardening",
+      "activationTarget": "docs/operations/production-checklist.md",
+      "activationDocument": "templates/operations/production-checklist.md"
+    },
+    {
+      "id": "payments",
+      "templatePath": "templates/payments/",
+      "enforcementMode": "manual-hardening",
+      "activationTarget": "apps/api/src/main/java/com/skeleton/api/payments/",
+      "activationDocument": "templates/payments/README.md"
+    }
+  ],
   "activationGates": [
     {
       "id": "admin-bff",
