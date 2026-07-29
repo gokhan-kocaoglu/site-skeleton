@@ -353,6 +353,69 @@ const scenarios = [
     setup: () => plantNestedMarkerCopy({ activation: `# checklist\n\n${tickedList(12)}\n` }),
   },
   {
+    // Security-gate regression (HIGH): an interim revision dropped a marker
+    // root whenever ANY deeper candidate existed, so a decoy directory whose
+    // name carries the fragment and whose checklist is fully ticked silenced
+    // the real, unhardened copy above it. Base behaviour FAILed; the interim
+    // code returned exit 0. This scenario nails the demand to the package root.
+    name: 'derindeki decoy ACTIVATION.md üstteki sertleştirilmemiş kopyayı gizleyemez (marker kökü)',
+    expectFragments: [
+      'apps/probe-gw: aktive şablon',
+      'marker: apps/probe-gw/src/server.mjs',
+    ],
+    setup() {
+      const dir = path.join(ROOT, 'apps', 'probe-gw');
+      mkdirSync(path.join(dir, 'src'), { recursive: true });
+      mkdirSync(path.join(dir, 'tools', 'decoy-bff'), { recursive: true });
+      writeFileSync(path.join(dir, 'package.json'), '{ "name": "probe-gw", "private": true }\n');
+      writeFileSync(
+        path.join(dir, 'src', 'server.mjs'),
+        `// copied template\n// ${'ADMIN_BFF'}_TEMPLATE_MARKER\n`
+      );
+      writeFileSync(
+        path.join(dir, 'tools', 'decoy-bff', 'ACTIVATION.md'),
+        `# checklist\n\n${tickedList(12)}\n`
+      );
+      return [dir];
+    },
+  },
+  {
+    // Data-only bypass: blanking the detection signals used to disarm the gate
+    // while verify-structure stayed green.
+    name: 'manifest\'te tespit sinyallerini boşaltmak FAIL üretir (gate sinyalleri kodda sabit)',
+    expectFragments: ['tespit sinyalleri kodda sabitlenen değerlerle uyuşmuyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        const gate = m.activationGates.find((g) => g.id === 'admin-bff');
+        gate.nameFragment = '';
+        gate.marker = '';
+      }),
+    }),
+  },
+  {
+    // The documented table must keep Enforcement next to Template: a reordered
+    // table let arbitrary prose sit where the enforcement mode belongs.
+    name: 'README tablosunda kolon sırası bozulursa FAIL üretir (beyan yapısı)',
+    expectFragments: ['README.md: activation-modules'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text
+          .split('\n')
+          .map((line) =>
+            /^\| `templates\/[a-z0-9-]+\/` \| `(automatic-gate|manual-hardening)` \|/.test(line)
+              ? line.replace(
+                  /^(\| `templates\/[a-z0-9-]+\/` )\| (`(?:automatic-gate|manual-hardening)`) \| ([^|]*)\|/,
+                  '$1| $3| $2 |'
+                )
+              : line
+          )
+          .join('\n')
+      ),
+    }),
+  },
+  {
     // The strict equality is a security property: extra ticks must not be able
     // to cover a missing mandatory item.
     name: '13 işaretli madde (beklenen 12) FAIL üretir (ticked === checklistItems)',

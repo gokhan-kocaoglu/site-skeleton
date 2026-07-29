@@ -21,17 +21,16 @@
 Yani beyan yüzeyi hem enforcement'tan geniş hem de kendi içinde tutarsızdır.
 Bulgu bir enforcement açığı değil, **beyan ile enforcement arasındaki farktır**.
 
-Kapsam genişletmenin teknik sınırları ölçüldü: aktivasyon kopyalarının hedefleri
-birbirinden yapısal olarak farklıdır — `db` kopyası yayınlanmış bir Flyway
-migration'ına dönüşür (`CLAUDE.md`: yayınlanmış migration düzenlenemez),
-`operations` kopyası `docs/` altına iner (aktivasyon taraması `apps/` köküne
-sabittir), `e2e` bir test modülüdür ve production sertleştirme yüzeyi yoktur.
-Dolayısıyla "gate'i beş modüle genelle" tek tip bir genişletme değildir.
+Kapsam genişletmenin teknik sınırları ölçüldü: kopya hedefleri yapısal olarak
+farklıdır — `db` kopyası yayınlanmış bir Flyway migration'ına dönüşür
+(`CLAUDE.md`: yayınlanmış migration düzenlenemez), `operations` kopyası `docs/`
+altına iner (tarama `apps/` köküne sabittir), `e2e` bir test modülüdür ve
+production sertleştirme yüzeyi yoktur. "Gate'i beşe genelle" tek tip bir
+genişletme değildir.
 
 Ayrıca marker sinyali bugün marker **dosyasının bulunduğu dizini** activation
-root sayar; `apps/x/src/server.mjs` senaryosunda `ACTIVATION.md` `apps/x/src/`
-altında aranır. Yön güvenlidir (false-FAIL) ama hata mesajı yanlış dizini
-gösterir ve düzeltme yanlış yere yapılır (F4-LOW-05).
+root sayar; `apps/x/src/server.mjs` için `ACTIVATION.md` `apps/x/src/` altında
+aranır. Yön güvenlidir (false-FAIL) ama düzeltme yanlış yere yapılır (F4-LOW-05).
 
 ## Decision
 
@@ -56,14 +55,21 @@ gösterir ve düzeltme yanlış yere yapılır (F4-LOW-05).
    bağlanmaz; tarama kökü `apps/` olarak kalır (`packages/` scan root **değildir**);
    checklist kuralı `unchecked === 0 && ticked === checklistItems` **katı
    eşitliğiyle** korunur — fazladan işaretli sahte madde, eksik zorunlu maddeyi
-   maskeleyemez.
+   maskeleyemez. Otomatik gate'li modül kümesi, checklist sayısı **ve tespit
+   sinyalleri** (`nameFragment`, `marker`) kodda sabitlenir; sinyalleri manifest
+   verisinde boşaltarak kapıyı sessizce etkisizleştirmek FAIL üretir.
 6. **Marker-root düzeltmesi (F4-LOW-05).** Marker eşleşmesinde activation root,
    marker dizininden `apps/` yönüne yukarı yürünerek bulunan **en yakın**
    `package.json` sahibi ancestor'dır. `apps` dizininin kendisi ve üstü asla
    değerlendirilmez; ancestor yoksa marker dizinine güvenli fallback yapılır.
-   Dizin-adı ve package-adı sinyalleriyle bulunan kökler değişmez. Marker
-   kökenli bir kök, daha spesifik başka bir kökün gerçek atasıysa düşürülür
-   (gruplama dizinini modül kökü sanma riskine karşı).
+   Dizin-adı ve package-adı sinyalleriyle bulunan kökler değişmez.
+   **Hiçbir kök düşürülmez.** Ara bir revizyon, "gruplama dizini" varsayımıyla
+   altında başka aday bulunan marker köklerini eliyordu; güvenlik kapısı bunun
+   gerçek bir kopyayı gizlediğini kanıtladı (sertleştirilmemiş `apps/gw/`,
+   altındaki tam işaretli decoy dizin yüzünden sessizleşiyordu). Fazladan bir
+   talep fail-closed gürültüdür; düşürülen talep false-PASS'tır. Gruplama
+   dizini senaryosunda iki ayrı talep üretilir ve mesaj marker dosyasını
+   adlandırır.
 
 ## Enforcement model
 
@@ -74,9 +80,12 @@ gösterir ve düzeltme yanlış yere yapılır (F4-LOW-05).
 | Aktivasyon kapısı | Aktive `admin-bff` kopyasının ACTIVATION.md'si (12/12, işaretsiz madde yok) | `verify-structure.mjs` 7f (değişmedi) |
 | Regresyon | Yukarıdakilerin her birinin gevşetildiğinde FAIL ürettiği | `scripts/tests/verify-structure-negative.mjs` |
 
-`automatic-gate` modül kümesi ve `admin-bff` checklist sayısı **manifest'te
-değil kodda sabittir**: gate'i zayıflatmak için manifest düzenlemek yetmez,
-`scripts/**` düzenlemesi gerekir (authority-map: orkestratör + insan onayı).
+`automatic-gate` modül kümesi, `admin-bff` checklist sayısı ve gate'in tespit
+sinyalleri **manifest'te değil kodda sabittir**; ayrıca sabitlenen checklist
+sayısı gerçek `templates/admin-bff/ACTIVATION.md` madde sayısıyla ve marker
+imzasının şablonda gerçekten bulunduğu çapraz doğrulanır. Gate'i zayıflatmak
+için manifest düzenlemek yetmez, `scripts/**` düzenlemesi gerekir
+(authority-map: orkestratör + insan onayı).
 
 ## Generated-project effect
 
@@ -89,9 +98,8 @@ hiçbirini içermez; dolayısıyla üretilen projede de üç küme eşit kalır.
 **doküman karşılaştırmasına dahil edilmez**; bu kısıt bağlayıcıdır.
 
 Bir proje meşru olarak bir şablonu kaldırırsa doğru prosedür kuralı kapatmak
-değil, **registry-önce** düzenlemedir: `activationModules` kaydı,
-`requiredDirs`/`requiredFiles` satırları ve iki doküman bölümü aynı değişiklikte
-birlikte kaldırılır.
+değil **registry-önce** düzenlemedir: `activationModules` kaydı,
+`requiredDirs`/`requiredFiles` satırları ve iki doküman bölümü birlikte kalkar.
 
 ## Security limitations
 
@@ -102,8 +110,13 @@ birlikte kaldırılır.
   almamıştır; aktivasyon anındaki sertleştirme (webhook imza doğrulaması,
   idempotency, tutar bütünlüğü, log redaction) proje sorumluluğundadır.
 - Marker-root düzeltmesinin kabul edilen artık riski: sertleştirme birimi artık
-  **paket sınırıdır**. 12/12 işaretli bir paketin içine vendor'lanmış ikinci bir
-  kopya ayrı FAIL üretmez; o paketin checklist sahibinin sorumluluğundadır.
+  **paket sınırıdır**. 12/12 işaretli bir paketin içine, kendi `package.json`'ı
+  olmadan vendor'lanmış ikinci bir kopya ayrı FAIL üretmez; o paketin checklist
+  sahibinin sorumluluğundadır. Kendi `package.json`'ı olan iç kopya ise ayrı bir
+  kök olarak denetlenmeye devam eder.
+- Beyanın makine kontrolü satır **yapısına** bağlıdır (README tablosunda
+  `Enforcement` kolonu `Template`'ten hemen sonra gelmelidir); bölüm içindeki
+  serbest metin denetlenmez.
 - Bounded section dışına eski genelleştirilmiş garantinin yeniden yazılması
   makine tarafından yakalanmaz; bu artık risk insan incelemesiyle kapanır.
 
@@ -140,10 +153,10 @@ Pozitif: beyan ve enforcement bir daha sessizce ayrışamaz; yeni bir
 `admin-bff` gate'i aynen korunur; F4-LOW-05 hata mesajı gerçek modül kökünü
 gösterir.
 
-Negatif / üstlenilen borç: `verify-structure` check sayısı ve dosya boyutu
-büyür; yeni bir otomatik gate eklemek `scripts/**` düzenlemesi ister (kasıtlı
-sürtünme); `manual-hardening` modülleri yapısal olarak korumasız kalır ve bu
-**kayıtlı, sahipli** bir risktir.
+Negatif / üstlenilen borç: `verify-structure` check sayısı ve dosya boyutu büyür
+(800 satır tavanına yaklaşıldı, bölme borcu kaydedildi); yeni otomatik gate
+`scripts/**` düzenlemesi ister; `manual-hardening` modülleri yapısal olarak
+korumasız kalır — **kayıtlı, sahipli** risk.
 
 ## Deferred work
 

@@ -242,13 +242,12 @@ if (manifest.handoffTargets) {
 //
 // Scope stays apps/ ONLY: the pristine, unticked template under templates/ is
 // dormant by definition and must never trip this rule.
-// F4-LOW-05 (ADR-0017): a marker found deep inside a copy used to make its OWN
+// F4-LOW-05 (ADR-0017): a marker deep inside a copy used to make its OWN
 // directory the activation root, so `apps/x/src/server.mjs` demanded
 // `apps/x/src/ACTIVATION.md` — the right FAIL pointed at the wrong place. The
-// root is now the NEAREST ancestor carrying a package.json (the hardening unit
-// is the package boundary), never `apps` itself or anything above it: the repo
-// root has a package.json, so an unbounded walk would collapse every copy onto
-// it. Directory-name and package-name signals are untouched.
+// root is now the NEAREST ancestor carrying a package.json (hardening unit =
+// package boundary), never `apps` itself or above: the repo root has a
+// package.json, so an unbounded walk would collapse every copy onto it.
 for (const gate of manifest.activationGates ?? []) {
   const appsRel = 'apps';
   if (!existsSync(p(appsRel))) continue;
@@ -299,19 +298,11 @@ for (const gate of manifest.activationGates ?? []) {
   };
   scan(appsRel);
 
-  // A marker-derived root that is a strict ancestor of another root is a
-  // grouping workspace, not the activated module itself: the more specific root
-  // already carries the demand, so drop the ancestor. Signal roots never drop.
-  const candidates = new Set([...signalRoots, ...markerRoots.keys()]);
-  for (const root of [...markerRoots.keys()]) {
-    for (const other of candidates) {
-      if (other !== root && other.startsWith(`${root}/`)) {
-        markerRoots.delete(root);
-        break;
-      }
-    }
-  }
-
+  // No root is ever dropped. An earlier revision discarded marker roots that
+  // were ancestors of another candidate ("grouping workspace"); the security
+  // gate proved that hides a real copy — an unhardened `apps/gw/` went silent
+  // behind a decoy `apps/gw/tools/x-bff/`. Extra demands are fail-closed noise;
+  // a dropped demand is a false PASS.
   for (const root of [...new Set([...signalRoots, ...markerRoots.keys()])].sort()) {
     const via = markerRoots.has(root) && !signalRoots.has(root)
       ? ` [marker: ${markerRoots.get(root)}]`
@@ -334,28 +325,40 @@ for (const gate of manifest.activationGates ?? []) {
 
 // 7j. Optional-module activation registry (AC-29 / F4-MEDIUM-01, ADR-0017).
 //
-// The repo ships five optional templates but only ONE of them is protected by a
+// The repo ships five optional templates but only ONE is protected by a
 // structural gate, while README generalised that guarantee to every copied
-// template. The registry below makes the enforcement scope explicit and — this
-// is the point — machine-checked: the declared module set, the enforcement mode
-// of each module and the README/CLAUDE prose must agree with each other and
-// with the real templates/ tree.
-//
-// Two deliberate design rules:
+// template. The registry makes the enforcement scope explicit and — the point —
+// machine-checked: declared module set, per-module enforcement mode and the
+// README/CLAUDE prose must agree with each other and with the real templates/
+// tree. Two deliberate design rules:
 //   * The gate loop above (7f) is NOT driven by this registry. Deleting a
 //     registry entry can never switch the admin-bff gate off; it only produces
 //     a named FAIL here.
-//   * The automatic-gate module set and the admin-bff checklist size are pinned
-//     in CODE, not in the manifest. Weakening the claim therefore needs a
-//     scripts/** change (orchestrator authority + review), not a data edit.
+//   * The automatic-gate module set, the checklist size AND the detection
+//     signals are pinned in CODE. Blanking `nameFragment`/`marker` in the
+//     manifest used to disarm the gate while the gate stayed green; that
+//     data-only bypass is now a FAIL.
 const AUTOMATIC_GATE_MODULES = ['admin-bff'];
 const ADMIN_BFF_CHECKLIST_ITEMS = 12;
+const EXPECTED_GATE_SIGNALS = {
+  'admin-bff': { nameFragment: 'bff', marker: 'ADMIN_BFF_TEMPLATE_MARKER' },
+};
 const ACTIVATION_SECTION_RE =
   /<!--\s*activation-modules:start\s*-->\r?\n([\s\S]*?)<!--\s*activation-modules:end\s*-->/;
-// One documented module = a templatePath code span followed by an
-// enforcementMode code span with no other code span in between, on one line.
-const ACTIVATION_ROW_RE =
-  /`(templates\/[a-z0-9][a-z0-9-]*\/)`[^`\n]*`(automatic-gate|manual-hardening)`/g;
+// Row patterns are anchored to each document's real structure: a loose "two
+// code spans on a line" match accepted a reordered table whose Enforcement
+// value sat behind arbitrary prose.
+const ACTIVATION_DOC_FORMATS = {
+  'README.md': {
+    row: /^\|\s*`(templates\/[a-z0-9][a-z0-9-]*\/)`\s*\|\s*`(automatic-gate|manual-hardening)`\s*\|/gm,
+    header: /^\|\s*Template\s*\|\s*Enforcement\s*\|/m,
+    headerLabel: '| Template | Enforcement | ... |',
+  },
+  'CLAUDE.md': {
+    row: /^- `(templates\/[a-z0-9][a-z0-9-]*\/)` · `(automatic-gate|manual-hardening)`/gm,
+    header: null,
+  },
+};
 const CANONICAL_MANUAL_PHRASES = [
   'no automatic activation gate',
   'outside the core production-ready claim until project-specific hardening',
@@ -423,8 +426,7 @@ for (const [i, mod] of registry.entries()) {
   check(modeOk, modeMsg);
 }
 
-// Driven by the file system, not by the registry: a new templates/<module>
-// directory must be classified before it can ship.
+// Driven by the file system: a new templates/<module> must be classified first.
 const templatesRel = 'templates';
 let templateDirs = null;
 if (existsSync(p(templatesRel)) && statSync(p(templatesRel)).isDirectory()) {
@@ -477,16 +479,41 @@ check(
   `activationGates["admin-bff"]: checklistItems=${adminBffGate?.checklistItems}` +
     ` (beklenen ${ADMIN_BFF_CHECKLIST_ITEMS} — templates/admin-bff/ACTIVATION.md madde sayısı)`
 );
+// The pinned count must stay tied to the real template's item count.
+const adminBffChecklist = existsSync(p('templates/admin-bff/ACTIVATION.md'))
+  ? (readFileSync(p('templates/admin-bff/ACTIVATION.md'), 'utf8').match(/- \[ \]/g) ?? []).length
+  : -1;
+check(
+  adminBffChecklist === ADMIN_BFF_CHECKLIST_ITEMS,
+  `templates/admin-bff/ACTIVATION.md: ${adminBffChecklist} işaretsiz madde` +
+    ` (kodda sabitlenen ${ADMIN_BFF_CHECKLIST_ITEMS} ile eşleşmeli)`
+);
+// Detection signals are part of the guarantee, not tunable data.
+for (const [gateId, expected] of Object.entries(EXPECTED_GATE_SIGNALS)) {
+  const gate = (manifest.activationGates ?? []).find((g) => g.id === gateId);
+  check(
+    gate?.nameFragment === expected.nameFragment && gate?.marker === expected.marker,
+    `activationGates["${gateId}"]: tespit sinyalleri kodda sabitlenen değerlerle uyuşmuyor` +
+      ` (nameFragment=${JSON.stringify(gate?.nameFragment)}, marker=${JSON.stringify(gate?.marker)}` +
+      ` — beklenen ${JSON.stringify(expected.nameFragment)}, ${JSON.stringify(expected.marker)})`
+  );
+  const templateSource = `templates/${gateId}/server.mjs`;
+  check(
+    existsSync(p(templateSource)) &&
+      readFileSync(p(templateSource), 'utf8').includes(expected.marker),
+    `${templateSource}: gate marker imzası (${expected.marker}) yok — kopyalanan şablon tespit edilemez`
+  );
+}
 
 // Declaration <-> enforcement: both documents must list exactly the registered
-// modules with exactly the registered enforcement mode. Comparison is on
-// sorted rows, so a duplicated or missing row fails too.
+// modules with exactly the registered mode; sorted-row comparison also catches
+// duplicated or missing rows.
 const expectedRows = registry
   .filter((m) => typeof m?.templatePath === 'string' && typeof m?.enforcementMode === 'string')
   .map((m) => `${m.templatePath} ${m.enforcementMode}`)
   .sort()
   .join(' | ');
-for (const docFile of ['README.md', 'CLAUDE.md']) {
+for (const [docFile, format] of Object.entries(ACTIVATION_DOC_FORMATS)) {
   const text = existsSync(p(docFile)) ? readFileSync(p(docFile), 'utf8') : '';
   const starts = (text.match(/<!--\s*activation-modules:start\s*-->/g) ?? []).length;
   const ends = (text.match(/<!--\s*activation-modules:end\s*-->/g) ?? []).length;
@@ -495,7 +522,14 @@ for (const docFile of ['README.md', 'CLAUDE.md']) {
     starts === 1 && ends === 1 && section !== null,
     `${docFile}: activation-modules bölümü yok veya marker çifti bozuk (<!-- activation-modules:start/end -->)`
   );
-  const rows = [...(section?.[1] ?? '').matchAll(ACTIVATION_ROW_RE)]
+  const body = section?.[1] ?? '';
+  if (format.header) {
+    check(
+      format.header.test(body),
+      `${docFile}: activation-modules tablosunun başlık satırı beklenen sırada değil (${format.headerLabel})`
+    );
+  }
+  const rows = [...body.matchAll(format.row)]
     .map((m) => `${m[1]} ${m[2]}`)
     .sort()
     .join(' | ');
@@ -505,7 +539,10 @@ for (const docFile of ['README.md', 'CLAUDE.md']) {
       ` — bölüm: [${rows}] · registry: [${expectedRows}]`
   );
 }
-const readmeText = existsSync(p('README.md')) ? readFileSync(p('README.md'), 'utf8') : '';
+// Whitespace-normalised: the sentence stays valid across a reflow/rewrap.
+const readmeText = existsSync(p('README.md'))
+  ? readFileSync(p('README.md'), 'utf8').replace(/\s+/g, ' ')
+  : '';
 for (const phrase of CANONICAL_MANUAL_PHRASES) {
   check(
     readmeText.includes(phrase),
