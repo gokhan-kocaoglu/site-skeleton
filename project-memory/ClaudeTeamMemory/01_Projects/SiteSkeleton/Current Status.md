@@ -6,61 +6,63 @@
 
 ## Aşama
 
-`v1.0.0-rc.2` immutable prerelease yayımlandı (release id `361341678`, target
-`175213d519acf199498a8efa7b307f5b4d5f44cd`) ve attestation doğrulandı
-(`gh release verify` exit 0 · 11/11 alan). Dördüncü bağımsız mini-denetim exact
-RC2 etiketi üzerinde tamamlandı; canonical audit raporu PR #35 ile main'e alındı
-(merge `740041c3083bd297cdb93f73dae3db0415061346`, post-merge main CI
-`30401353317` success). Audit sonucu **FAIL / CORE_SKELETON_NOT_PRODUCTION_READY /
-NO_GO_REMEDIATION_REQUIRED**. Proje artık karşılanmayan dört acceptance criterion
-(AC-26 · AC-29 · AC-32 · AC-33) için remediation aşamasındadır; `v1.0.0` yayın
-zinciri durdurulmuştur.
+RC2 NO-GO remediation zinciri devam ediyor. **AC-29 / F4-MEDIUM-01**
+implementation'ı PR #37 ile merge edildi ve post-merge main CI ile doğrulandı;
+komşu bulgu **F4-LOW-05** aynı implementation yüzeyinde remediation edildi ve
+doğrulandı. Açık formal acceptance criteria: **AC-32 · AC-33 · AC-26**.
+
+Genel karar değişmedi: **FAIL / CORE_SKELETON_NOT_PRODUCTION_READY /
+NO_GO_REMEDIATION_REQUIRED**. `v1.0.0-rc.2` immutable prerelease ve canonical
+RC2 audit kaydı olduğu gibi geçerlidir; `v1.0.0` yayın zinciri durdurulmuş
+durumdadır.
 
 ## Son Tamamlanan Görev
 
-PR #35 (`docs(audit): record RC2 fourth mini-audit no-go`) merge edildi.
-Head `6c45e37e95f7ec8ec373b4aeb198d5a3f8bd05bb` · head CI `30400420009` —
-success 7/7 · merge `740041c3083bd297cdb93f73dae3db0415061346` · post-merge main
-CI `30401353317` — success (altı aktif job success, `dependency-review` skipped).
-Canonical audit: `docs/audits/2026-07-28-fourth-mini-audit-rc2.md` · SHA-256
-`67FCED3D02CCBB824C94D31D5E88F0E446E00C399FD2B050088E25DD7F499736`.
+PR #37 (`fix(structure): align optional-module claims with enforced scope`)
+merge edildi. Head `b83b7b2935d33753b014358a002ffea173241b7a` · PR CI
+`30445187365` — success 7/7 · merge `190e33bd2e139d15db1c718caec0c741f82f889e` ·
+post-merge main CI `30446569727` — success (altı aktif job success,
+`dependency-review` skipped).
 
-Ayrım net: F4-HIGH-01 `CLOSED`; açık CRITICAL/HIGH release blocker **yok**.
-Buna rağmen AC-26, AC-29, AC-32 ve AC-33 `FAIL`; `verdict-policy.md` kural 4
-uyarınca en az bir karşılanmayan kabul kriteri formal verdict'i `FAIL` yapar.
-Kanıt eksikliği yoktur — bütün zorunlu gate kanıtları üretilebilmiştir.
+Yedi commitlik zincir: ADR-0017 → registry + aktivasyon kökleri → negatif testler
+→ beyan hizalaması → marker-root false-PASS düzeltmesi → kanıt raporu → kanıt
+raporundaki local path redaksiyonu. Kanıt:
+`docs/test-reports/2026-07-29-ac-29-activation-scope-remediation.md`
+(implementation SHA `d9c23317741a4e1bf216ff66e400361ff65031ae`;
+`verify-structure` 1144, negatif suite 34/34, hook harness 302/94 değişmedi).
+
+Teknik sonuç: **AC-29 `MERGED_AND_POST_MERGE_CI_VERIFIED`** ·
+**F4-MEDIUM-01 `MERGED_AND_POST_MERGE_CI_VERIFIED`** ·
+**F4-LOW-05 `MERGED_AND_POST_MERGE_CI_VERIFIED`**. Bu teknik sonuç canonical RC2
+audit'ini geriye dönük değiştirmez.
 
 ## Aktif Görev
 
-RC2 NO-GO remediation planının hazırlanması ve karşılanmayan dört acceptance
-criterion'ın kontrollü biçimde kapatılması. Remediation sırası:
-1) AC-29 / F4-MEDIUM-01 · 2) AC-32 / F4-MEDIUM-02 · 3) AC-33 / F4-MEDIUM-03 ·
-4) AC-26 / F4-LOW-02.
+AC-32 / F4-MEDIUM-02 release-state documentation drift remediation planı ve
+implementation hazırlığı. AC-32 üzerinde bu ana kadar hiçbir implementation
+yapılmamıştır.
 
 ## Blocker
 
-CRITICAL/HIGH release blocker yoktur ve F4-HIGH-01 kapalıdır. Ancak `v1.0.0`
-release gate'i **kapalıdır**: AC-26, AC-29, AC-32 ve AC-33 karşılanmamıştır ve
-`verdict-policy.md` kural 4 tek bir karşılanmayan kabul kriterini severity veya
-blocking şartına bağlamaksızın `FAIL` sayar. Bu dört kriter "non-blocking"
-oldukları gerekçesiyle GO olarak yorumlanamaz.
+`v1.0.0` release gate'i **kapalıdır**: AC-32, AC-33 ve AC-26 karşılanmadan yeni
+release candidate ve bağımsız audit aşamasına geçilemez. Açık CRITICAL/HIGH
+release blocker yoktur; ancak karşılanmayan kabul kriterleri `verdict-policy.md`
+kural 4 uyarınca formal `FAIL` üretmeye devam eder.
 
 ## Sonraki 3 Adım
 
-1. Dört acceptance criterion için tek, kontrollü remediation brief'i ve kabul
-   planı hazırla.
-2. Remediation'ı ayrı implementation PR/PR'larında uygula; bütün gate zincirini
-   yeniden çalıştır ve evidence + memory closure zincirini tamamla.
-3. Remediation kapanırsa yeni immutable `v1.0.0-rc.3` candidate'ı oluştur,
-   attestation'ı doğrula ve bağımsız mini-denetimi exact RC3 üzerinde yeniden
-   koştur.
+1. AC-32 / F4-MEDIUM-02 implementation scope'unu güncel main üzerinde doğrula ve
+   kontrollü PR hazırla.
+2. AC-32 merge + post-merge CI sonrasında ayrı terminal memory closure oluştur.
+3. Ardından AC-33 / F4-MEDIUM-03 security-header remediation'ına geç; AC-26 /
+   F4-LOW-02 bu sıradan sonra açık kalır.
 
 ## Son Uygulama Commiti
 
-`PR #35` · `Merge SHA: 740041c3083bd297cdb93f73dae3db0415061346` ·
-`Post-merge main CI: 30401353317` · `Sonuç: success` ·
+`PR #37` · `Merge SHA: 190e33bd2e139d15db1c718caec0c741f82f889e` ·
+`Post-merge main CI: 30446569727` · `Sonuç: completed / success` ·
 `dependency-review: skipped — main push için beklenen`.
 
 ## Memory Closure Commiti
 
-`chore(memory): close session 2026-07-29` · `b562fc52338803de32537800221ee2daaa5e2d76`
+`PENDING — Session 11 close commit henüz oluşturulmadı.`
