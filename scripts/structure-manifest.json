@@ -610,6 +610,40 @@
     ]
   },
   "trackedForbidden": ["*.tsbuildinfo", "apps/web/next-env.d.ts"],
+  "upstreamReleaseProvenance": {
+    "auditedState": {
+      "auditedCandidateTag": "v1.0.0-rc.2",
+      "auditReport": "docs/audits/2026-07-28-fourth-mini-audit-rc2.md",
+      "auditSha256": "67fced3d02ccbb824c94d31d5e88f0e446e00c399fd2b050088e25dd7f499736",
+      "verdict": "FAIL",
+      "productionReadiness": "CORE_SKELETON_NOT_PRODUCTION_READY",
+      "recommendation": "NO_GO_REMEDIATION_REQUIRED",
+      "stableReleaseStatusAtAudit": "NOT_PUBLISHED"
+    },
+    "auditedImmutableReleases": [
+      {
+        "tag": "v1.0.0-rc.1",
+        "releaseId": 361113458,
+        "targetCommit": "f891910d9e6877b4ce40d5833cb42579c6d3d9f1",
+        "publishedAt": "2026-07-28T13:37:11Z",
+        "prerelease": true,
+        "immutable": true,
+        "repositorySnapshot": "docs/releases/v1.0.0-rc.1.md",
+        "snapshotProtectedSectionSha256": "4a8d7b2fc90293ca35186e0a9506217d17f1044c132460dd1204b23c92fdf583"
+      },
+      {
+        "tag": "v1.0.0-rc.2",
+        "releaseId": 361341678,
+        "targetCommit": "175213d519acf199498a8efa7b307f5b4d5f44cd",
+        "publishedAt": "2026-07-28T19:57:09Z",
+        "prerelease": true,
+        "immutable": true,
+        "attestationVerified": true,
+        "attestationChecks": 11,
+        "repositorySnapshot": null
+      }
+    ]
+  },
   "activationModules": [
     {
       "id": "admin-bff",

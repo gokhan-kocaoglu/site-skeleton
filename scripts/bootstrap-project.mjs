@@ -158,8 +158,14 @@ const EXCLUDE_DIRS = new Set([
   'refs', 'graphify-out',
   // historical evidence stays untouched; memory is handled by explicit ops:
   'project-memory', 'docs/source-briefs', 'docs/test-reports', 'docs/audits',
+  'docs/releases',
 ]);
 const EXCLUDE_FILES = new Set(['scripts/bootstrap-project.mjs']);
+// Upstream audit provenance is skeleton-only: a generated project must not
+// inherit the template's verdict as its own release state (ADR-0018).
+const RELEASE_STATE_DOCS = new Set(['README.md', 'CLAUDE.md']);
+const RELEASE_STATE_RE =
+  /\n?<!--\s*release-state:start\s*-->[\s\S]*?<!--\s*release-state:end\s*-->\n?/g;
 const EXTENSIONS = [
   '.json', '.yaml', '.yml', '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs',
   '.java', '.xml', '.md', '.css', '.sql', '.toml', '.example', '.html',
@@ -227,8 +233,10 @@ export function createBootstrapPlan(root, identity) {
     if (rel === MANIFEST_REL) continue; // manifest is rebuilt below in one op
     const buf = readFileSync(p(root, rel));
     if (buf.includes(0)) continue; // binary
-    const { next, count } = substitute(buf.toString('utf8'), replacements);
-    if (count > 0) {
+    const text = buf.toString('utf8');
+    let { next, count } = substitute(text, replacements);
+    if (RELEASE_STATE_DOCS.has(rel)) next = next.replace(RELEASE_STATE_RE, '\n');
+    if (next !== text) {
       operations.push({ type: 'replace', rel, before: buf, after: next, count });
       substitutions += count;
     }

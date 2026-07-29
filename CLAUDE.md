@@ -29,6 +29,20 @@ Enforcement modu registry ile makine-doğrulanır (ADR-0017):
 `manual-hardening` = otomatik aktivasyon kapısı YOK; proje-özel sertleştirme
 yapılana kadar core production-ready iddiasının dışındadır.
 
+<!-- release-state:start -->
+## Release Durumu (canonical ledger: docs/releases/README.md)
+- verdict: `FAIL`
+- audited candidate: `v1.0.0-rc.2`
+- audit report: `docs/audits/2026-07-28-fourth-mini-audit-rc2.md`
+- production readiness: `CORE_SKELETON_NOT_PRODUCTION_READY`
+- recommendation: `NO_GO_REMEDIATION_REQUIRED`
+- stable release status at audit: `NOT_PUBLISHED`
+
+Hüküm denetlenen candidate'a aittir, main'in anlık durumuna değil. Bu, upstream
+template'in audited release provenance'ıdır; üretilen projenin kendi release
+durumu değildir (ADR-0018).
+<!-- release-state:end -->
+
 ## Mutlak Kurallar
 - Hibernate DDL: validate. Şema değişikliği YALNIZ Flyway `V<n>__desc.sql`.
 - Para: NUMERIC(12,2). Tarih: TIMESTAMPTZ (UTC). Public ID: UUID, internal PK: BIGINT identity.
