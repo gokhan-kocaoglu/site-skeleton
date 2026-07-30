@@ -957,6 +957,139 @@ const scenarios = [
     }),
   },
   {
+    // Fail-closed grammar: the canonical six rows stay untouched and a seventh
+    // bullet the parser does not understand is added. Collecting only canonical
+    // rows made this invisible to the gate while reading as a live claim.
+    name: 'README bounded bölüme gramer dışı bullet eklenirse FAIL üretir',
+    modes: ['skeleton-dev'],
+    expectFragments: [
+      'README.md: release-state bölümünde canonical metadata grameri dışı bullet var',
+      'current release: v1.0.0',
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text.replace('- verdict: `FAIL`', '- verdict: `FAIL`\n- current release: v1.0.0')
+      ),
+    }),
+  },
+  {
+    name: 'CLAUDE bounded bölüme serbest metin bullet\'ı eklenirse FAIL üretir',
+    modes: ['skeleton-dev'],
+    expectFragments: [
+      'CLAUDE.md: release-state bölümünde canonical metadata grameri dışı bullet var',
+      'note: free text',
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('CLAUDE.md', (text) =>
+        text.replace('- verdict: `FAIL`', '- verdict: `FAIL`\n- note: free text')
+      ),
+    }),
+  },
+  {
+    // This one DOES satisfy the canonical grammar, so the bullet-count contract
+    // is what has to bite: a seventh canonical-looking row is still a violation.
+    name: 'ledger bounded bölüme yedinci canonical-looking bullet eklenirse FAIL üretir',
+    expectFragments: ['docs/releases/README.md: release-state bölümü tam 6 bullet taşımalı'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/README.md', (text) =>
+        text.replace('- verdict: `FAIL`', '- verdict: `FAIL`\n- unknown: `value`')
+      ),
+    }),
+  },
+  {
+    // Without an end anchor the row pattern matched a PREFIX: eight clean cells
+    // were still "found" while a ninth rode along unverified.
+    name: 'ledger data row\'una dokuzuncu hücre eklenirse FAIL üretir (end-anchored gramer)',
+    expectFragments: ['data row grameri exact değil', 'sapan satır(lar)'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/README.md', (text) =>
+        text.replace('| `verified:11` | `none` |', '| `verified:11` | `none` | `extra` |')
+      ),
+    }),
+  },
+  {
+    name: 'ledger data row\'unun sonuna serbest metin eklenirse FAIL üretir',
+    expectFragments: ['data row grameri exact değil', 'sapan satır(lar)'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/README.md', (text) =>
+        text.replace(
+          '| `not-recorded` | `docs/releases/v1.0.0-rc.1.md` |',
+          '| `not-recorded` | `docs/releases/v1.0.0-rc.1.md` | trailing prose'
+        )
+      ),
+    }),
+  },
+  {
+    // The table body must be CONTIGUOUS: a line wedged in truncates the region.
+    name: 'separator ile data row arasına açıklama satırı girerse FAIL üretir',
+    expectFragments: ['ardışık data row bulunmalı', 'ölçülen 0'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/README.md', (text) =>
+        text.replace(
+          '|---|---|---|---|---|---|---|---|\n',
+          '|---|---|---|---|---|---|---|---|\nara açıklama satırı\n'
+        )
+      ),
+    }),
+  },
+  {
+    // Row count is derived from the registry, never hard-coded.
+    name: 'ledger\'a üçüncü sahte release row eklenirse FAIL üretir (registry uzunluğu)',
+    expectFragments: ['ardışık data row bulunmalı', 'ölçülen 3'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/README.md', (text) =>
+        text.replace(
+          '| `verified:11` | `none` |\n',
+          '| `verified:11` | `none` |\n| `v9.9.9` | `999999999` |' +
+            ' `0123456789abcdef0123456789abcdef01234567` | `2026-07-30T00:00:00Z` |' +
+            ' `true` | `true` | `not-recorded` | `none` |\n'
+        )
+      ),
+    }),
+  },
+  {
+    // A canonical-looking row is only history INSIDE the header's region.
+    name: 'başlık bölgesi dışına canonical release row konursa FAIL üretir',
+    expectFragments: ['canonical release-history satırı yalnız başlık bölgesinde bulunabilir'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/README.md', (text) =>
+        `${text}\n| \`v8.8.8\` | \`888888888\` | \`0123456789abcdef0123456789abcdef01234567\` |` +
+          ' `2026-07-30T00:00:00Z` | `true` | `true` | `not-recorded` | `none` |\n'
+      ),
+    }),
+  },
+  {
+    name: 'RC1 historical-note\'a gramer dışı blockquote bullet eklenirse FAIL üretir',
+    expectFragments: [
+      'historical-note içinde canonical metadata grameri dışı blockquote bullet var',
+      'current release: v1.0.0',
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
+        text.replace('> - tag: `v1.0.0-rc.1`', '> - current release: v1.0.0\n> - tag: `v1.0.0-rc.1`')
+      ),
+    }),
+  },
+  {
+    name: 'RC1 historical-note\'a beşinci metadata bullet\'ı eklenirse FAIL üretir',
+    expectFragments: ['historical-note tam 4 blockquote bullet taşımalı'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
+        text.replace('> - tag: `v1.0.0-rc.1`', '> - tag: `v1.0.0-rc.1`\n> - unknown: `value`')
+      ),
+    }),
+  },
+  {
     name: 'dokunulmamış release provenance FAIL ÜRETMEZ (registry taban kontrolü)',
     expectOk: true,
     setup: () => [],
