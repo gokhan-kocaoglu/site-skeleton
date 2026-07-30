@@ -597,7 +597,14 @@ const RELEASE_STATE_SECTION_RE =
 // label as well as the value is what makes `- unrelated label: \`FAIL\`` a
 // violation: a correct value under a wrong (or reordered, recased, duplicated)
 // label reads as provenance to a human while meaning nothing to the machine.
-const RELEASE_STATE_ROW_RE = /^- ([^:`\n]+): `([^`\n]+)`\s*$/gm;
+//
+// The grammar is also FAIL-CLOSED, which needs two stages. Matching only
+// canonical rows means a bullet the pattern does not understand is simply not
+// collected — so `- current release: v1.0.0` could sit among six perfect rows
+// and be invisible to the gate while reading as a live claim to a human. Stage 1
+// collects EVERY bullet, stage 2 requires each of them to be canonical.
+const ANY_BULLET_RE = /^\s*-\s+/;
+const STATE_BULLET_RE = /^- ([^:`\n]+): `([^`\n]+)`\s*$/;
 // Exact lowercase English labels, in canonical order. No case normalisation:
 // the label set IS the contract, so `Verdict` is a different label than
 // `verdict` and must fail rather than be silently accepted.
@@ -613,8 +620,11 @@ const LEDGER_HEADER =
   '| Tag | Release ID | Target commit | Published (UTC) |' +
   ' Prerelease | Immutable | Attestation | Repository snapshot |';
 const LEDGER_SEPARATOR = '|---|---|---|---|---|---|---|---|';
-// RC1 historical-note metadata rows: same label+value discipline as above.
-const RC1_NOTE_ROW_RE = /^>\s*-\s*([^:`\n]+):\s*`([^`\n]+)`\s*$/gm;
+// RC1 historical-note metadata rows: same label+value discipline, same
+// two-stage fail-closed grammar (free prose paragraphs stay unconstrained;
+// every blockquote BULLET must be canonical).
+const ANY_NOTE_BULLET_RE = /^>\s*-\s+/;
+const RC1_NOTE_ROW_RE = /^>\s*-\s*([^:`\n]+):\s*`([^`\n]+)`\s*$/;
 const RC1_NOTE_FIELDS = [
   ['tag', (rel) => rel?.tag],
   ['release ID', (rel) => String(rel?.releaseId)],
@@ -625,8 +635,14 @@ const pairVector = (pairs) => pairs.map(([label, value]) => `${label}=${value}`)
 // Eight code-span cells per ledger row: every truth field of a release record
 // is mirrored, so a one-sided registry edit cannot hide behind an unmirrored
 // column (prerelease/immutable/attestation used to be prose only).
+// END-ANCHORED: without `$` the pattern matched a PREFIX, so a ninth cell or
+// trailing prose rode along on an otherwise canonical row and the comparison
+// still saw eight clean cells. A row is exactly eight code-span cells and
+// nothing else.
 const LEDGER_CELL_RE = '\\s*`([^`|]+)`\\s*\\|';
-const RELEASE_HISTORY_ROW_RE = new RegExp(`^\\|${LEDGER_CELL_RE.repeat(8)}`, 'gm');
+const LEDGER_ROW_SOURCE = `^\\|${LEDGER_CELL_RE.repeat(8)}\\s*$`;
+const RELEASE_HISTORY_ROW_RE = new RegExp(LEDGER_ROW_SOURCE, 'gm');
+const LEDGER_ROW_LINE_RE = new RegExp(LEDGER_ROW_SOURCE);
 const HISTORICAL_NOTE_RE =
   /<!--\s*historical-note:start\s*-->([\s\S]*?)<!--\s*historical-note:end\s*-->/;
 // The registry itself legitimately carries 40-hex targets, so identity tokens
@@ -874,8 +890,21 @@ check(rc1Note !== null, `${rc1Path || 'RC1 snapshot'}: historical-note bloğu bu
 // relabelled, reordered or duplicated metadata list. The rows are a schema:
 // label, order and value are compared as one vector. Prose paragraphs inside the
 // note stay free — only the `> - label: \`value\`` rows are constrained.
+const noteBullets = (rc1Note?.[1] ?? '').split(/\r?\n/).filter((line) => ANY_NOTE_BULLET_RE.test(line));
+const noteParsed = noteBullets.map((line) => line.match(RC1_NOTE_ROW_RE));
+const strayNoteBullets = noteBullets.filter((_, i) => noteParsed[i] === null);
+check(
+  strayNoteBullets.length === 0,
+  `${rc1Path || 'RC1 snapshot'}: historical-note içinde canonical metadata grameri dışı blockquote bullet var` +
+    ` — [${strayNoteBullets.map((line) => line.trim()).join(' · ')}]`
+);
+check(
+  noteBullets.length === RC1_NOTE_FIELDS.length,
+  `${rc1Path || 'RC1 snapshot'}: historical-note tam ${RC1_NOTE_FIELDS.length} blockquote bullet taşımalı` +
+    ` — ölçülen ${noteBullets.length}`
+);
 const measuredNoteRows = pairVector(
-  [...(rc1Note?.[1] ?? '').matchAll(RC1_NOTE_ROW_RE)].map((match) => [match[1].trim(), match[2]])
+  noteParsed.filter(Boolean).map((match) => [match[1].trim(), match[2]])
 );
 const expectedNoteRows = pairVector(RC1_NOTE_FIELDS.map(([label, read]) => [label, read(rc1)]));
 check(
@@ -907,7 +936,22 @@ for (const docFile of ['README.md', 'CLAUDE.md', RELEASE_LEDGER]) {
     `${docFile}: release-state bölümü yok veya marker çifti bozuk (<!-- release-state:start/end -->)`
   );
   const body = section?.[1] ?? '';
-  const rows = [...body.matchAll(RELEASE_STATE_ROW_RE)].map((match) => [match[1].trim(), match[2]]);
+  // Stage 1: every bullet, canonical or not. Stage 2: each must be canonical.
+  const bullets = body.split(/\r?\n/).filter((line) => ANY_BULLET_RE.test(line));
+  const parsed = bullets.map((line) => line.match(STATE_BULLET_RE));
+  const strayBullets = bullets.filter((_, i) => parsed[i] === null);
+  check(
+    strayBullets.length === 0,
+    `${docFile}: release-state bölümünde canonical metadata grameri dışı bullet var` +
+      ` — [${strayBullets.map((line) => line.trim()).join(' · ')}]` +
+      ' (beklenen biçim: - <etiket>: `<değer>`)'
+  );
+  check(
+    bullets.length === RELEASE_STATE_FIELD_LABELS.length,
+    `${docFile}: release-state bölümü tam ${RELEASE_STATE_FIELD_LABELS.length} bullet taşımalı` +
+      ` — ölçülen ${bullets.length}`
+  );
+  const rows = parsed.filter(Boolean).map((match) => [match[1].trim(), match[2]]);
   const values = pairVector(rows);
   check(
     values === expectedStateVector,
@@ -939,28 +983,11 @@ const attestationCell = (rel) => {
   }
   return `${rel.attestationVerified ? 'verified' : 'unverified'}:${rel.attestationChecks}`;
 };
-const ledgerText = existsSync(p(RELEASE_LEDGER)) ? readFileSync(p(RELEASE_LEDGER), 'utf8') : '';
-const ledgerRows = [...ledgerText.matchAll(RELEASE_HISTORY_ROW_RE)]
-  .map((match) => match.slice(1, 9).join('|'))
-  .join(' || ');
-const expectedLedgerRows = releaseHistory
-  .map((rel) =>
-    [
-      rel?.tag, String(rel?.releaseId), rel?.targetCommit, rel?.publishedAt,
-      String(rel?.prerelease), String(rel?.immutable), attestationCell(rel),
-      rel?.repositorySnapshot ?? 'none',
-    ].join('|')
-  )
-  .join(' || ');
-check(
-  ledgerRows === expectedLedgerRows,
-  `${RELEASE_LEDGER}: audited release history registry ile uyuşmuyor` +
-    ` — ledger: [${ledgerRows}] · registry: [${expectedLedgerRows}]`
-);
 // Data cells alone are not the contract. Renaming `Immutable` to `Immutability`,
 // or swapping the `Prerelease` and `Immutable` columns, leaves every value byte
 // identical while telling a human reader something else — so the header line,
 // its column order and its separator are pinned exactly.
+const ledgerText = existsSync(p(RELEASE_LEDGER)) ? readFileSync(p(RELEASE_LEDGER), 'utf8') : '';
 const ledgerLines = ledgerText.split(/\r?\n/);
 const headerIdx = ledgerLines.findIndex((line) => line.trim().startsWith('| Tag '));
 check(
@@ -980,6 +1007,52 @@ check(
 check(
   headerIdx >= 0 && (ledgerLines[headerIdx + 1] ?? '').trim() === LEDGER_SEPARATOR,
   `${RELEASE_LEDGER}: başlık satırını sekiz hücreli separator izlemeli (${LEDGER_SEPARATOR})`
+);
+// The table BODY is a contiguous region whose length comes from the registry —
+// never a hard-coded count. Everything the region contains must be a canonical
+// row, and the region ends at the first non-table line: an explanatory line
+// wedged between two rows, a third fabricated row and a malformed row are all
+// violations, and none of them can hide by simply not matching the pattern.
+const regionLines = [];
+for (let i = headerIdx + 2; headerIdx >= 0 && i < ledgerLines.length; i++) {
+  if (!ledgerLines[i].trim().startsWith('|')) break;
+  regionLines.push(ledgerLines[i]);
+}
+check(
+  regionLines.length === releaseHistory.length,
+  `${RELEASE_LEDGER}: separator sonrasında registry uzunluğu kadar (${releaseHistory.length})` +
+    ` ardışık data row bulunmalı — ölçülen ${regionLines.length}`
+);
+const strayRegionRows = regionLines.filter((line) => !LEDGER_ROW_LINE_RE.test(line));
+check(
+  strayRegionRows.length === 0,
+  `${RELEASE_LEDGER}: data row grameri exact değil (satır sonuna sabitli tam sekiz code-span hücre)` +
+    ` — sapan satır(lar): [${strayRegionRows.map((line) => line.trim()).join(' · ')}]`
+);
+const ledgerRows = regionLines
+  .map((line) => line.match(LEDGER_ROW_LINE_RE))
+  .filter(Boolean)
+  .map((match) => match.slice(1, 9).join('|'))
+  .join(' || ');
+const expectedLedgerRows = releaseHistory
+  .map((rel) =>
+    [
+      rel?.tag, String(rel?.releaseId), rel?.targetCommit, rel?.publishedAt,
+      String(rel?.prerelease), String(rel?.immutable), attestationCell(rel),
+      rel?.repositorySnapshot ?? 'none',
+    ].join('|')
+  )
+  .join(' || ');
+check(
+  ledgerRows === expectedLedgerRows,
+  `${RELEASE_LEDGER}: audited release history registry ile uyuşmuyor` +
+    ` — ledger: [${ledgerRows}] · registry: [${expectedLedgerRows}]`
+);
+// A canonical-looking row anywhere else in the file is not history: rows are only
+// history inside the header's region, so a stray one must not pass as a record.
+check(
+  [...ledgerText.matchAll(RELEASE_HISTORY_ROW_RE)].length === regionLines.length - strayRegionRows.length,
+  `${RELEASE_LEDGER}: canonical release-history satırı yalnız başlık bölgesinde bulunabilir`
 );
 // The history table carries release IDs, SHAs and metadata by design, so it must
 // stay OUTSIDE the bounded summary — otherwise the forbidden-token rule above
