@@ -593,7 +593,35 @@ const RC1_PROTECTED_START = '## Attestation (dış immutable kanıt)';
 const RC1_PROTECTED_END = '**Bağlayıcı kural:**';
 const RELEASE_STATE_SECTION_RE =
   /<!--\s*release-state:start\s*-->\r?\n([\s\S]*?)<!--\s*release-state:end\s*-->/;
-const RELEASE_STATE_ROW_RE = /^- [^:`\n]+: `([^`\n]+)`\s*$/gm;
+// Human-readable documents carry a SCHEMA, not just a value list. Capturing the
+// label as well as the value is what makes `- unrelated label: \`FAIL\`` a
+// violation: a correct value under a wrong (or reordered, recased, duplicated)
+// label reads as provenance to a human while meaning nothing to the machine.
+const RELEASE_STATE_ROW_RE = /^- ([^:`\n]+): `([^`\n]+)`\s*$/gm;
+// Exact lowercase English labels, in canonical order. No case normalisation:
+// the label set IS the contract, so `Verdict` is a different label than
+// `verdict` and must fail rather than be silently accepted.
+const RELEASE_STATE_FIELD_LABELS = [
+  ['verdict', 'verdict'],
+  ['audited candidate', 'auditedCandidateTag'],
+  ['audit report', 'auditReport'],
+  ['production readiness', 'productionReadiness'],
+  ['recommendation', 'recommendation'],
+  ['stable release status at audit', 'stableReleaseStatusAtAudit'],
+];
+const LEDGER_HEADER =
+  '| Tag | Release ID | Target commit | Published (UTC) |' +
+  ' Prerelease | Immutable | Attestation | Repository snapshot |';
+const LEDGER_SEPARATOR = '|---|---|---|---|---|---|---|---|';
+// RC1 historical-note metadata rows: same label+value discipline as above.
+const RC1_NOTE_ROW_RE = /^>\s*-\s*([^:`\n]+):\s*`([^`\n]+)`\s*$/gm;
+const RC1_NOTE_FIELDS = [
+  ['tag', (rel) => rel?.tag],
+  ['release ID', (rel) => String(rel?.releaseId)],
+  ['target', (rel) => rel?.targetCommit],
+  ['publishedAt', (rel) => rel?.publishedAt],
+];
+const pairVector = (pairs) => pairs.map(([label, value]) => `${label}=${value}`).join(' | ');
 // Eight code-span cells per ledger row: every truth field of a release record
 // is mirrored, so a one-sided registry edit cannot hide behind an unmirrored
 // column (prerelease/immutable/attestation used to be prose only).
@@ -613,7 +641,10 @@ const SECTION_FORBIDDEN_PATTERNS = [
   [/\b[0-9a-fA-F]{40}\b/, '40-hex commit SHA'],
   [/actions\/runs\/\d+/, 'CI run URL'],
   [/\b\d{7,}\b/, 'release ID / CI run ID'],
-  [/(?:^|[\s([])#\d{1,5}\b/, 'PR numarası'],
+  // Any positive PR reference, at any digit length — a five-digit cap merely
+  // moved the self-reference above the ceiling. A `#` must be followed
+  // immediately by a digit, so Markdown headings are never mistaken for one.
+  [/(?:^|[\s([])#\d+\b/, 'PR numarası'],
   [SKELETON_IDENTITY_RE, 'skeleton kimlik token\'ı'],
   [/publishedAt|prerelease|immutable/i, 'release metadata alanı'],
   [/attestationVerified|verified:\s*\d+|attestation[^\n]{0,24}(?:verified|doğrulan)/i,
@@ -836,18 +867,24 @@ check(
     ' (snapshotProtectedSectionSha256 eşleşmiyor — placeholder\'lar doldurulamaz)'
 );
 const rc1Note = rc1Text.match(HISTORICAL_NOTE_RE);
+check(rc1Note !== null, `${rc1Path || 'RC1 snapshot'}: historical-note bloğu bulunamadı`);
+// Containment ("are these four values somewhere in the block?") accepted a
+// relabelled, reordered or duplicated metadata list. The rows are a schema:
+// label, order and value are compared as one vector. Prose paragraphs inside the
+// note stay free — only the `> - label: \`value\`` rows are constrained.
+const measuredNoteRows = pairVector(
+  [...(rc1Note?.[1] ?? '').matchAll(RC1_NOTE_ROW_RE)].map((match) => [match[1].trim(), match[2]])
+);
+const expectedNoteRows = pairVector(RC1_NOTE_FIELDS.map(([label, read]) => [label, read(rc1)]));
 check(
-  rc1Note !== null &&
-    [rc1?.tag, String(rc1?.releaseId), rc1?.targetCommit, rc1?.publishedAt].every((value) =>
-      rc1Note[1].includes(value)
-    ),
-  `${rc1Path || 'RC1 snapshot'}: historical-note bloğu registry kimliğiyle eşleşmiyor`
+  measuredNoteRows === expectedNoteRows,
+  `${rc1Path || 'RC1 snapshot'}: historical-note metadata satırları registry sözleşmesinden sapıyor` +
+    ` — blok: [${measuredNoteRows}] · beklenen: [${expectedNoteRows}]`
 );
 
-const expectedStateVector = [
-  auditedState.verdict, auditedState.auditedCandidateTag, auditedState.auditReport,
-  auditedState.productionReadiness, auditedState.recommendation, auditedState.stableReleaseStatusAtAudit,
-].join(' | ');
+const expectedStateVector = pairVector(
+  RELEASE_STATE_FIELD_LABELS.map(([label, key]) => [label, auditedState[key]])
+);
 for (const docFile of ['README.md', 'CLAUDE.md', RELEASE_LEDGER]) {
   const text = existsSync(p(docFile)) ? readFileSync(p(docFile), 'utf8') : '';
   const starts = (text.match(/<!--\s*release-state:start\s*-->/g) ?? []).length;
@@ -868,14 +905,20 @@ for (const docFile of ['README.md', 'CLAUDE.md', RELEASE_LEDGER]) {
     `${docFile}: release-state bölümü yok veya marker çifti bozuk (<!-- release-state:start/end -->)`
   );
   const body = section?.[1] ?? '';
-  const fields = [...body.matchAll(RELEASE_STATE_ROW_RE)].map((match) => match[1]);
-  const values = fields.join(' | ');
+  const rows = [...body.matchAll(RELEASE_STATE_ROW_RE)].map((match) => [match[1].trim(), match[2]]);
+  const values = pairVector(rows);
   check(
     values === expectedStateVector,
-    `${docFile}: release-state alanları registry ile uyuşmuyor — bölüm: [${values}] · registry: [${expectedStateVector}]`
+    `${docFile}: release-state alan/değer çiftleri registry ile uyuşmuyor` +
+      ` — bölüm: [${values}] · registry: [${expectedStateVector}]`
+  );
+  const labels = rows.map(([label]) => label);
+  check(
+    new Set(labels).size === labels.length,
+    `${docFile}: release-state bölümünde yinelenen alan etiketi var — [${labels.join(', ')}]`
   );
   check(
-    fields[0] === auditedState.verdict,
+    labels[0] === 'verdict' && rows[0]?.[1] === auditedState.verdict,
     `${docFile}: release-state bölümünün ilk alanı verdict olmalı (olumlu sinyal verdict'i gömemez)`
   );
   const forbidden = SECTION_FORBIDDEN_PATTERNS.filter(([pattern]) => pattern.test(body)).map(([, label]) => label);
@@ -912,14 +955,44 @@ check(
   `${RELEASE_LEDGER}: audited release history registry ile uyuşmuyor` +
     ` — ledger: [${ledgerRows}] · registry: [${expectedLedgerRows}]`
 );
+// Data cells alone are not the contract. Renaming `Immutable` to `Immutability`,
+// or swapping the `Prerelease` and `Immutable` columns, leaves every value byte
+// identical while telling a human reader something else — so the header line,
+// its column order and its separator are pinned exactly.
+const ledgerLines = ledgerText.split(/\r?\n/);
+const headerIdx = ledgerLines.findIndex((line) => line.trim().startsWith('| Tag '));
+check(
+  headerIdx >= 0,
+  `${RELEASE_LEDGER}: release-history başlık satırı bulunamadı (beklenen: ${LEDGER_HEADER})`
+);
+const headerLine = headerIdx >= 0 ? ledgerLines[headerIdx].trim() : '';
+check(
+  headerLine === LEDGER_HEADER,
+  `${RELEASE_LEDGER}: release-history başlık satırı exact kolon sözleşmesinden sapıyor` +
+    ` — ölçülen: [${headerLine}] · beklenen: [${LEDGER_HEADER}]`
+);
+check(
+  ledgerLines.filter((line) => line.trim() === LEDGER_HEADER).length === 1,
+  `${RELEASE_LEDGER}: exact release-history başlık satırı tam bir kez bulunmalı`
+);
+check(
+  headerIdx >= 0 && (ledgerLines[headerIdx + 1] ?? '').trim() === LEDGER_SEPARATOR,
+  `${RELEASE_LEDGER}: başlık satırını sekiz hücreli separator izlemeli (${LEDGER_SEPARATOR})`
+);
 // The history table carries release IDs, SHAs and metadata by design, so it must
 // stay OUTSIDE the bounded summary — otherwise the forbidden-token rule above
-// would be satisfied only by weakening it.
+// would be satisfied only by weakening it — and every data row must follow the
+// header rather than float above it.
 const ledgerSectionEnd = ledgerText.indexOf('<!-- release-state:end -->');
+const headerOffset = headerIdx >= 0 ? ledgerLines.slice(0, headerIdx).join('\n').length : -1;
+const historyRowOffsets = [...ledgerText.matchAll(RELEASE_HISTORY_ROW_RE)].map((match) => match.index);
 check(
-  ledgerSectionEnd >= 0 &&
-    [...ledgerText.matchAll(RELEASE_HISTORY_ROW_RE)].every((match) => match.index > ledgerSectionEnd),
+  ledgerSectionEnd >= 0 && historyRowOffsets.every((offset) => offset > ledgerSectionEnd),
   `${RELEASE_LEDGER}: release-history satırları bounded release-state bölümünün dışında kalmalı`
+);
+check(
+  headerOffset >= 0 && historyRowOffsets.every((offset) => offset > headerOffset),
+  `${RELEASE_LEDGER}: release-history veri satırları başlık satırından sonra gelmeli`
 );
 
 // Stale-state ban (F4R2-MEDIUM-01). The attestation file is a TIMELESS contract:
