@@ -574,6 +574,19 @@ const AUDITED_STATE_FIELDS = [
   'auditedCandidateTag', 'auditReport', 'auditSha256',
   'verdict', 'productionReadiness', 'recommendation', 'stableReleaseStatusAtAudit',
 ];
+// Schema verification is EXACT, not "required fields present". A key nobody
+// enforces is a key that can lie: `currentRelease`, `latestCandidate` or a
+// harmless-looking `displayLabel` would each smuggle an unverified — and in the
+// time-bound cases immediately stale — claim past the gate. Naming the banned
+// fields one by one would be an endless denylist, so the rule is fail-closed:
+// anything outside these sets is a violation on its own.
+const PROVENANCE_FIELDS = ['auditedState', 'auditedImmutableReleases'];
+const RELEASE_REQUIRED_FIELDS = [
+  'tag', 'releaseId', 'targetCommit', 'publishedAt', 'prerelease', 'immutable', 'repositorySnapshot',
+];
+const RELEASE_OPTIONAL_FIELDS = [
+  'snapshotProtectedSectionSha256', 'attestationVerified', 'attestationChecks',
+];
 const RELEASE_LEDGER = 'docs/releases/README.md';
 const RELEASE_ATTESTATION = 'docs/operations/release-attestation.md';
 const RC1_PROTECTED_START = '## Attestation (dış immutable kanıt)';
@@ -581,20 +594,47 @@ const RC1_PROTECTED_END = '**Bağlayıcı kural:**';
 const RELEASE_STATE_SECTION_RE =
   /<!--\s*release-state:start\s*-->\r?\n([\s\S]*?)<!--\s*release-state:end\s*-->/;
 const RELEASE_STATE_ROW_RE = /^- [^:`\n]+: `([^`\n]+)`\s*$/gm;
-const RELEASE_HISTORY_ROW_RE =
-  /^\|\s*`([^`|]+)`\s*\|\s*`([^`|]+)`\s*\|\s*`([^`|]+)`\s*\|\s*`([^`|]+)`\s*\|\s*`([^`|]+)`\s*\|/gm;
+// Eight code-span cells per ledger row: every truth field of a release record
+// is mirrored, so a one-sided registry edit cannot hide behind an unmirrored
+// column (prerelease/immutable/attestation used to be prose only).
+const LEDGER_CELL_RE = '\\s*`([^`|]+)`\\s*\\|';
+const RELEASE_HISTORY_ROW_RE = new RegExp(`^\\|${LEDGER_CELL_RE.repeat(8)}`, 'gm');
 const HISTORICAL_NOTE_RE =
   /<!--\s*historical-note:start\s*-->([\s\S]*?)<!--\s*historical-note:end\s*-->/;
-// Self-reference and marketing signals are banned inside the bounded section.
-const SECTION_FORBIDDEN_RE =
-  /\b[0-9a-f]{40}\b|actions\/runs\/\d+|(?:^|\s)#\d{1,5}\b|site-skeleton|Site Skeleton|@skeleton\/|com\.skeleton|skeleton-api/;
 // The registry itself legitimately carries 40-hex targets, so identity tokens
 // get their own narrower pattern: those WOULD be rewritten by bootstrap.
 const SKELETON_IDENTITY_RE = /site-skeleton|Site Skeleton|@skeleton\/|com\.skeleton|skeleton-api/;
+// Inside the bounded summary every self-reference and every per-release metadata
+// signal is banned: the section is an audit-scoped verdict summary, not a second
+// copy of the release history. 40-hex is matched case-INSENSITIVELY (an
+// uppercase SHA is the same self-reference), and long digit runs cover both
+// release IDs and CI run IDs. Labels are reported so the failure names the class.
+const SECTION_FORBIDDEN_PATTERNS = [
+  [/\b[0-9a-fA-F]{40}\b/, '40-hex commit SHA'],
+  [/actions\/runs\/\d+/, 'CI run URL'],
+  [/\b\d{7,}\b/, 'release ID / CI run ID'],
+  [/(?:^|[\s([])#\d{1,5}\b/, 'PR numarası'],
+  [SKELETON_IDENTITY_RE, 'skeleton kimlik token\'ı'],
+  [/publishedAt|prerelease|immutable/i, 'release metadata alanı'],
+  [/attestationVerified|verified:\s*\d+|attestation[^\n]{0,24}(?:verified|doğrulan)/i,
+    'olumlu attestation sinyali'],
+];
 const RELEASE_TAG_RE = /^v\d+\.\d+\.\d+(?:-rc\.\d+)?$/;
 const SHA256_RE = /^[0-9a-f]{64}$/;
 const SHA40_RE = /^[0-9a-f]{40}$/;
 const ISO_UTC_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+
+/** Exact key-set equality on a plain object — the fail-closed schema primitive. */
+function sameKeySet(value, expected) {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    Object.keys(value).sort().join('|') === [...expected].sort().join('|')
+  );
+}
+const keyList = (value) =>
+  value !== null && typeof value === 'object' ? Object.keys(value).sort().join(', ') : 'nesne değil';
 
 const provenance = manifest.upstreamReleaseProvenance;
 check(
@@ -604,7 +644,17 @@ check(
   'scripts/structure-manifest.json: upstreamReleaseProvenance eksik veya şema dışı' +
     ' (auditedState nesnesi + auditedImmutableReleases dizisi zorunlu)'
 );
+check(
+  sameKeySet(provenance, PROVENANCE_FIELDS),
+  'upstreamReleaseProvenance: exact şema dışı anahtar kümesi' +
+    ` — izinli: [${PROVENANCE_FIELDS.join(', ')}] · ölçülen: [${keyList(provenance)}]`
+);
 const auditedState = provenance?.auditedState ?? {};
+check(
+  sameKeySet(auditedState, AUDITED_STATE_FIELDS),
+  'upstreamReleaseProvenance.auditedState: exact şema dışı anahtar kümesi' +
+    ` — izinli: [${[...AUDITED_STATE_FIELDS].sort().join(', ')}] · ölçülen: [${keyList(auditedState)}]`
+);
 const releaseHistory = Array.isArray(provenance?.auditedImmutableReleases)
   ? provenance.auditedImmutableReleases
   : [];
@@ -664,6 +714,21 @@ const seenIds = new Set();
 let previousPublishedAt = '';
 for (const [i, rel] of releaseHistory.entries()) {
   const label = typeof rel?.tag === 'string' ? rel.tag : `#${i}`;
+  const keys = rel !== null && typeof rel === 'object' && !Array.isArray(rel) ? Object.keys(rel) : [];
+  const unknown = keys.filter(
+    (key) => !RELEASE_REQUIRED_FIELDS.includes(key) && !RELEASE_OPTIONAL_FIELDS.includes(key)
+  );
+  check(
+    unknown.length === 0,
+    `auditedImmutableReleases[${label}]: şema dışı alan(lar): ${unknown.join(', ')}` +
+      ` — izinli zorunlu: [${RELEASE_REQUIRED_FIELDS.join(', ')}]` +
+      ` · izinli koşullu: [${RELEASE_OPTIONAL_FIELDS.join(', ')}]`
+  );
+  const missing = RELEASE_REQUIRED_FIELDS.filter((key) => !keys.includes(key));
+  check(
+    missing.length === 0,
+    `auditedImmutableReleases[${label}]: zorunlu alan eksik: ${missing.join(', ')}`
+  );
   check(
     typeof rel?.tag === 'string' && RELEASE_TAG_RE.test(rel.tag) && !seenTags.has(rel.tag),
     `auditedImmutableReleases[${label}]: tag geçersiz veya yinelenmiş`
@@ -696,6 +761,39 @@ for (const [i, rel] of releaseHistory.entries()) {
     snapshot === null || (typeof snapshot === 'string' && existsSync(p(snapshot)) && statSync(p(snapshot)).isFile()),
     `auditedImmutableReleases[${label}]: repositorySnapshot yolu yok: ${snapshot}`
   );
+  // A snapshot without its protected digest is an unbound file; a digest without
+  // a snapshot is a claim about nothing. Both directions are violations.
+  const hasDigest = keys.includes('snapshotProtectedSectionSha256');
+  if (typeof snapshot === 'string') {
+    check(
+      hasDigest && SHA256_RE.test(rel.snapshotProtectedSectionSha256 ?? ''),
+      `auditedImmutableReleases[${label}]: repositorySnapshot taşıyan kayıt` +
+        ' lowercase 64-hex snapshotProtectedSectionSha256 taşımalı'
+    );
+  } else {
+    check(
+      !hasDigest,
+      `auditedImmutableReleases[${label}]: repositorySnapshot null iken` +
+        ' snapshotProtectedSectionSha256 taşınmamalı (bağlanacak dosya yok)'
+    );
+  }
+  const hasVerified = keys.includes('attestationVerified');
+  const hasChecks = keys.includes('attestationChecks');
+  check(
+    hasVerified === hasChecks,
+    `auditedImmutableReleases[${label}]: attestationVerified ve attestationChecks` +
+      ' birlikte bulunmalı (biri olmadan diğeri ölçülemez)'
+  );
+  if (hasVerified && hasChecks) {
+    check(
+      typeof rel.attestationVerified === 'boolean',
+      `auditedImmutableReleases[${label}]: attestationVerified boolean değil`
+    );
+    check(
+      Number.isInteger(rel.attestationChecks) && rel.attestationChecks > 0,
+      `auditedImmutableReleases[${label}]: attestationChecks pozitif integer değil`
+    );
+  }
 }
 check(
   releaseHistory.filter((rel) => rel?.tag === auditedState.auditedCandidateTag).length === 1,
@@ -780,19 +878,33 @@ for (const docFile of ['README.md', 'CLAUDE.md', RELEASE_LEDGER]) {
     fields[0] === auditedState.verdict,
     `${docFile}: release-state bölümünün ilk alanı verdict olmalı (olumlu sinyal verdict'i gömemez)`
   );
+  const forbidden = SECTION_FORBIDDEN_PATTERNS.filter(([pattern]) => pattern.test(body)).map(([, label]) => label);
   check(
-    !SECTION_FORBIDDEN_RE.test(body),
-    `${docFile}: release-state bölümünde yasak token var (40-hex SHA / CI run / PR no / skeleton kimliği)`
+    forbidden.length === 0,
+    `${docFile}: release-state bölümünde yasak token var (${forbidden.join(' · ')})` +
+      ' — bölüm audit-scoped verdict özetidir, release geçmişinin kopyası değildir'
   );
 }
 
+// Normalised attestation cell: the boolean decides the label, so flipping
+// `attestationVerified` alone is a drift the ledger comparison must catch.
+const attestationCell = (rel) => {
+  if (typeof rel?.attestationVerified !== 'boolean' || !Number.isInteger(rel?.attestationChecks)) {
+    return 'not-recorded';
+  }
+  return `${rel.attestationVerified ? 'verified' : 'unverified'}:${rel.attestationChecks}`;
+};
 const ledgerText = existsSync(p(RELEASE_LEDGER)) ? readFileSync(p(RELEASE_LEDGER), 'utf8') : '';
 const ledgerRows = [...ledgerText.matchAll(RELEASE_HISTORY_ROW_RE)]
-  .map((match) => match.slice(1, 6).join('|'))
+  .map((match) => match.slice(1, 9).join('|'))
   .join(' || ');
 const expectedLedgerRows = releaseHistory
   .map((rel) =>
-    [rel?.tag, String(rel?.releaseId), rel?.targetCommit, rel?.publishedAt, rel?.repositorySnapshot ?? 'none'].join('|')
+    [
+      rel?.tag, String(rel?.releaseId), rel?.targetCommit, rel?.publishedAt,
+      String(rel?.prerelease), String(rel?.immutable), attestationCell(rel),
+      rel?.repositorySnapshot ?? 'none',
+    ].join('|')
   )
   .join(' || ');
 check(
@@ -800,15 +912,63 @@ check(
   `${RELEASE_LEDGER}: audited release history registry ile uyuşmuyor` +
     ` — ledger: [${ledgerRows}] · registry: [${expectedLedgerRows}]`
 );
+// The history table carries release IDs, SHAs and metadata by design, so it must
+// stay OUTSIDE the bounded summary — otherwise the forbidden-token rule above
+// would be satisfied only by weakening it.
+const ledgerSectionEnd = ledgerText.indexOf('<!-- release-state:end -->');
+check(
+  ledgerSectionEnd >= 0 &&
+    [...ledgerText.matchAll(RELEASE_HISTORY_ROW_RE)].every((match) => match.index > ledgerSectionEnd),
+  `${RELEASE_LEDGER}: release-history satırları bounded release-state bölümünün dışında kalmalı`
+);
 
+// Stale-state ban (F4R2-MEDIUM-01). The attestation file is a TIMELESS contract:
+// it legitimately teaches the placeholder model (`FINAL_MERGE_SHA`, …), so a
+// repo-wide word ban would break its own examples — prose labels such as "Final
+// evidence closure merge SHA" read almost identically to the banned
+// FINAL_EVIDENCE_CLOSURE_MERGE_SHA placeholder. The ban therefore has two exact
+// contexts: (1) no `Mevcut durum` heading may return, whatever its casing,
+// emphasis or date suffix — except the pointer heading that says the state is
+// NOT kept here; (2) SCREAMING_SNAKE status identifiers and the three
+// external-status sentences are banned as written, case- and
+// emphasis-insensitively, which prose spellings can never satisfy.
+const STALE_STATUS_IDS = [
+  'RC1_RELEASE_TARGET_SHA',
+  'FINAL_EVIDENCE_MERGE_SHA',
+  'FINAL_EVIDENCE_POST_MERGE_CI_RUN_URL',
+  'FINAL_EVIDENCE_CLOSURE_PR',
+  'FINAL_EVIDENCE_CLOSURE_MERGE_SHA',
+  'FINAL_EVIDENCE_CLOSURE_POST_MERGE_CI_RUN_URL',
+  'PENDING_USER_ACTION',
+];
+const STALE_STATUS_SENTENCES = [
+  'Dördüncü mini-denetim başlatılmadı',
+  'Release oluşturulmadı',
+  'Tag oluşturulmadı',
+];
+const POINTER_HEADING = 'mevcut durum burada tutulmaz';
 const attestationText = existsSync(p(RELEASE_ATTESTATION)) ? readFileSync(p(RELEASE_ATTESTATION), 'utf8') : '';
-for (const token of [
-  '## Mevcut durum (', 'RC1_RELEASE_TARGET_SHA', 'FINAL_EVIDENCE_MERGE_SHA',
-  'FINAL_EVIDENCE_CLOSURE_MERGE_SHA', 'PENDING_USER_ACTION',
-]) {
+for (const line of attestationText.replace(/[`*_]/g, '').split(/\r?\n/)) {
+  const heading = line.match(/^#{2,6}\s+(.+)$/);
+  if (heading === null || !/mevcut\s+durum/i.test(heading[1])) continue;
   check(
-    !attestationText.includes(token),
+    heading[1].trim().toLowerCase() === POINTER_HEADING,
+    `${RELEASE_ATTESTATION}: kaldırılan current-status bölümü geri geldi ("${heading[1].trim()}")` +
+      ' — güncel durum yalnız ledger\'da tutulur'
+  );
+}
+const staleIdText = attestationText.replace(/[`*]/g, '').toUpperCase();
+for (const token of STALE_STATUS_IDS) {
+  check(
+    !staleIdText.includes(token),
     `${RELEASE_ATTESTATION}: bayat current-state token'ı taşıyor (${token}) — durum ledger'da tutulur`
+  );
+}
+const staleProseText = attestationText.replace(/[`*]/g, '').replace(/\s+/g, ' ').toLowerCase();
+for (const sentence of STALE_STATUS_SENTENCES) {
+  check(
+    !staleProseText.includes(sentence.replace(/\s+/g, ' ').toLowerCase()),
+    `${RELEASE_ATTESTATION}: bayat dış-durum cümlesi taşıyor ("${sentence}") — durum ledger'da tutulur`
   );
 }
 check(

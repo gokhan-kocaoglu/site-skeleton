@@ -26,13 +26,18 @@ hakkında iddia taşımaz.
 
 ## Audited immutable release history
 
-| Tag | Release ID | Target commit | Published (UTC) | Repository snapshot |
-|---|---|---|---|---|
-| `v1.0.0-rc.1` | `361113458` | `f891910d9e6877b4ce40d5833cb42579c6d3d9f1` | `2026-07-28T13:37:11Z` | `docs/releases/v1.0.0-rc.1.md` |
-| `v1.0.0-rc.2` | `361341678` | `175213d519acf199498a8efa7b307f5b4d5f44cd` | `2026-07-28T19:57:09Z` | `none` |
+Tablonun her kolonu registry kaydının bir doğruluk alanıdır ve `verify-structure`
+tarafından exact karşılaştırılır; tek taraflı bir manifest düzenlemesi
+mismatch üretir. `Attestation` kolonu normalize edilmiş değeri taşır:
+`verified:<alan sayısı>`, `unverified:<alan sayısı>` veya `not-recorded`.
 
-Her iki kayıt da prerelease ve immutable'dır. RC2 için GitHub'ın kriptografik
-release attestation'ı doğrulanmıştır (11/11 alan). RC1 için repository'de bir
+| Tag | Release ID | Target commit | Published (UTC) | Prerelease | Immutable | Attestation | Repository snapshot |
+|---|---|---|---|---|---|---|---|
+| `v1.0.0-rc.1` | `361113458` | `f891910d9e6877b4ce40d5833cb42579c6d3d9f1` | `2026-07-28T13:37:11Z` | `true` | `true` | `not-recorded` | `docs/releases/v1.0.0-rc.1.md` |
+| `v1.0.0-rc.2` | `361341678` | `175213d519acf199498a8efa7b307f5b4d5f44cd` | `2026-07-28T19:57:09Z` | `true` | `true` | `verified:11` | `none` |
+
+RC1 için `not-recorded`, attestation'ın başarısız olduğunu değil, o release için
+alan-alan doğrulamanın **kaydedilmediğini** söyler. RC1 için repository'de bir
 **yayın öncesi taslak snapshot'ı** vardır; RC2 için böyle bir taslak hiç
 üretilmemiştir ve geriye dönük olarak da üretilmez.
 
