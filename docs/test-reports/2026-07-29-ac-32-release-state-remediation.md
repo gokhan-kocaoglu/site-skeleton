@@ -14,7 +14,7 @@
 | Repository | `gokhan-kocaoglu/site-skeleton` |
 | Dal | `fix/f4-release-state-registry` |
 | Base SHA (main) | `cfe61e82c7b1458e1280187be6214ded0a702b49` |
-| Implementation/test SHA (testlerin bizzat koştuğu commit, C10) | `3d8245c3e303a2a729005651ca9306be10092fee` |
+| Implementation/test SHA (testlerin bizzat koştuğu commit, C13) | `6cfaae810809a5e3f0a7de2e2297af354731721a` |
 | Tarih | 2026-07-29 |
 | Hedef kriter | AC-32 / F4-MEDIUM-02 (README/CLAUDE RC durumunu bildirmiyordu) |
 | Aynı kök nedenli komşu bulgu | F4R2-MEDIUM-01 (`docs/operations/release-attestation.md` durum tablosu bayat) |
@@ -31,7 +31,7 @@ kavramı ayırır:
 
 | Kavram | Değer / otorite | Bu raporda nasıl kullanılır |
 |---|---|---|
-| **Implementation/test tree** | `3d8245c3e303a2a729005651ca9306be10092fee` (C10) | Aşağıdaki **tüm** komut çıktıları, dosya satır sayıları, digest'ler ve senaryo sayıları bu ağaçta ölçüldü. Ölçümün tek bağlamı budur. |
+| **Implementation/test tree** | `6cfaae810809a5e3f0a7de2e2297af354731721a` (C13) | Aşağıdaki **tüm** komut çıktıları, dosya satır sayıları, digest'ler ve senaryo sayıları bu ağaçta ölçüldü. Ölçümün tek bağlamı budur. |
 | **Evidence commit** | Bu rapor dosyası | Implementation/test tree'den **sonra** oluşturulur; bu yüzden ölçtüğü ağacın parçası değildir ve **kendi SHA'sını yazmaz** (Katman 1/Katman 2 ayrımı, `docs/operations/release-attestation.md`). |
 | **Final dal ucu** | Otoritesi **GitHub PR metadata'sı** | Bu rapor final dal ucunun ne olduğunu iddia etmez, tahmin etmez ve "ölçüm bağlamı" olarak kullanmaz. Dal ucu, kanıt commit'leri eklendikçe ilerler; kanıtın tazeliği implementation/test SHA'sına bakılarak denetlenir. |
 
@@ -41,19 +41,21 @@ bağlanmamıştır; her `git` komutu **exact SHA aralığı** ile yazılmıştı
 olarak sembolik bir revizyon adı (dal ucu takma adı dâhil) hiçbir yerde
 kullanılmamıştır.
 
-Tarihsel bağlam: `d1066ca529aa97bdb5b7b50342a354a18370ae13` (C5) ve
-`54169144f46059423fd7a70eb87c5e70109fee36` (C8) bu raporun **önceki iki evidence
-commit'idir**. Bu SHA'lar yalnız tarihsel zincir bağlamında geçer; "current"
-veya final dal ucu olarak sunulamaz.
+Tarihsel bağlam: `d1066ca529aa97bdb5b7b50342a354a18370ae13` (C5),
+`54169144f46059423fd7a70eb87c5e70109fee36` (C8) ve
+`f7bd7d71e232d61d09f61d66eb32a96f5e2a1aa0` (C11) bu raporun **önceki üç
+evidence commit'idir**. Bu üç SHA yalnız tarihsel zincir bağlamında geçer;
+"current" veya final dal ucu olarak sunulamaz — evidence commit tanımı gereği
+kendi ölçtüğü ağacın dışındadır.
 
 ## Commit Zinciri (base → implementation/test tree)
 
 ```bash
 git log --reverse --format="%H %s" \
-  cfe61e82c7b1458e1280187be6214ded0a702b49..3d8245c3e303a2a729005651ca9306be10092fee
+  cfe61e82c7b1458e1280187be6214ded0a702b49..6cfaae810809a5e3f0a7de2e2297af354731721a
 ```
 
-On commit:
+On üç commit:
 
 ```text
 c2308d03080ecbc4ca21fbcfce567183340f270b docs(adr): define audited upstream release provenance
@@ -66,6 +68,9 @@ d1066ca529aa97bdb5b7b50342a354a18370ae13 docs(test): record AC-32 remediation ev
 54169144f46059423fd7a70eb87c5e70109fee36 docs(test): refresh AC-32 evidence after review corrections
 15eb17eafaee12eed305d88b446b774972e23bc4 fix(structure): enforce exact release document schemas
 3d8245c3e303a2a729005651ca9306be10092fee test(structure): cover release document schema regressions
+f7bd7d71e232d61d09f61d66eb32a96f5e2a1aa0 docs(test): refresh AC-32 evidence after document-schema review
+eea394a055dc745e6d3d830e57ee4437a02298ab fix(structure): close release document grammar bypasses
+6cfaae810809a5e3f0a7de2e2297af354731721a test(structure): cover unmatched release metadata grammar
 ```
 
 | # | Commit | Rolü |
@@ -80,6 +85,9 @@ d1066ca529aa97bdb5b7b50342a354a18370ae13 docs(test): record AC-32 remediation ev
 | C8 | `54169144…` | Kanıt raporunun ikinci sürümü (evidence, tarihsel) |
 | C9 | `15eb17ea…` | İkinci denetim turunun dört doküman-şema açığına düzeltme (bounded label/value sözleşmesi, ledger header, RC1 note alanları, PR self-reference deseni) |
 | C10 | `3d8245c3…` | C9 kurallarının negatif regresyon kanıtı (+ tek satırlık guard düzeltmesi) |
+| C11 | `f7bd7d71…` | Kanıt raporunun üçüncü sürümü (evidence, tarihsel) |
+| C12 | `eea394a0…` | Üçüncü denetim turunun üç **gramer** bypass'ına düzeltme (bounded bullet grameri, end-anchored ledger satırı + ardışık bölge, RC1 blockquote bullet grameri) |
+| C13 | `6cfaae81…` | C12 kurallarının negatif regresyon kanıtı (on yeni senaryo) |
 
 ### C6 / C7 kapsamları (gerçek `git diff --name-status`)
 
@@ -115,6 +123,19 @@ uygulanmasının doküman değişikliği gerektirmemesi, bu turda kapatılan aç
 "yanlış içerik" değil "makinece görünmeyen içerik" sınıfında olduğunun
 doğrudan kanıtıdır.
 
+### C12 / C13 kapsamları (gerçek `git diff --name-status`)
+
+| Commit | Değişen dosyalar |
+|---|---|
+| C12 `eea394a0…` | **yalnız** `scripts/verify-structure.mjs` |
+| C13 `6cfaae81…` | **yalnız** `scripts/tests/verify-structure-negative.mjs` |
+
+**Bu turda kapsam sapması YOK.** Önceki iki turda kaydedilen intra-commit
+sapmalar (C7 casing düzeltmesi, C10 prefix-sınıfı düzeltmesi) bu turda
+tekrarlanmadı: C12 tam olarak beklenen tek kural dosyasına, C13 tam olarak
+beklenen tek test dosyasına dokundu. Kural düzeltmesi ile onun regresyon kanıtı
+bu turda temiz biçimde ayrı commit'lerde durur.
+
 ## Doğrulanan Değişiklik Kümesi (raporlanıyor, yazılmadı)
 
 1. **`scripts/structure-manifest.json` → `upstreamReleaseProvenance`** —
@@ -130,8 +151,10 @@ doğrudan kanıtıdır.
 3. **`docs/releases/README.md`** — yeni canonical ledger (insan-okur), audited
    state özetini ve iki kayıtlı release history satırını taşıyor. C6 ile
    geçmiş tablosu **sekiz kolona** genişletildi; C9 ile bu tablonun **başlık
-   satırı, kolon sırası ve separator'ı** da makine-pinli hâle geldi. Ölçülen
-   satır sayısı **69** (manifest `maxLines` kaydı **120**, limit altında).
+   satırı, kolon sırası ve separator'ı** makine-pinli hâle geldi; C12 ile veri
+   satırları **satır sonuna sabitlendi** ve tablo gövdesi **ardışık bölge**
+   olarak doğrulanır oldu. Ölçülen satır sayısı **69** (manifest `maxLines`
+   kaydı **120**, limit altında).
 4. **`docs/operations/release-attestation.md`** — bayat "Mevcut durum"
    tablosu çıkarıldı; yerine ledger'a yönlendirme + "Adım 9 (ADR-0018)"
    prosedürel kuralı geldi. maxLines manifest kaydı 180 → **165**; ölçülen
@@ -140,18 +163,21 @@ doğrudan kanıtıdır.
    -->` bloğu + yalnız dört zaman-kipi düzeltmesi eklendi; `## Attestation
    (dış immutable kanıt)` başlığından `**Bağlayıcı kural:**` satırına kadar
    olan korunan bölüm **değişmedi** ve SHA-256 ile manifest'e bağlandı
-   (aşağıda ölçüldü). C9 ile blok içindeki metadata satırları da exact
-   etiket/sıra sözleşmesine bağlandı.
+   (aşağıda ölçüldü). C9 ile blok içindeki metadata satırları exact
+   etiket/sıra sözleşmesine bağlandı; C12 ile bloktaki **bütün** blockquote
+   bullet'ları fail-closed gramere alındı.
 6. **README.md + CLAUDE.md** — `<!-- release-state:start/end -->` bounded
    section; ilk içerik satırı `verdict` etiketi ve registry verdict'i (`FAIL`).
+   C12 ile bölüm içindeki **bütün** bullet satırları fail-closed gramere alındı.
 7. **`scripts/verify-structure.mjs` yeni 7k bloğu** — `node:crypto` ile
    audit dosyası digest'i + RC1 korunan bölüm digest bağını doğruluyor;
    mode-aware doküman sözleşmesi (skeleton-dev'de upstream bölümü zorunlu,
    project modda yasak); exact canonical şema; bounded-section yasak desenleri;
    bayat-durum kuralları; C9 ile insan-okur doküman şemaları (etiket+değer
-   vektörü, ledger header, RC1 note alanları). Kod okumasıyla doğrulandı:
-   ADR-0018 madde 11 gereği **ağ/git-ancestry kuralı yok** — yalnız offline,
-   ağaç-içi kanıt kullanılıyor.
+   vektörü, ledger header, RC1 note alanları); C12 ile bütün-bullet grameri,
+   end-anchored ledger satırı ve ardışık tablo bölgesi. Kod okumasıyla
+   doğrulandı: ADR-0018 madde 11 gereği **ağ/git-ancestry kuralı yok** —
+   yalnız offline, ağaç-içi kanıt kullanılıyor.
 8. **`scripts/bootstrap-project.mjs`** — `EXCLUDE_DIRS += docs/releases`;
    README/CLAUDE bounded section'ı aynı `replace` operasyonunun final byte
    çıktısından kaldırılıyor. maxLines manifest kaydı **500 korundu**; ölçülen
@@ -259,7 +285,9 @@ Basit repo-wide kelime yasağı bu meşru örnekleri kırardı. Bu yüzden yasak
 Self-reference düzeltmesi: "dal ucu = implementation SHA" iddiası kaldırıldı,
 üç kavram (implementation/test tree · evidence commit · final dal ucu) yukarıda
 açıkça ayrıldı, tüm komut örnekleri exact SHA aralığına çevrildi. Bu tur aynı
-disiplini yeni implementation/test SHA'sı (`3d8245c3…`) için tekrar uyguladı.
+disiplini yeni implementation/test SHA'sı (`6cfaae81…`) için tekrar uyguladı;
+üç tarihsel evidence commit'i (C5, C8, C11) yalnız tarihsel zincir olarak
+listelenir.
 
 ## Review Düzeltmeleri — İkinci Tur: Doküman Şeması (C9 + C10)
 
@@ -359,7 +387,7 @@ karakterinin hemen ardından digit gelmesi gerektiği için normal Markdown
 başlıkları (`## Release state`) hiçbir zaman PR numarası sanılmıyor; yani guard
 genişletilirken false-positive sınıfı açılmadı.
 
-### C10'un kapsam sapması (açık kayıt)
+### C10'un kapsam sapması (açık kayıt, tarihsel)
 
 C10, kapsam gereği yalnız test dosyasını taşıması beklenirken
 `scripts/verify-structure.mjs`'ye **tek satırlık** (efektif olarak tek desen
@@ -374,12 +402,120 @@ indirildi.
 kanıtlayan testle aynı commit'te durur. Bu, bir önceki turdaki Türkçe casing
 düzeltmesiyle (Düzeltme D, i-varyantı maddesi) **aynı gerekçeye dayanan ikinci**
 intra-commit kapsam sapmasıdır; amend/reset yasak ve commit sayısı sabit olduğu
-için alternatif yoktu. Sapma burada kayıtlıdır, örtülmemiştir.
+için alternatif yoktu. Sapma burada kayıtlıdır, örtülmemiştir. Üçüncü turda
+(C12/C13) **bu sapma tekrarlanmadı**.
+
+## Review Düzeltmeleri — Üçüncü Tur: Doküman Grameri (C12 + C13)
+
+Üçüncü bağımsız denetim, C9–C11 ile gelen düzeltmeleri — bounded field
+label+value exact karşılaştırması, ledger exact header ve kolon sırası, RC1
+historical-note exact label/order sözleşmesi, arbitrary-length PR reference
+guard ve evidence self-reference ayrımı — **kabul etti**. Açık kalan üç bulgu
+artık şema değil **gramer** düzeyindeydi. Ortak kök neden tek cümleyle:
+doğrulama canonical satırları **topluyordu**, dolayısıyla canonical grameri
+karşılamayan bir satır sessizce kapsam dışında kalıyordu — insan okur onu
+görüyor, makine hiç görmüyordu. Bu üçü C12'de kapatıldı, C13'te kanıtlandı.
+
+### Gramer düzeltmesi A — bounded section bütün-bullet grameri (fail-closed)
+
+Eski yapı yalnız canonical regex'e uyan satırları topluyordu. Altı kusursuz
+satırın yanında duran bir `- current release: v1.0.0` satırı insan okura canlı
+bir iddia gibi görünürken gate'e **hiç görünmüyordu**. Doğrulama artık iki
+aşamalı:
+
+| Aşama | Kural |
+|---|---|
+| 1 | Bölüm gövdesindeki `^\s*-\s+` ile başlayan **BÜTÜN** satırlar toplanır. |
+| 2 | Her bullet exact `` - <etiket>: `<tek satırlık değer>` `` gramerini karşılamalı; karşılamayan **tek bir bullet bile FAIL**. Ayrıca bullet sayısı exact **6** olmalı. |
+
+Serbest açıklama paragrafları kısıtsız kalır; fail-closed olan yalnız **bullet
+biçimindeki** satırlardır. Aynı kural README, CLAUDE ve ledger bounded
+section'ının üçü için de geçerlidir. Etiket sırası değişmedi: `verdict` ·
+`audited candidate` · `audit report` · `production readiness` ·
+`recommendation` · `stable release status at audit`.
+
+Bu, ikinci turda kurulan `label=value` vektörünün **tamamlayıcısıdır**: vektör
+"tanınan satırlar doğru mu" sorusunu yanıtlıyordu, gramer kuralı "tanınmayan
+satır var mı" sorusunu yanıtlar. İkisi birlikte bölümün tüm bullet yüzeyini
+kapatır.
+
+### Gramer düzeltmesi B — ledger data-row end-anchored grameri + ardışık bölge
+
+`$` olmadan data-row pattern'i bir **ÖNEK** eşliyordu: dokuzuncu bir hücre ya da
+satır sonuna eklenen prose canonical bir satırın üstüne binebiliyordu ve
+karşılaştırma yine sekiz temiz hücre görüyordu. İki değişiklik:
+
+- **End-anchored gramer:** row artık satır sonuna sabitli **tam sekiz** code-span
+  hücredir; önek eşleşmesi geçmez.
+- **Ardışık bölge:** tablo gövdesi bir bütün olarak doğrulanır —
+
+```text
+header
+separator
+registry uzunluğu kadar exact data row
+sonraki satır tablo-dışı (boş veya yeni bölüm)
+```
+
+Bölge uzunluğu **kodda sabit sayı olarak yazılmadı**; `releaseHistory.length`
+üzerinden türetilir (mevcut registry için 2). Bölge, ilk tablo-dışı satırda
+biter. Ek invariant: canonical bir satır **yalnız başlık bölgesinde** history
+sayılır — dokümanın başka bir yerine konan canonical-looking bir row kayıt
+olarak kabul edilmez. Böylece hem "araya açıklama sokup bölgeyi kesme" hem de
+"tabloyu taşıyıp sahte satır ekleme" sınıfları kapanır.
+
+### Gramer düzeltmesi C — RC1 historical-note bütün-blockquote-bullet grameri
+
+Bounded section ile aynı iki aşama, blockquote biçimi için:
+
+| Aşama | Kural |
+|---|---|
+| 1 | `^>\s*-\s+` ile başlayan **BÜTÜN** blockquote bullet'lar toplanır. |
+| 2 | Her biri exact `` > - <etiket>: `<değer>` `` gramerini karşılamalı; bullet sayısı exact **4** olmalı. |
+
+Exact sıra değişmedi: `tag` · `release ID` · `target` · `publishedAt`. Notun
+serbest açıklama paragrafları kısıtsızdır. RC1 **protected section değişmedi** —
+digest bu turda da aynı (aşağıda bağımsız ölçüm).
+
+### Implementation öncesi salt-okuma doküman denetimi
+
+C12 yazılmadan önce, kural sıkılaştırmasının mevcut dokümanları kırıp
+kırmayacağı beş yüzeyde bizzat ölçüldü. Beşi de canonical sözleşmelere **zaten
+uyuyordu**; **existing-document drift YOK** ve hiçbir doküman değiştirilmedi:
+
+| Yüzey | Ölçüm |
+|---|---|
+| `README.md` release-state bölümü | bullet=6 · canonical=6 |
+| `CLAUDE.md` release-state bölümü | bullet=6 · canonical=6 |
+| `docs/releases/README.md` release-state bölümü | bullet=6 · canonical=6 |
+| `docs/releases/README.md` history tablosu | exact header (satır index 33) + exact separator + separator sonrası 2 tablo satırı, ikisi de end-anchored sekiz hücreli; tablodan sonraki satır boş |
+| RC1 historical-note | blockquote bullet=4 · canonical=4 |
+
+Bu ölçüm, C9'daki aynı disiplinin tekrarıdır ve aynı sonucu verir: kapatılan
+açık "yanlış içerik" değil, "makinece görünmeyen içerik" sınıfındadır. Kuralın
+sıkılaşması hiçbir doküman düzenlemesi gerektirmedi.
+
+### Uygulama öncesi prob (beş bypass, gerçek mutasyonla)
+
+C12 commit'lenmeden önce üç bypass'ın beş somut biçimi gerçek dosya
+mutasyonlarıyla prob edildi; her biri **exit 1** ve kendi adlandırılmış hatasını
+üretti. Her prob sonrası dosya **byte-exact** geri yazıldı:
+
+| # | Planted mutasyon | Üretilen hata sınıfı |
+|---|---|---|
+| 1 | README'ye `- current release: v1.0.0` | canonical metadata grameri dışı bullet var |
+| 2 | RC2 satırına dokuzuncu `extra` hücresi | data row grameri exact değil |
+| 3 | RC1 satırına trailing prose | data row grameri exact değil |
+| 4 | separator ile row arasına açıklama satırı | ardışık data row bulunmalı (ölçülen 0) |
+| 5 | RC1 note'a `> - current release: v1.0.0` | canonical metadata grameri dışı blockquote bullet var |
+
+Prob, kuralın **yazılmadan önce** gerçekten açık olduğunu ve **yazıldıktan
+sonra** kapandığını aynı mutasyon kümesiyle gösterir; bu, C13'teki kalıcı
+regresyon senaryolarının ön koşuludur.
 
 ## Negatif Senaryolar — Birinci Tur (C7)
 
-C7'de eklenen senaryolar bu turda da `3d8245c3e303a2a729005651ca9306be10092fee`
-ağacındaki 83/83 koşusunun içinde yer aldı ve exit-0 çıktısında hepsi PASS
+C7'de eklenen senaryolar bu turda da `6cfaae810809a5e3f0a7de2e2297af354731721a`
+ağacındaki 93/93 koşusunun içinde yer aldı ve exit-0 çıktısında hepsi PASS
 satırı üretti.
 
 | Sınıf | Senaryo |
@@ -404,11 +540,11 @@ Ayrıca **önceden var olan** `release-attestation bayat durum tablosu geri
 konursa` senaryosunun beklentisi C7'de güncellenmişti: artık heading kuralı
 tetikliyor (`kaldırılan current-status bölümü geri geldi`).
 
-## Negatif Senaryolar — İkinci Tur (C10, dokuz yeni senaryo)
+## Negatif Senaryolar — İkinci Tur (C10, dokuz senaryo)
 
-Dokuz senaryo `3d8245c3e303a2a729005651ca9306be10092fee` ağacında bizzat
-koşturuldu; hepsi planted violation nedeniyle FAIL ürettiğini ve exact hata
-fragment'ini doğruladı.
+Dokuz senaryo C10 ağacında eklendi; bu turda
+`6cfaae810809a5e3f0a7de2e2297af354731721a` ağacındaki 93/93 koşusunun içinde
+yeniden koştu ve PASS satırı üretti.
 
 | # | Senaryo | Kritik nokta |
 |---|---|---|
@@ -421,11 +557,6 @@ fragment'ini doğruladı.
 | 7 | RC1 `> - target:` → `> - commit:` | değer unchanged; beklenen fragment `commit=f891910d9e6877b4ce40d5833cb42579c6d3d9f1` |
 | 8 | RC1 `release ID` / `target` satır sırası | metadata sırası |
 | 9 | README bounded section'a `- pr: \`#123456\`` | altı basamak (eski tavanın üstü) + kod-span biçimi (eski prefix sınıfının kör noktası) |
-
-Her senaryonun ortak invariantları (suite mekanizması, kod okumasıyla teyit):
-planted violation nedeniyle FAIL üretiyor, **exact hata fragment'ini**
-doğruluyor, **byte-exact restore** yapıyor, worktree snapshot'ı başlangıca
-dönüyor ve `modes` semantiği açıkça taşınıyor.
 
 ### Güncellenen fragment beklentileri (davranış değişmedi)
 
@@ -443,22 +574,53 @@ FAIL üretmeye devam ediyor; yalnız kuralın kendini adlandırma biçimi
 keskinleşti. Not: bu dağılım (4 + 1) rapor yazımında bizzat ölçüldü; toplam
 beş senaryo.
 
+## Negatif Senaryolar — Üçüncü Tur (C13, on yeni senaryo)
+
+On senaryo `6cfaae810809a5e3f0a7de2e2297af354731721a` ağacında bizzat
+koşturuldu; hepsi planted violation nedeniyle FAIL ürettiğini ve exact hata
+fragment'ini doğruladı. Kritik tasarım noktası: **birinci ve ikinci senaryoda
+canonical altı çift hiç değişmiyor** — yalnız parser'ın eskiden görmediği bir
+bullet ekleniyor. Yani senaryolar tam olarak C12 öncesinde sessiz kalan sınıfı
+hedefler.
+
+| # | Senaryo | Kritik nokta |
+|---|---|---|
+| 1 | README bounded bölüme `- current release: v1.0.0` | canonical altı çift **hiç değişmiyor**; yalnız parser dışı bullet ekleniyor (`modes: ['skeleton-dev']`) |
+| 2 | CLAUDE bounded bölüme `- note: free text` | aynı sınıf; serbest metin bullet'ı (`modes: ['skeleton-dev']`) |
+| 3 | ledger bounded bölüme `` - unknown: `value` `` | gramer **karşılanıyor**, bu yüzden ısıran kural **bullet sayısı** sözleşmesidir (yedinci canonical-looking bullet) |
+| 4 | ledger row'una dokuzuncu `extra` hücresi | end-anchored gramer; önek eşleşmesi artık geçmiyor |
+| 5 | ledger row sonuna trailing prose | aynı sınıf; satır sonu sabitlemesi |
+| 6 | separator ile data row arasına açıklama satırı | ardışık bölge kesiliyor → `ölçülen 0` |
+| 7 | ledger'a üçüncü sahte release row | bölge uzunluğu registry'den türetiliyor → `ölçülen 3` |
+| 8 | başlık bölgesi dışına canonical release row | `canonical release-history satırı yalnız başlık bölgesinde bulunabilir` |
+| 9 | RC1 note'a `> - current release: v1.0.0` | gramer dışı blockquote bullet |
+| 10 | RC1 note'a `` > - unknown: `value` `` | gramer karşılanıyor → **bullet sayısı** sözleşmesi ısırıyor (beşinci metadata bullet) |
+
+Üç ve on numaralı senaryolar özellikle değerlidir: gramer kuralını **karşılayan**
+ama sözleşme dışı olan bullet'ların, sayı invariantı tarafından yakalandığını
+gösterirler. Gramer ve sayı kuralları böylece birbirinin kör noktasını kapatır.
+
+Her senaryonun ortak invariantları (suite mekanizması, kod okumasıyla teyit):
+planted violation nedeniyle FAIL üretiyor, **exact hata fragment'ini**
+doğruluyor, **byte-exact restore** yapıyor, worktree snapshot'ı başlangıca
+dönüyor ve `modes` semantiği açıkça taşınıyor.
+
 ## Çalıştırılan Komutlar × Exit Code × Gerçek Sayısal Çıktı
 
 Tüm komutlar bu QA turunda, `fix/f4-release-state-registry` dalının
-`3d8245c3e303a2a729005651ca9306be10092fee` ağacında bizzat koşturuldu.
+`6cfaae810809a5e3f0a7de2e2297af354731721a` ağacında bizzat koşturuldu.
 
 | # | Komut | Exit | Gerçek çıktı |
 |---|---|---|---|
-| 1 | `pnpm install --frozen-lockfile` | **0** | `Done in 519ms using pnpm v10.34.4` |
-| 2 | `node scripts/verify-structure.mjs` | **0** | `PASS — 1236 checks OK (manifest: scripts/structure-manifest.json)` |
-| 3 | `node scripts/tests/verify-structure-negative.mjs` | **0** | `83/83 senaryo PASS (mode=skeleton-dev, 3 senaryo bu modda kapalı; toplam 86)` |
+| 1 | `pnpm install --frozen-lockfile` | **0** | `Done in 493ms using pnpm v10.34.4` |
+| 2 | `node scripts/verify-structure.mjs` | **0** | `PASS — 1247 checks OK (manifest: scripts/structure-manifest.json)` |
+| 3 | `node scripts/tests/verify-structure-negative.mjs` | **0** | `93/93 senaryo PASS (mode=skeleton-dev, 3 senaryo bu modda kapalı; toplam 96)` |
 | 4 | `node .claude/hooks/tests/run-tests.js` | **0** | `PASS — 302 assertions OK (94 fixtures + settings bindings + git closure-context scenarios)` |
 | 5 | `node scripts/tests/bootstrap-transaction.mjs` | **0** | `7/7 senaryo PASS` + `kaynak repo hiç yazılmadı` |
 | 6 | `node scripts/tests/bootstrap-e2e.mjs` | **0** | `[bootstrap-e2e] tüm assertion'lar PASS` · adım 11'in **on** assertion'ı PASS · `temp temizlendi: evet` |
 | 7 | `pnpm gate` | **0** | `All gates PASS` — toolchain·build·typecheck·lint·test·audit·structure·contract-drift = **8/8** |
-| 8 | `git log --reverse --format="%H %s" cfe61e82c7b1458e1280187be6214ded0a702b49..3d8245c3e303a2a729005651ca9306be10092fee` | **0** | 10 commit (yukarıda tam liste) |
-| 9 | `git diff --name-status cfe61e82c7b1458e1280187be6214ded0a702b49...3d8245c3e303a2a729005651ca9306be10092fee` | **0** | 13 dosya (aşağıda tam liste) |
+| 8 | `git log --reverse --format="%H %s" cfe61e82c7b1458e1280187be6214ded0a702b49..6cfaae810809a5e3f0a7de2e2297af354731721a` | **0** | 13 commit (yukarıda tam liste) |
+| 9 | `git diff --name-status cfe61e82c7b1458e1280187be6214ded0a702b49...6cfaae810809a5e3f0a7de2e2297af354731721a` | **0** | 13 dosya (aşağıda tam liste) |
 
 `SKIP_API=1 pnpm gate` bu turda **gerekmedi ve koşturulmadı**: Docker Engine
 29.6.1 daemon'ı erişilebilirdi ve tam `pnpm gate` exit 0 verdi. Koşmamış bir
@@ -470,20 +632,22 @@ doküman dosyası yazmadı.
 
 ## Before/After
 
-### `verify-structure` check sayısı: 1144 → 1208 → 1227 → **1236**
+### `verify-structure` check sayısı: 1144 → 1208 → 1227 → 1236 → **1247**
 
 | Ölçüm noktası | Değer |
 |---|---|
 | Tarihsel baseline (önceki remediation turu) | 1144 |
 | Tarihsel: ilk evidence turu (C4 ağacı) | 1208 |
 | Tarihsel: ikinci evidence turu (C7 ağacı) | 1227 |
-| **Şimdi (`3d8245c3…`)** | **1236** |
+| Tarihsel: üçüncü evidence turu (C10 ağacı) | 1236 |
+| **Şimdi (`6cfaae81…`)** | **1247** |
 
-Artış, C9'un doküman-şema kontrolleriyle tutarlı: etiket/değer vektörü,
-yinelenen etiket kontrolü, çifte ilk-alan kontrolü, ledger header/separator/
-tekillik/sıra kontrolleri ve RC1 note blok+vektör kontrolleri.
+Artış, C12'nin gramer kontrolleriyle tutarlı: üç bounded section için
+bütün-bullet toplama + sayı invariantı, end-anchored data-row grameri, ardışık
+tablo bölgesi ve bölge-dışı canonical satır kontrolü, RC1 note bütün-blockquote
+bullet toplama + sayı invariantı.
 
-### `verify-structure-negative`: 34 → 62 → 77 → **86 tanımlı** (bu modda **83 koşan**)
+### `verify-structure-negative`: 34 → 62 → 77 → 86 → **96 tanımlı** (bu modda **93 koşan**)
 
 `MODE` değeri repo'nun kendi `scripts/structure-manifest.json` → `mode`
 alanından türetiliyor (bu repo `skeleton-dev`; bizzat okundu).
@@ -493,10 +657,11 @@ alanından türetiliyor (bu repo `skeleton-dev`; bizzat okundu).
 | Tarihsel baseline | 34 | 34 |
 | Tarihsel: ilk evidence turu (C4 ağacı) | 59 | 62 |
 | Tarihsel: ikinci evidence turu (C7 ağacı) | 74 | 77 |
-| **Şimdi (`3d8245c3…`)** | **83** | **86** |
+| Tarihsel: üçüncü evidence turu (C10 ağacı) | 83 | 86 |
+| **Şimdi (`6cfaae81…`)** | **93** | **96** |
 
-- **83 senaryo `mode=skeleton-dev`'de koşuyor ve PASS veriyor** (gerçek exit-0
-  çıktısı: `83/83 senaryo PASS`). Bu kümenin içinde, fixture seviyesinde kendi
+- **93 senaryo `mode=skeleton-dev`'de koşuyor ve PASS veriyor** (gerçek exit-0
+  çıktısı: `93/93 senaryo PASS`). Bu kümenin içinde, fixture seviyesinde kendi
   izole manifest kopyasını `mode=project` olarak yamayan proje-modu senaryoları
   da var — bunlar global `MODE` sabitini değiştirmediği için skeleton-dev
   koşusunda da çalışıyor.
@@ -517,19 +682,19 @@ alanından türetiliyor (bu repo `skeleton-dev`; bizzat okundu).
 Bu tur bu sayıları yeniden ölçtü; artış/azalış yok. Beklenen: bu remediation
 hook sistemine dokunmuyor.
 
-### Ölçülen dosya satır sayıları (gerçek `wc -l`, `3d8245c3…` ağacı)
+### Ölçülen dosya satır sayıları (gerçek `wc -l`, `6cfaae81…` ağacı)
 
 | Dosya | Satır | Manifest `maxLines` |
 |---|---|---|
-| `scripts/verify-structure.mjs` | **1310** | **kayıt yok** (gate denetlemiyor) |
-| `scripts/tests/verify-structure-negative.mjs` | **1193** | kayıt yok |
+| `scripts/verify-structure.mjs` | **1383** | **kayıt yok** (gate denetlemiyor) |
+| `scripts/tests/verify-structure-negative.mjs` | **1326** | kayıt yok |
 | `docs/releases/README.md` | **69** | 120 |
 | `scripts/bootstrap-project.mjs` | **492** | **500 korundu** |
 | `docs/operations/release-attestation.md` | **164** | 165 |
 
 ## Generated-Project Kanıtı (`bootstrap-e2e` adım 11)
 
-`node scripts/tests/bootstrap-e2e.mjs`, `3d8245c3…` ağacında exit 0 ile
+`node scripts/tests/bootstrap-e2e.mjs`, `6cfaae81…` ağacında exit 0 ile
 koştu; adım 11'in on assertion'ı PASS verdi:
 
 ```text
@@ -558,7 +723,8 @@ kaynak repo hiçbir noktada yazılmadı (`kaynak repo hiç yazılmadı` — ayn�
 
 Ayrıca adım 6 (generated project quality gate) ve adım 7 (project-mode
 `verify-structure`) bu turda da PASS satırı üretti — generated project'te de
-yeni provenance registry'si ve C9'un doküman-şema kuralları tutarlı kaldı.
+yeni provenance registry'si, C9'un doküman-şema kuralları ve C12'nin gramer
+kuralları tutarlı kaldı.
 
 ## Audit Digest ve RC1 Korunan Bölüm Digest'i (bizzat ölçüldü)
 
@@ -576,9 +742,10 @@ Her iki değer `scripts/structure-manifest.json` içindeki kayıtlı değerlerle
 `auditedImmutableReleases[0].snapshotProtectedSectionSha256`) **birebir
 eşleşti** — yani 7k bloğunun kendi runtime kontrolü bağımsız bir ikinci
 ölçümle doğrulanmıştır. Ek teyit: canonical audit dosyası byte-for-byte
-**değişmedi**; base → `3d8245c3…` changed-file listesinde `docs/audits/**`
-yok. RC1 korunan bölüm digest'i de C9/C10 boyunca **değişmedi** (yukarıdaki
-değer, önceki turda ölçülenin aynısıdır).
+**değişmedi**; base → `6cfaae81…` changed-file listesinde `docs/audits/**`
+yok. RC1 korunan bölüm digest'i de C12/C13 boyunca **değişmedi** (yukarıdaki
+değer, önceki turda ölçülenin aynısıdır); C12'nin gramer kuralı yalnız bounded
+`historical-note` bloğuna bakar, protected section'a dokunmaz.
 
 ## Lokal Docker Durumu
 
@@ -604,10 +771,10 @@ PR CI tetiklendiğinde ayrıca doğrulanmalıdır.
 
 ```bash
 git diff --name-status \
-  cfe61e82c7b1458e1280187be6214ded0a702b49...3d8245c3e303a2a729005651ca9306be10092fee
+  cfe61e82c7b1458e1280187be6214ded0a702b49...6cfaae810809a5e3f0a7de2e2297af354731721a
 ```
 
-13 dosya, `13 files changed, 2013 insertions(+), 41 deletions(-)`:
+13 dosya, `13 files changed, 2419 insertions(+), 41 deletions(-)`:
 
 ```text
 M	CLAUDE.md
@@ -626,13 +793,13 @@ M	scripts/verify-structure.mjs
 ```
 
 Listedeki `docs/test-reports/2026-07-29-ac-32-release-state-remediation.md`
-girdisi, bu raporun C5'te eklenip C8'de yenilenen **önceki** sürümüdür. Bu turda
-yapılan yenileme ölçülen ağacın parçası **değildir** — bu, yukarıdaki üç kavram
-ayrımının doğrudan sonucudur.
+girdisi, bu raporun C5'te eklenip C8 ve C11'de yenilenen **önceki** sürümüdür.
+Bu turda yapılan yenileme ölçülen ağacın parçası **değildir** — bu, yukarıdaki
+üç kavram ayrımının doğrudan sonucudur.
 
 `git diff --stat` ile ölçülen değişen satır sayıları (aynı aralık):
-`scripts/tests/verify-structure-negative.mjs` 610 · `scripts/verify-structure.mjs`
-510 · `docs/test-reports/2026-07-29-ac-32-release-state-remediation.md` 529 ·
+`scripts/tests/verify-structure-negative.mjs` 743 · `scripts/verify-structure.mjs`
+583 · `docs/test-reports/2026-07-29-ac-32-release-state-remediation.md` 729 ·
 `docs/adr/ADR-0018-release-state-registry.md` 130 · `docs/releases/README.md`
 69 · `docs/operations/release-attestation.md` 52 ·
 `scripts/structure-manifest.json` 41 · `scripts/tests/bootstrap-e2e.mjs` 30 ·
@@ -644,9 +811,10 @@ Allowlist teyidi: bu QA turu implementasyon/test/manifest/doküman dosyalarını
 yalnız bu kanıt raporu yazıldı. Yukarıdaki dosyalar implementation dalının
 kendi değişikliğidir. Sürpriz dosya yok: değişiklik kümesi
 `scripts/structure-manifest.json` (registry), `scripts/verify-structure.mjs`
-(7k enforcement + doküman şeması), `scripts/tests/verify-structure-negative.mjs`
-(regresyon kapsamı), `scripts/tests/bootstrap-e2e.mjs` (generated-project
-kanıtı), `scripts/bootstrap-project.mjs` (exclude + section strip), `README.md`/
+(7k enforcement + doküman şeması + doküman grameri),
+`scripts/tests/verify-structure-negative.mjs` (regresyon kapsamı),
+`scripts/tests/bootstrap-e2e.mjs` (generated-project kanıtı),
+`scripts/bootstrap-project.mjs` (exclude + section strip), `README.md`/
 `CLAUDE.md` (bounded section), `docs/releases/**` (yeni ledger + RC1
 historical-note), `docs/operations/{authority-map,release-attestation}.md`,
 yeni `docs/adr/ADR-0018-*.md` ve bu kanıt raporu ile sınırlı. `apps/**`,
@@ -654,11 +822,11 @@ yeni `docs/adr/ADR-0018-*.md` ve bu kanıt raporu ile sınırlı. `apps/**`,
 
 ## Kayıtlı Borç
 
-`scripts/verify-structure.mjs` **1310** satıra çıktı; `coding-style.md` genel
+`scripts/verify-structure.mjs` **1383** satıra çıktı; `coding-style.md` genel
 stil tavanı **800**; manifest `maxLines` sözlüğünde bu dosya için kayıt **yok**
 (bizzat ölçüldü → `undefined`), yani gate bu dosyanın boyutunu hiç
-denetlemiyor. Borç seri hâlinde büyüdü: tavan **800** → 1066 → 1235 →
-**1310**. Bölme işlemi allowlist dışı olduğu için bu turda da yapılmadı; borç
+denetlemiyor. Borç seri hâlinde büyüdü: tavan **800** → 1066 → 1235 → 1310 →
+**1383**. Bölme işlemi allowlist dışı olduğu için bu turda da yapılmadı; borç
 ADR-0017/ADR-0018 hattında kayıtlıdır.
 
 ## Kalan Riskler
@@ -670,23 +838,26 @@ ADR-0017/ADR-0018 hattında kayıtlıdır.
    tazelik "Adım 9" prosedürünün insan/PR disiplinine bağlıdır.
 2. **Registry değerlerinin semantik doğruluğu insan review'u gerektirir.**
    `verify-structure` yapısal tutarlılığı (exact şema, digest, bounded section
-   etiket/değer eşitliği, ledger header + satır eşitliği, RC1 note vektörü)
-   denetler; `auditedCandidateTag`, `stableReleaseStatusAtAudit` gibi alanların
+   etiket/değer eşitliği + bullet grameri/sayısı, ledger header + end-anchored
+   satır + ardışık bölge, RC1 note vektörü + bullet grameri/sayısı) denetler;
+   `auditedCandidateTag`, `stableReleaseStatusAtAudit` gibi alanların
    **anlamsal olarak doğru** audit hükmünü yansıttığı makine tarafından
    doğrulanamaz.
 3. **Registry + ledger bilinçli olarak birlikte değiştirilirse** structural
    gate mismatch üretmez; dış gerçekliğin doğruluğu code-review kapsamındadır.
    Gate'in tasarım hedefi **tek-taraflı drift**, iki-taraflı kasıtlı düzenleme
    değildir (Düzeltme B, "Sınır" maddesi).
-4. **`verify-structure.mjs` 1310 satır, `maxLines` kaydı yok** (yukarıdaki
-   "Kayıtlı Borç"); borç bu turda yine büyüdü (1235 → 1310) ve bölme
+4. **`verify-structure.mjs` 1383 satır, `maxLines` kaydı yok** (yukarıdaki
+   "Kayıtlı Borç"); borç bu turda yine büyüdü (1310 → 1383) ve bölme
    ertelenmiş bir borç olarak açık kalıyor.
-5. **Doküman etiketleri exact lowercase English sözleşmesine bağlandı.** Bu
-   bilinçli bir katılıktır: ileride etiket metnini iyileştirmek isteyen bir
-   değişiklik, aynı commit'te `RELEASE_STATE_FIELD_LABELS` /
-   `RC1_NOTE_FIELDS` / `LEDGER_HEADER` sabitlerini de güncellemek zorundadır;
-   aksi hâlde gate FAIL verir. Sözleşmenin sahibi kural dosyasıdır, doküman
-   metni değil.
+5. **Doküman etiketleri exact lowercase English sözleşmesine bağlandı ve bullet
+   yüzeyi fail-closed hâle geldi.** Bu bilinçli bir katılıktır: ileride etiket
+   metnini iyileştirmek ya da bölüme yeni bir bullet eklemek isteyen bir
+   değişiklik, aynı commit'te `RELEASE_STATE_FIELD_LABELS` / `RC1_NOTE_FIELDS`
+   / `LEDGER_HEADER` sabitlerini de güncellemek zorundadır; aksi hâlde gate
+   FAIL verir. Serbest açıklama paragrafları hâlâ kısıtsızdır, ama **bullet
+   biçimi** artık sözleşmenin parçasıdır. Sözleşmenin sahibi kural dosyasıdır,
+   doküman metni değil.
 6. **Lokal Docker koşusu tekrarlanabilir değil** (yukarıdaki bölüm) —
    bağlayıcı kanıt PR CI'daki `api-verify-testcontainers`, henüz koşmadı.
 7. **`verify-structure-negative` üç senaryosu bu turda `SKIP` kaldı**
@@ -696,7 +867,14 @@ ADR-0017/ADR-0018 hattında kayıtlıdır.
 8. **İki intra-commit kapsam sapması kayıtlı** (C7 casing düzeltmesi, C10
    prefix-sınıfı düzeltmesi). Her ikisi de "testi kurala değil, kuralı gerçeğe
    uydur" ilkesiyle gerekçelendirildi ve kanıtlayan testle aynı commit'te
-   durur; yine de commit kapsam disiplininden sapma olarak açık kalıyor.
+   durur; yine de commit kapsam disiplininden sapma olarak tarihsel kayıtta
+   açık kalıyor. **Bu turda (C12/C13) sapma tekrarlanmadı**: iki commit de tam
+   olarak beklenen tek dosyaya dokundu.
+9. **Ledger tablo bölgesi uzunluğu registry'den türetiliyor**, sabit sayı
+   değil; bu doğru tasarımdır, ama registry ile ledger aynı commit'te birlikte
+   büyütülmezse gate FAIL verir. Yeni bir release kaydı eklerken registry ve
+   ledger satırı **aynı commit'te** taşınmalıdır — bu bilinçli bir birlikte
+   değişim yükümlülüğüdür.
 
 ## Statü (bağlayıcı dil — tahmin edilmiş SHA/PR/CI yok)
 
@@ -723,7 +901,8 @@ her ikisi de ADR-0018 kapsamı dışında bırakılmıştır (madde 13, Deferred
 Required check'ler (`quality-gate-ubuntu`, `api-verify-testcontainers` dahil)
 PR CI'da koşar → code-reviewer + Security gate Final Gate Mode'da bu raporu ve
 implementasyon diff'ini (özellikle exact şema bloğu, etiket/değer vektörü,
-pinlenen ledger header'ı, RC1 note sözleşmesi, bounded-section desen listesi ve
-`foldCase` düzeltmesi) birlikte inceler → tüm gate'ler yeşilse merge → memory
-closure protokolü (`fix/f4-release-state-registry` dalında **değil**, ayrı
+bütün-bullet grameri + sayı invariantı, end-anchored ledger satırı ve ardışık
+tablo bölgesi, RC1 note sözleşmesi, bounded-section desen listesi ve `foldCase`
+düzeltmesi) birlikte inceler → tüm gate'ler yeşilse merge → memory closure
+protokolü (`fix/f4-release-state-registry` dalında **değil**, ayrı
 `chore/memory-close-*` dalında).
