@@ -641,10 +641,12 @@ const SECTION_FORBIDDEN_PATTERNS = [
   [/\b[0-9a-fA-F]{40}\b/, '40-hex commit SHA'],
   [/actions\/runs\/\d+/, 'CI run URL'],
   [/\b\d{7,}\b/, 'release ID / CI run ID'],
-  // Any positive PR reference, at any digit length — a five-digit cap merely
-  // moved the self-reference above the ceiling. A `#` must be followed
-  // immediately by a digit, so Markdown headings are never mistaken for one.
-  [/(?:^|[\s([])#\d+\b/, 'PR numarası'],
+  // Any positive PR reference, at any digit length and in any position — a
+  // five-digit cap merely moved the self-reference above the ceiling, and a
+  // prefix class let `` `#39` `` (a code span, the section's own field style)
+  // slip past. Requiring a digit immediately after `#` is the whole guard:
+  // Markdown headings (`## Release state`) can never satisfy it.
+  [/#\d+\b/, 'PR numarası'],
   [SKELETON_IDENTITY_RE, 'skeleton kimlik token\'ı'],
   [/publishedAt|prerelease|immutable/i, 'release metadata alanı'],
   [/attestationVerified|verified:\s*\d+|attestation[^\n]{0,24}(?:verified|doğrulan)/i,

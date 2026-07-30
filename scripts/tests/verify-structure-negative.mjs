@@ -462,7 +462,7 @@ const scenarios = [
   {
     name: 'README release-state alanı silinirse FAIL üretir (auditedState)',
     modes: ['skeleton-dev'],
-    expectFragments: ['README.md: release-state alanları registry ile uyuşmuyor'],
+    expectFragments: ['README.md: release-state alan/değer çiftleri registry ile uyuşmuyor'],
     setup: () => ({
       paths: [],
       restore: patchTextFile('README.md', (text) => dropReleaseStateField(text, 'recommendation')),
@@ -471,7 +471,7 @@ const scenarios = [
   {
     name: 'CLAUDE.md release-state alanı silinirse FAIL üretir (auditedState)',
     modes: ['skeleton-dev'],
-    expectFragments: ['CLAUDE.md: release-state alanları registry ile uyuşmuyor'],
+    expectFragments: ['CLAUDE.md: release-state alan/değer çiftleri registry ile uyuşmuyor'],
     setup: () => ({
       paths: [],
       restore: patchTextFile('CLAUDE.md', (text) => dropReleaseStateField(text, 'verdict')),
@@ -479,7 +479,7 @@ const scenarios = [
   },
   {
     name: 'ledger audited-state alanı silinirse FAIL üretir (auditedState)',
-    expectFragments: ['docs/releases/README.md: release-state alanları registry ile uyuşmuyor'],
+    expectFragments: ['docs/releases/README.md: release-state alan/değer çiftleri registry ile uyuşmuyor'],
     setup: () => ({
       paths: [],
       restore: patchTextFile('docs/releases/README.md', (text) =>
@@ -552,7 +552,7 @@ const scenarios = [
   },
   {
     name: 'RC1 historical-note kimliği saptırılırsa FAIL üretir',
-    expectFragments: ['historical-note bloğu registry kimliğiyle eşleşmiyor'],
+    expectFragments: ['historical-note metadata satırları registry sözleşmesinden sapıyor'],
     setup: () => ({
       paths: [],
       restore: patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
@@ -836,6 +836,127 @@ const scenarios = [
     }),
   },
   {
+    // The decisive case: EVERY value stays byte-identical and only the label
+    // moves. A value-vector comparison passes this; a label+value contract does
+    // not. To a human reader `unrelated label: FAIL` still reads as provenance.
+    name: 'README verdict etiketi değişirse (değerler unchanged) FAIL üretir',
+    modes: ['skeleton-dev'],
+    expectFragments: [
+      'README.md: release-state alan/değer çiftleri registry ile uyuşmuyor',
+      'unrelated label=FAIL',
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text.replace('- verdict: `FAIL`', '- unrelated label: `FAIL`')
+      ),
+    }),
+  },
+  {
+    name: 'CLAUDE audited candidate etiketi kısaltılırsa FAIL üretir (etiket sözleşmesi)',
+    modes: ['skeleton-dev'],
+    expectFragments: [
+      'CLAUDE.md: release-state alan/değer çiftleri registry ile uyuşmuyor',
+      'candidate=v1.0.0-rc.2',
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('CLAUDE.md', (text) =>
+        text.replace('- audited candidate: `v1.0.0-rc.2`', '- candidate: `v1.0.0-rc.2`')
+      ),
+    }),
+  },
+  {
+    // Order is part of the schema: swapping two intact rows keeps every pair
+    // valid in isolation and still breaks the canonical vector.
+    name: 'ledger bounded field sırası değişirse FAIL üretir (etiket sırası)',
+    expectFragments: ['docs/releases/README.md: release-state alan/değer çiftleri registry ile uyuşmuyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/README.md', (text) =>
+        text.replace(
+          '- production readiness: `CORE_SKELETON_NOT_PRODUCTION_READY`\n- recommendation: `NO_GO_REMEDIATION_REQUIRED`',
+          '- recommendation: `NO_GO_REMEDIATION_REQUIRED`\n- production readiness: `CORE_SKELETON_NOT_PRODUCTION_READY`'
+        )
+      ),
+    }),
+  },
+  {
+    name: 'bounded section\'da yinelenen alan etiketi FAIL üretir',
+    expectFragments: ['docs/releases/README.md: release-state bölümünde yinelenen alan etiketi var'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/README.md', (text) =>
+        text.replace('- verdict: `FAIL`', '- verdict: `FAIL`\n- verdict: `FAIL`')
+      ),
+    }),
+  },
+  {
+    // Data cells stay byte-identical; only the human-readable column name moves.
+    name: 'ledger Immutable kolon başlığı yeniden adlandırılırsa FAIL üretir',
+    expectFragments: [
+      'release-history başlık satırı exact kolon sözleşmesinden sapıyor',
+      'Immutability',
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/README.md', (text) =>
+        text.replace('| Prerelease | Immutable | Attestation |', '| Prerelease | Immutability | Attestation |')
+      ),
+    }),
+  },
+  {
+    name: 'ledger Prerelease/Immutable kolon sırası değişirse FAIL üretir',
+    expectFragments: ['release-history başlık satırı exact kolon sözleşmesinden sapıyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/README.md', (text) =>
+        text.replace('| Prerelease | Immutable | Attestation |', '| Immutable | Prerelease | Attestation |')
+      ),
+    }),
+  },
+  {
+    // Containment ("is this SHA somewhere in the block?") accepted this: the
+    // value is correct, only the label lies about what it is.
+    name: 'RC1 historical-note target etiketi commit olursa FAIL üretir (değer unchanged)',
+    expectFragments: [
+      'historical-note metadata satırları registry sözleşmesinden sapıyor',
+      'commit=f891910d9e6877b4ce40d5833cb42579c6d3d9f1',
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
+        text.replace('> - target: `f891910d', '> - commit: `f891910d')
+      ),
+    }),
+  },
+  {
+    name: 'RC1 historical-note metadata sırası değişirse FAIL üretir',
+    expectFragments: ['historical-note metadata satırları registry sözleşmesinden sapıyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
+        text.replace(
+          '> - release ID: `361113458`\n> - target: `f891910d9e6877b4ce40d5833cb42579c6d3d9f1`',
+          '> - target: `f891910d9e6877b4ce40d5833cb42579c6d3d9f1`\n> - release ID: `361113458`'
+        )
+      ),
+    }),
+  },
+  {
+    // Six digits cleared the old five-digit ceiling, and the code-span form is
+    // exactly how the section writes its own fields — both had to be closed.
+    name: 'bounded section\'a altı basamaklı PR referansı eklenirse FAIL üretir',
+    modes: ['skeleton-dev'],
+    expectFragments: ['README.md: release-state bölümünde yasak token', 'PR numarası'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text.replace('- verdict: `FAIL`', '- verdict: `FAIL`\n- pr: `#123456`')
+      ),
+    }),
+  },
+  {
     name: 'dokunulmamış release provenance FAIL ÜRETMEZ (registry taban kontrolü)',
     expectOk: true,
     setup: () => [],
@@ -891,7 +1012,7 @@ const scenarios = [
   },
   {
     name: 'project modda ledger manifestten saparsa FAIL üretir',
-    expectFragments: ['docs/releases/README.md: release-state alanları registry ile uyuşmuyor'],
+    expectFragments: ['docs/releases/README.md: release-state alan/değer çiftleri registry ile uyuşmuyor'],
     setup() {
       const restoreDoc = patchTextFile('docs/releases/README.md', (text) =>
         text.replace('- verdict: `FAIL`', '- verdict: `PASS_WITH_RISKS`')
