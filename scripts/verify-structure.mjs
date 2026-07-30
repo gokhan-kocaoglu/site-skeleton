@@ -947,12 +947,21 @@ const STALE_STATUS_SENTENCES = [
   'Tag oluşturulmadı',
 ];
 const POINTER_HEADING = 'mevcut durum burada tutulmaz';
+// Turkish casing is lossy in BOTH directions: `'I'.toLowerCase()` is dotted `i`
+// while the written form is dotless `ı`, and `'İ'.toLowerCase()` adds a combining
+// dot. A plain toLowerCase() comparison would therefore miss an ALL-CAPS stale
+// sentence — a false negative in exactly the case the rule must catch. Folding
+// every i-variant to bare `i` makes the match casing-proof both ways.
+const COMBINING_DOT_ABOVE = '\u0307';
+const DOTLESS_I = '\u0131';
+const foldCase = (text) =>
+  text.toLowerCase().split(COMBINING_DOT_ABOVE).join('').split(DOTLESS_I).join('i');
 const attestationText = existsSync(p(RELEASE_ATTESTATION)) ? readFileSync(p(RELEASE_ATTESTATION), 'utf8') : '';
 for (const line of attestationText.replace(/[`*_]/g, '').split(/\r?\n/)) {
   const heading = line.match(/^#{2,6}\s+(.+)$/);
   if (heading === null || !/mevcut\s+durum/i.test(heading[1])) continue;
   check(
-    heading[1].trim().toLowerCase() === POINTER_HEADING,
+    foldCase(heading[1].trim()) === foldCase(POINTER_HEADING),
     `${RELEASE_ATTESTATION}: kaldırılan current-status bölümü geri geldi ("${heading[1].trim()}")` +
       ' — güncel durum yalnız ledger\'da tutulur'
   );
@@ -964,10 +973,10 @@ for (const token of STALE_STATUS_IDS) {
     `${RELEASE_ATTESTATION}: bayat current-state token'ı taşıyor (${token}) — durum ledger'da tutulur`
   );
 }
-const staleProseText = attestationText.replace(/[`*]/g, '').replace(/\s+/g, ' ').toLowerCase();
+const staleProseText = foldCase(attestationText.replace(/[`*]/g, '').replace(/\s+/g, ' '));
 for (const sentence of STALE_STATUS_SENTENCES) {
   check(
-    !staleProseText.includes(sentence.replace(/\s+/g, ' ').toLowerCase()),
+    !staleProseText.includes(foldCase(sentence.replace(/\s+/g, ' '))),
     `${RELEASE_ATTESTATION}: bayat dış-durum cümlesi taşıyor ("${sentence}") — durum ledger'da tutulur`
   );
 }

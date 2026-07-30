@@ -634,8 +634,11 @@ const scenarios = [
     }),
   },
   {
+    // The removed current-status surface is caught by its HEADING, whatever the
+    // date suffix, casing or emphasis — not by a repo-wide word ban that would
+    // also outlaw the contract's own placeholder examples.
     name: 'release-attestation bayat durum tablosu geri konursa FAIL üretir',
-    expectFragments: ["bayat current-state token'ı taşıyor"],
+    expectFragments: ['kaldırılan current-status bölümü geri geldi', 'Mevcut durum (2026-07-28)'],
     setup: () => ({
       paths: [],
       restore: patchTextFile('docs/operations/release-attestation.md', (text) =>
@@ -662,6 +665,174 @@ const scenarios = [
       restore: patchManifest((m) => {
         m.upstreamReleaseProvenance.auditedImmutableReleases[1].releaseName = 'site-skeleton v1.0.0-rc.2';
       }),
+    }),
+  },
+  {
+    // Exact schema, not "required fields present": a time-bound field nobody
+    // enforces would be born stale the moment the next candidate ships.
+    name: 'auditedState\'e currentRelease eklenirse FAIL üretir (exact key set)',
+    expectFragments: ['auditedState: exact şema dışı anahtar kümesi', 'currentRelease'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.upstreamReleaseProvenance.auditedState.currentRelease = 'v1.0.0';
+      }),
+    }),
+  },
+  {
+    name: 'provenance top-level\'ına latestRelease eklenirse FAIL üretir (exact key set)',
+    expectFragments: ['upstreamReleaseProvenance: exact şema dışı anahtar kümesi', 'latestRelease'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.upstreamReleaseProvenance.latestRelease = 'v1.0.0-rc.2';
+      }),
+    }),
+  },
+  {
+    // The identity-token rule cannot carry this load: the planted field is
+    // perfectly innocent-looking and survives bootstrap untouched. Only the
+    // fail-closed key set rejects it.
+    name: 'release kaydına kimlik token\'sız bilinmeyen alan eklenirse FAIL üretir (exact key set)',
+    expectFragments: ['şema dışı alan(lar): displayLabel'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.upstreamReleaseProvenance.auditedImmutableReleases[1].displayLabel = 'Audited candidate';
+      }),
+    }),
+  },
+  {
+    name: 'snapshot\'sız kayda protected digest eklenirse FAIL üretir (koşullu şema)',
+    expectFragments: ['repositorySnapshot null iken', 'snapshotProtectedSectionSha256 taşınmamalı'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.upstreamReleaseProvenance.auditedImmutableReleases[1].snapshotProtectedSectionSha256 = 'b'.repeat(64);
+      }),
+    }),
+  },
+  {
+    name: 'attestation çifti bölünürse FAIL üretir (koşullu şema)',
+    expectFragments: ['attestationVerified ve attestationChecks', 'birlikte bulunmalı'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        delete m.upstreamReleaseProvenance.auditedImmutableReleases[1].attestationChecks;
+      }),
+    }),
+  },
+  {
+    // Metadata drift: each field below used to live in ledger PROSE, so a
+    // one-sided manifest edit was invisible. The ledger stays untouched here.
+    name: 'RC2 immutable false yapılırsa ledger mismatch FAIL üretir',
+    expectFragments: ['audited release history registry ile uyuşmuyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.upstreamReleaseProvenance.auditedImmutableReleases[1].immutable = false;
+      }),
+    }),
+  },
+  {
+    name: 'RC2 prerelease false yapılırsa ledger mismatch FAIL üretir',
+    expectFragments: ['audited release history registry ile uyuşmuyor'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.upstreamReleaseProvenance.auditedImmutableReleases[1].prerelease = false;
+      }),
+    }),
+  },
+  {
+    name: 'RC2 attestationVerified false yapılırsa ledger mismatch FAIL üretir',
+    expectFragments: ['audited release history registry ile uyuşmuyor', 'unverified:11'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.upstreamReleaseProvenance.auditedImmutableReleases[1].attestationVerified = false;
+      }),
+    }),
+  },
+  {
+    name: 'RC2 attestationChecks 10 yapılırsa ledger mismatch FAIL üretir',
+    expectFragments: ['audited release history registry ile uyuşmuyor', 'verified:10'],
+    setup: () => ({
+      paths: [],
+      restore: patchManifest((m) => {
+        m.upstreamReleaseProvenance.auditedImmutableReleases[1].attestationChecks = 10;
+      }),
+    }),
+  },
+  {
+    // Uppercase is the same self-reference; the old pattern was lowercase-only.
+    name: 'bounded section\'a uppercase 40-hex SHA eklenirse FAIL üretir (self-reference)',
+    modes: ['skeleton-dev'],
+    expectFragments: ['README.md: release-state bölümünde yasak token', '40-hex commit SHA'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text.replace('- verdict: `FAIL`', '- verdict: `FAIL`\n- merge: `0123456789ABCDEF0123456789ABCDEF01234567`')
+      ),
+    }),
+  },
+  {
+    name: 'bounded section\'a publishedAt alanı eklenirse FAIL üretir',
+    modes: ['skeleton-dev'],
+    expectFragments: ['README.md: release-state bölümünde yasak token', 'release metadata alanı'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text.replace('- verdict: `FAIL`', '- verdict: `FAIL`\n- publishedAt: `recorded`')
+      ),
+    }),
+  },
+  {
+    name: 'bounded section\'a olumlu attestation sinyali eklenirse FAIL üretir',
+    modes: ['skeleton-dev'],
+    expectFragments: ['CLAUDE.md: release-state bölümünde yasak token', 'olumlu attestation sinyali'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('CLAUDE.md', (text) =>
+        text.replace('- verdict: `FAIL`', '- verdict: `FAIL`\n- attestation: `verified:11`')
+      ),
+    }),
+  },
+  {
+    // The history table may never migrate into the bounded summary: that would
+    // "satisfy" the forbidden-token rule only by hollowing it out.
+    name: 'release-history satırı bounded section\'a taşınırsa FAIL üretir',
+    expectFragments: ['release-history satırları bounded release-state bölümünün dışında kalmalı'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/README.md', (text) =>
+        text.replace(
+          '<!-- release-state:end -->',
+          '| `v0.0.1` | `1` | `f891910d9e6877b4ce40d5833cb42579c6d3d9f1` |' +
+            ' `2026-07-28T13:37:11Z` | `true` | `true` | `not-recorded` | `none` |\n<!-- release-state:end -->'
+        )
+      ),
+    }),
+  },
+  {
+    name: 'attestation yönlendirme bölümüne bayat CI placeholder\'ı eklenirse FAIL üretir',
+    expectFragments: ["bayat current-state token'ı taşıyor (FINAL_EVIDENCE_POST_MERGE_CI_RUN_URL)"],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/operations/release-attestation.md', (text) =>
+        `${text}\nSon closure CI: \`FINAL_EVIDENCE_POST_MERGE_CI_RUN_URL\`\n`
+      ),
+    }),
+  },
+  {
+    // Markdown emphasis and casing must not create a false negative.
+    name: 'attestation dosyasına bayat dış-durum cümlesi eklenirse FAIL üretir',
+    expectFragments: ['bayat dış-durum cümlesi taşıyor ("Release oluşturulmadı")'],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/operations/release-attestation.md', (text) =>
+        `${text}\n**RELEASE OLUŞTURULMADI**\n`
+      ),
     }),
   },
   {
