@@ -62,6 +62,7 @@
     "docs/operations/ci.md",
     "docs/operations/deployment.md",
     "docs/operations/release-attestation.md",
+    "docs/releases/README.md",
     "docs/releases/v1.0.0-rc.1.md",
     "docs/source-briefs/skeleton-brief.md",
     "docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md",
@@ -264,6 +265,7 @@
     "docs/adr/ADR-0014-next-16-migration.md",
     "docs/adr/ADR-0015-supply-chain-hardening.md",
     "docs/adr/ADR-0017-activation-enforcement-scope.md",
+    "docs/adr/ADR-0018-release-state-registry.md",
     "scripts/bootstrap-project.mjs",
     "scripts/quality/gate-build.mjs",
     "scripts/quality/gate-typecheck.mjs",
@@ -387,6 +389,7 @@
     "docs/adr/ADR-0014-next-16-migration.md": 65,
     "docs/adr/ADR-0015-supply-chain-hardening.md": 170,
     "docs/adr/ADR-0017-activation-enforcement-scope.md": 170,
+    "docs/adr/ADR-0018-release-state-registry.md": 170,
     "scripts/quality/assert-sbom.mjs": 130,
     "scripts/quality/assert-toolchain-policy.mjs": 180,
     "scripts/quality/gate-toolchain.mjs": 80,
@@ -399,7 +402,8 @@
     "scripts/tests/toolchain-policy-negative.mjs": 170,
     "docs/test-reports/2026-07-28-faz8.3-release-hardening.md": 380,
     "docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md": 200,
-    "docs/operations/release-attestation.md": 180,
+    "docs/operations/release-attestation.md": 165,
+    "docs/releases/README.md": 120,
     "docs/releases/v1.0.0-rc.1.md": 190,
     "docs/audits/2026-07-03-recertification.md": 280
   },
@@ -434,6 +438,7 @@
     "docs/adr/ADR-0007-payment-provider.md",
     "docs/adr/ADR-0015-supply-chain-hardening.md",
     "docs/adr/ADR-0017-activation-enforcement-scope.md",
+    "docs/adr/ADR-0018-release-state-registry.md",
     "scripts/quality/run-gates.mjs",
     "scripts/quality/gate-audit.mjs",
     "scripts/quality/assert-sbom.mjs",
@@ -605,6 +610,40 @@
     ]
   },
   "trackedForbidden": ["*.tsbuildinfo", "apps/web/next-env.d.ts"],
+  "upstreamReleaseProvenance": {
+    "auditedState": {
+      "auditedCandidateTag": "v1.0.0-rc.2",
+      "auditReport": "docs/audits/2026-07-28-fourth-mini-audit-rc2.md",
+      "auditSha256": "67fced3d02ccbb824c94d31d5e88f0e446e00c399fd2b050088e25dd7f499736",
+      "verdict": "FAIL",
+      "productionReadiness": "CORE_SKELETON_NOT_PRODUCTION_READY",
+      "recommendation": "NO_GO_REMEDIATION_REQUIRED",
+      "stableReleaseStatusAtAudit": "NOT_PUBLISHED"
+    },
+    "auditedImmutableReleases": [
+      {
+        "tag": "v1.0.0-rc.1",
+        "releaseId": 361113458,
+        "targetCommit": "f891910d9e6877b4ce40d5833cb42579c6d3d9f1",
+        "publishedAt": "2026-07-28T13:37:11Z",
+        "prerelease": true,
+        "immutable": true,
+        "repositorySnapshot": "docs/releases/v1.0.0-rc.1.md",
+        "snapshotProtectedSectionSha256": "4a8d7b2fc90293ca35186e0a9506217d17f1044c132460dd1204b23c92fdf583"
+      },
+      {
+        "tag": "v1.0.0-rc.2",
+        "releaseId": 361341678,
+        "targetCommit": "175213d519acf199498a8efa7b307f5b4d5f44cd",
+        "publishedAt": "2026-07-28T19:57:09Z",
+        "prerelease": true,
+        "immutable": true,
+        "attestationVerified": true,
+        "attestationChecks": 11,
+        "repositorySnapshot": null
+      }
+    ]
+  },
   "activationModules": [
     {
       "id": "admin-bff",

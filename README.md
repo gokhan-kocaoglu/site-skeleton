@@ -10,6 +10,26 @@ the work through the quality-gate chain.
 - The template's public-facing surface (`apps/web` pages/metadata) is English; the real
   project's language is a per-project brief decision.
 
+<!-- release-state:start -->
+
+## Release state
+
+- verdict: `FAIL`
+- audited candidate: `v1.0.0-rc.2`
+- audit report: `docs/audits/2026-07-28-fourth-mini-audit-rc2.md`
+- production readiness: `CORE_SKELETON_NOT_PRODUCTION_READY`
+- recommendation: `NO_GO_REMEDIATION_REQUIRED`
+- stable release status at audit: `NOT_PUBLISHED`
+
+This verdict belongs to the audited candidate, not to the current `main`; open
+acceptance criteria live in the canonical audit report and in the memory vault.
+Stable release status at the audited RC2 state: NOT_PUBLISHED — an audit-scoped
+record, not a claim about today. This is the release provenance of the upstream
+template repository, not the release state of a project generated from it. Full
+ledger: `docs/releases/README.md`; decision: `docs/adr/ADR-0018-release-state-registry.md`.
+
+<!-- release-state:end -->
+
 ## Stack
 
 | Layer | Technology |

@@ -58,6 +58,16 @@ try {
   check(gitStatus(dir) === '', 'dry-run sonrası çalışma ağacı temiz');
   check(diffHashTrees(beforeDryRun, hashTree(dir)).length === 0, 'dry-run hiçbir dosyayı değiştirmedi');
 
+  // Upstream audited provenance must survive the apply byte-for-byte (ADR-0018).
+  const releaseHashes = (tree) =>
+    JSON.stringify([...tree].filter(([rel]) => rel.startsWith('docs/releases/')).sort());
+  const provenanceOf = () =>
+    JSON.stringify(
+      JSON.parse(readIfAny(at('scripts', 'structure-manifest.json')) || '{}').upstreamReleaseProvenance ?? null
+    );
+  const releasesBefore = releaseHashes(beforeDryRun);
+  const provenanceBefore = provenanceOf();
+
   // 2 — the real apply.
   step('2. --apply');
   const apply = bootstrap([SLUG, '--apply']);
@@ -186,6 +196,26 @@ try {
   );
   const report = at('docs/test-reports/2026-07-03-faz8.2-sealing.md');
   check(/site-skeleton|Site Skeleton/.test(readIfAny(report)), 'tarihsel test raporu değiştirilmedi');
+
+  // 11 — upstream release provenance: stripped from the active surface, kept
+  // byte-for-byte as archive (AC-32 / ADR-0018).
+  step('11. upstream release provenance');
+  for (const rel of ['README.md', 'CLAUDE.md']) {
+    const text = readIfAny(at(rel));
+    check(!/release-state:(start|end)/.test(text), `${rel}: upstream release-state marker'ı kaldırıldı`);
+    check(!/v1\.0\.0-rc/.test(text), `${rel}: upstream RC hükmü taşınmıyor`);
+  }
+  check(releaseHashes(hashTree(dir)) === releasesBefore, 'docs/releases dosya kümesi ve byte hash\'leri korundu');
+  check(provenanceOf() === provenanceBefore, 'manifest upstreamReleaseProvenance deep-equal korundu');
+  const rc1Snapshot = readIfAny(at('docs/releases/v1.0.0-rc.1.md'));
+  check(rc1Snapshot.startsWith('# site-skeleton v1.0.0-rc.1'), 'RC1 snapshot upstream başlığı korundu');
+  check(
+    !new RegExp(`github\\.com/[^/\\s]+/${SLUG}/`).test(rc1Snapshot),
+    'upstream GitHub linkleri project slug\'a dönüşmedi'
+  );
+  const ledger = readIfAny(at('docs/releases/README.md'));
+  check(ledger.includes('Audited Upstream Release Provenance'), 'ledger upstream provenance metni korundu');
+  check(!new RegExp(SLUG).test(ledger), 'ledger project slug\'ı ile yeniden yazılmadı');
 } catch (error) {
   failures++;
   console.error(`\n[bootstrap-e2e] beklenmedik hata: ${error.stack ?? error.message}`);

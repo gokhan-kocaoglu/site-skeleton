@@ -119,6 +119,12 @@ değerler dış immutable GitHub Release üzerinde mühürlenir. Aksi hâlde her
 release yeni bir kanıt PR'ı, o da yeni bir closure gerektirir ve zincir
 kapanmaz.
 
+**Adım 9 (ADR-0018).** Yeni candidate'ın canonical audit raporu repository'ye
+alındığı turda; manifest registry'si (`upstreamReleaseProvenance`),
+`docs/releases/README.md` ledger'ı ve `README.md` + `CLAUDE.md` bounded
+section'ları **aynı PR içinde** eşitlenir. Publication tek başına repository
+mutation'ı gerektirmez.
+
 ## Self-reference yasağı
 
 Bir PR'ın **kendi içindeki** belge, o PR'ın güncel head SHA'sını "current"
@@ -141,36 +147,18 @@ yazmak kanıt değil, kanıt taklididir. Faz 8.2 session log'u bunun somut örne
 kapanışta varsayılan "CI #29" numarası, sonradan GitHub kaydından doğrulanınca
 **#30** çıkmıştır (düzeltme şerhi: vault `08_Session_Logs/2026-07-19-session-06.md`).
 
-## Mevcut durum (2026-07-28)
+## Mevcut durum burada tutulmaz
 
-| Öğe | Değer |
-|---|---|
-| Feature PR | **#28** (Faz 8.3 PR-D) |
-| Feature implementation merge SHA | `cf5226f05848a9e27c8b14877b455c8bdfe5e7e5` |
-| Feature post-merge main CI | [30348674300](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30348674300) — success |
-| Feature terminal memory closure PR | **#29** |
-| **Evidence package base SHA** | `90bbf1205509633c0b1004af57e7ebfcd51327f6` |
-| Feature closure post-merge main CI | [30350754770](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30350754770) — success |
-| Final evidence PR | **#30** |
-| ↳ *Initial package certification snapshot* | `a312cf148e988c50750eb077b1e5afd1e609ed08` · CI [30354440371](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30354440371) |
-| ↳ *RC1 sequence-remediation snapshot* | `dc5737630471a9e1be115ec91593a787e3712244` · CI [30355634333](https://github.com/gokhan-kocaoglu/site-skeleton/actions/runs/30355634333) |
-| ↳ Current pre-merge head/check authority | **GitHub PR #30 metadata ve required check'ler** |
-| Final evidence PR merge SHA | `FINAL_EVIDENCE_MERGE_SHA` *(henüz yok)* |
-| Final evidence post-merge main CI | `FINAL_EVIDENCE_POST_MERGE_CI_RUN_URL` *(henüz yok)* |
-| Final evidence closure PR | `FINAL_EVIDENCE_CLOSURE_PR` *(henüz yok)* |
-| Final evidence closure merge SHA | `FINAL_EVIDENCE_CLOSURE_MERGE_SHA` *(henüz yok)* |
-| Final evidence closure post-merge main CI | `FINAL_EVIDENCE_CLOSURE_POST_MERGE_CI_RUN_URL` *(henüz yok)* |
-| **RC1 release target SHA** | `RC1_RELEASE_TARGET_SHA` = `FINAL_EVIDENCE_CLOSURE_MERGE_SHA` *(henüz yok)* |
-| Ruleset | `main-branch-protection` (id 18469047) · **active** · 7 required check · strict **true** |
-| Required checks | quality-gate-ubuntu · api-verify-testcontainers · hooks-and-structure-windows · gitleaks-full-history · supply-chain-trivy · dependency-review · bootstrap-e2e |
-| Release | **oluşturulmadı** |
-| Tag | **oluşturulmadı** |
-| Kanıt paketi | **`PASS_WITH_RISKS`** — `READY_FOR_FINAL_EVIDENCE_PR_MERGE` |
-| RC1 dış attestation (MEDIUM-10) | **`PENDING_USER_ACTION`** |
-| Dördüncü mini-denetim | **başlatılmadı** — `v1.0.0` gate'i, rc.1'in ön koşulu değil |
-| Kanıt raporu | `docs/test-reports/2026-07-28-faz8.3-release-hardening.md` |
-| Resertifikasyon eki | `docs/audits/2026-07-03-recertification.md` (Faz 8.3 eki) |
-| Release taslağı | `docs/releases/v1.0.0-rc.1.md` |
+Bu dosya **zamansız sözleşmedir**. Hangi release'in yayımlandığı, hangi
+candidate'ın denetlendiği ve güncel canonical hüküm tek bir yerde yaşar:
 
-`v1.0.0` etiketi bu turda gündemde değildir: brief gereği yalnız **dördüncü
-mini-denetim** "production-ready" hükmü verdikten sonra atılır.
+```text
+docs/releases/README.md          (insan-okur ledger)
+scripts/structure-manifest.json  (upstreamReleaseProvenance — makine kaynağı)
+```
+
+Gerekçe: durum tablosu bu dosyada tutulduğunda sözleşme doğru kalırken tablo
+bayatladı (F4R2-MEDIUM-01). Politika ile olgu ayrı yaşam döngüleridir ve ayrı
+dosyalarda tutulurlar. Karar kaydı: `docs/adr/ADR-0018-release-state-registry.md`.
+
+Ruleset ve required check listesi için: `docs/operations/ci.md`.
