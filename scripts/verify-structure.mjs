@@ -9,6 +9,7 @@ import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assertWebSecurityContract } from './quality/assert-web-security-contract.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MANIFEST_PATH = path.join(ROOT, 'scripts', 'structure-manifest.json');
@@ -1372,6 +1373,12 @@ for (const rule of manifest.forbiddenPatterns ?? []) {
     }
   }
 }
+
+// 7l. AC-33 web security header contract (ADR-0019). Domain logic lives in the
+// helper so this file does not grow a rule body; only the wiring is here.
+const webSecurity = assertWebSecurityContract(ROOT);
+checks += webSecurity.checks;
+failures.push(...webSecurity.failures);
 
 // Report
 if (failures.length) {
