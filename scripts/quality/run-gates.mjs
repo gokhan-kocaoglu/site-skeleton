@@ -20,6 +20,9 @@ const here = fileURLToPath(new URL('.', import.meta.url));
 const GATES = [
   'toolchain',
   'build',
+  // right after build: its oracle is the freshly written apps/web/.next
+  // artifacts, so it must not run against a stale or absent build (AC-33).
+  'web-headers',
   'typecheck',
   'lint',
   'test',

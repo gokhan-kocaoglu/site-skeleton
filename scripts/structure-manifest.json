@@ -277,6 +277,7 @@
     "scripts/quality/gate-test.mjs",
     "scripts/quality/gate-audit.mjs",
     "scripts/quality/gate-structure.mjs",
+    "scripts/quality/gate-web-headers.mjs",
     "scripts/quality/gate-contract-drift.mjs",
     "scripts/quality/assert-sbom.mjs",
     "scripts/quality/assert-toolchain-policy.mjs",
@@ -308,7 +309,8 @@
     "scripts/tests/bootstrap-e2e.mjs",
     "scripts/tests/bootstrap-transaction.mjs",
     "scripts/tests/critical-domain-coverage-negative.mjs",
-    "scripts/tests/toolchain-policy-negative.mjs"
+    "scripts/tests/toolchain-policy-negative.mjs",
+    "scripts/tests/web-headers-gate-negative.mjs"
   ],
   "maxLines": {
     "CLAUDE.md": 80,
@@ -405,6 +407,8 @@
     "scripts/tests/bootstrap-transaction.mjs": 240,
     "scripts/tests/critical-domain-coverage-negative.mjs": 140,
     "scripts/tests/toolchain-policy-negative.mjs": 170,
+    "scripts/quality/gate-web-headers.mjs": 180,
+    "scripts/tests/web-headers-gate-negative.mjs": 290,
     "docs/test-reports/2026-07-28-faz8.3-release-hardening.md": 380,
     "docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md": 200,
     "docs/operations/release-attestation.md": 165,
@@ -457,6 +461,8 @@
     "scripts/tests/bootstrap-transaction.mjs",
     "scripts/tests/critical-domain-coverage-negative.mjs",
     "scripts/tests/toolchain-policy-negative.mjs",
+    "scripts/quality/gate-web-headers.mjs",
+    "scripts/tests/web-headers-gate-negative.mjs",
     "docs/setup/local-setup-windows.md",
     "docs/adr/ADR-0001-model-routing.md",
     "docs/operations/authority-map.md",
