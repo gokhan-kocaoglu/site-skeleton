@@ -91,4 +91,4 @@ ayrı karar gerektirir. Bunlar AC-26 canonical blocker'ı değildir.
 
 ## Memory Closure Commiti
 
-PENDING — closure commit henüz oluşturulmadı
+chore(memory): close session 2026-08-25 · 32468cc138640c316ba793c7152701e8c8be0c4a
