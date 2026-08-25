@@ -304,6 +304,7 @@
     "docs/test-reports/2026-07-27-faz8.3-pr-c-bootstrap-certification.md",
     "docs/test-reports/2026-07-27-faz8.3-pr-d-governance-seals.md",
     "docs/test-reports/2026-07-28-faz8.3-release-hardening.md",
+    "docs/test-reports/2026-08-25-ac-26-release-version-source-of-truth.md",
     "docs/audits/2026-07-03-baseline-security-review.md",
     "docs/audits/2026-07-03-recertification.md",
     "docs/audits/seo/2026-07-02-web-home.md",
@@ -420,6 +421,7 @@
     "scripts/tests/web-headers-gate-negative.mjs": 290,
     "scripts/tests/release-version-contract-negative.mjs": 360,
     "docs/test-reports/2026-07-28-faz8.3-release-hardening.md": 380,
+    "docs/test-reports/2026-08-25-ac-26-release-version-source-of-truth.md": 450,
     "docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md": 200,
     "docs/operations/release-attestation.md": 165,
     "docs/releases/README.md": 120,
@@ -483,6 +485,7 @@
     "docs/operations/release-attestation.md",
     "docs/releases/v1.0.0-rc.1.md",
     "docs/test-reports/2026-07-28-faz8.3-release-hardening.md",
+    "docs/test-reports/2026-08-25-ac-26-release-version-source-of-truth.md",
     "docs/audits/2026-07-03-recertification.md",
     "docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md",
     "README.md"
