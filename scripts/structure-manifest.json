@@ -671,6 +671,21 @@
       }
     ]
   },
+  "upstreamReleaseVersionPolicy": {
+    "authority": "manifest",
+    "canonicalVersion": "1.0.0",
+    "tagPrefix": "v",
+    "prereleaseChannels": ["rc"],
+    "nonAuthoritativeVersionSources": [
+      "package.json",
+      "apps/web/package.json",
+      "apps/admin/package.json",
+      "packages/api-types/package.json",
+      "packages/design-tokens/package.json",
+      "apps/api/pom.xml"
+    ],
+    "generatedProjectScope": "upstream-only"
+  },
   "activationModules": [
     {
       "id": "admin-bff",

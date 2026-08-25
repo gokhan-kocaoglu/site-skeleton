@@ -68,7 +68,7 @@ zincirinin kapanışını dışarıda bırakır. Daha erken SHA'lar silinmez; he
 
 | Alan | Kaynak |
 |---|---|
-| Tag | `v<sürüm>` (kullanıcı oluşturur) |
+| Tag | `v<canonicalVersion>[-<kanal>.<n>]` — authority: manifest / ADR-0020 |
 | PR-D feature implementation merge SHA | Feature PR'ının gerçek merge commit'i |
 | PR-D feature post-merge main CI | Feature merge sonrası `main` push run'ı |
 | **Evidence package base SHA** | Feature memory closure PR'ının merge commit'i — kanıt paketinin üzerine inşa edildiği base |
@@ -104,8 +104,8 @@ production-ready hükmü yalnız **`v1.0.0`** kararını etkiler (brief FİNAL �
    → yedi check → merge                               [final evidence merge SHA]
 6. Final evidence için terminal memory closure PR → merge
                                                       [final evidence closure merge SHA]
-7. GitHub Release/tag v1.0.0-rc.1: dış attestation mühürlenir;
-   tag target = adım 6'nın SHA'sı
+7. `assert-release-version-contract.mjs --tag <TAG>` PASS → kullanıcı Release/
+   tag'i oluşturur, dış attestation mühürlenir; tag target = adım 6'nın SHA'sı
 8. Dördüncü mini-denetim release candidate'ı denetler → yalnız production-ready
    hükmü çıkarsa v1.0.0 gündeme gelir
 ```

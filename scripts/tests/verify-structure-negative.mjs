@@ -1547,6 +1547,150 @@ const scenarios = [
       };
     },
   },
+  // --- AC-26 / F4-LOW-02 release version source-of-truth (ADR-0020) ---------
+  {
+    name: 'upstreamReleaseVersionPolicy yoksa FAIL üretir (releaseVersionPolicy)',
+    expectFragments: ['POLICY_MISSING'],
+    setup() {
+      return {
+        paths: [],
+        restore: patchManifest((m) => {
+          delete m.upstreamReleaseVersionPolicy;
+        }),
+      };
+    },
+  },
+  {
+    name: 'policy exact anahtar kümesi dışına çıkarsa FAIL üretir (releaseVersionPolicy)',
+    expectFragments: ['POLICY_SCHEMA'],
+    setup() {
+      return {
+        paths: [],
+        restore: patchManifest((m) => {
+          m.upstreamReleaseVersionPolicy.packageManifestAuthority = 'none';
+        }),
+      };
+    },
+  },
+  {
+    name: 'canonicalVersion v prefix taşırsa FAIL üretir (releaseVersionPolicy)',
+    expectFragments: ['CANONICAL_VERSION_MALFORMED'],
+    setup() {
+      return {
+        paths: [],
+        restore: patchManifest((m) => {
+          m.upstreamReleaseVersionPolicy.canonicalVersion = 'v1.0.0';
+        }),
+      };
+    },
+  },
+  {
+    name: 'canonicalVersion doc bloğuyla uyuşmazsa FAIL üretir (releaseVersionPolicy)',
+    expectFragments: ['DOC_BLOCK_MISMATCH'],
+    setup() {
+      return {
+        paths: [],
+        restore: patchManifest((m) => {
+          m.upstreamReleaseVersionPolicy.canonicalVersion = '2.0.0';
+        }),
+      };
+    },
+  },
+  {
+    name: 'ledger policy bloğu silinirse FAIL üretir (releaseVersionPolicy)',
+    expectFragments: ['DOC_BLOCK_MISMATCH'],
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('docs/releases/README.md', (x) =>
+          x.replace('<!-- release-version-policy:end -->', '')
+        ),
+      };
+    },
+  },
+  {
+    name: 'ledger blok bullet işareti sürüklenirse FAIL üretir (releaseVersionPolicy)',
+    expectFragments: ['DOC_BLOCK_MISMATCH'],
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('docs/releases/README.md', (x) =>
+          x.replace('- tag prefix: `v`', '* tag prefix: `v`')
+        ),
+      };
+    },
+  },
+  {
+    name: 'ledger ayrım ifadesi silinirse FAIL üretir (releaseVersionPolicy)',
+    expectFragments: ['DOC_BLOCK_MISMATCH'],
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('docs/releases/README.md', (x) =>
+          x.replace('historical audited provenance registry', 'baska bir sey')
+        ),
+      };
+    },
+  },
+  {
+    name: 'non-authoritative kaynak yolu yoksa FAIL üretir (releaseVersionPolicy)',
+    expectFragments: ['SOURCE_PATH_MISSING'],
+    setup() {
+      return {
+        paths: [],
+        restore: patchManifest((m) => {
+          m.upstreamReleaseVersionPolicy.nonAuthoritativeVersionSources.push(
+            'apps/ghost/package.json'
+          );
+        }),
+      };
+    },
+  },
+  {
+    name: 'generatedProjectScope sürüklenirse FAIL üretir (releaseVersionPolicy)',
+    expectFragments: ['POLICY_SCHEMA'],
+    setup() {
+      return {
+        paths: [],
+        restore: patchManifest((m) => {
+          m.upstreamReleaseVersionPolicy.generatedProjectScope = 'project';
+        }),
+      };
+    },
+  },
+  {
+    name: 'historical tag grammar dışına çıkarsa FAIL üretir (releaseVersionPolicy)',
+    expectFragments: ['tag geçersiz veya yinelenmiş'],
+    setup() {
+      return {
+        paths: [],
+        restore: patchManifest((m) => {
+          m.upstreamReleaseProvenance.auditedImmutableReleases[0].tag = 'v1.0.0-rc.01';
+        }),
+      };
+    },
+  },
+  {
+    name: 'canonicalVersion ilerlerken historical tag\'ler FAIL ÜRETMEZ (FE-1 pozitif kontrol)',
+    expectOk: true,
+    setup() {
+      return {
+        paths: [],
+        restore: (() => {
+          const restoreManifest = patchManifest((m) => {
+            m.upstreamReleaseVersionPolicy.canonicalVersion = '1.1.0';
+          });
+          const restoreDoc = patchTextFile('docs/releases/README.md', (x) =>
+            x.replace('- current release version: `1.0.0`', '- current release version: `1.1.0`')
+          );
+          return () => {
+            restoreDoc();
+            restoreManifest();
+          };
+        })(),
+      };
+    },
+  },
   {
     name: 'blok DIŞINDAKİ serbest proza FAIL üretmez (pozitif kontrol)',
     expectOk: true,
