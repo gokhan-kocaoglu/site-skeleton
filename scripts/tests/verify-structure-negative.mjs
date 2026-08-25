@@ -1259,6 +1259,306 @@ const scenarios = [
       };
     },
   },
+
+  // --- 7l · AC-33 web security header contract (ADR-0019) ------------------
+  // The doc side is verified by exact block equality, so these scenarios also
+  // cover the class a bullet-collection grammar would miss: a `-` turning into
+  // `*`, an extra space, an indented row. None of them is parsed; the whole
+  // block is one string.
+  {
+    name: 'deployment.md web bloğunda değer sürüklenirse FAIL üretir (blok eşitliği)',
+    expectFragment: 'web block does not equal the canonical block',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('docs/operations/deployment.md', (t) =>
+          t.replace('- X-Frame-Options: `DENY`', '- X-Frame-Options: `SAMEORIGIN`')
+        ),
+      };
+    },
+  },
+  {
+    name: 'deployment.md web bloğundan bir header silinirse FAIL üretir',
+    expectFragment: 'web block does not equal the canonical block',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('docs/operations/deployment.md', (t) =>
+          t.replace('- X-Content-Type-Options: `nosniff`\n', '')
+        ),
+      };
+    },
+  },
+  {
+    name: 'deployment.md web bloğunda bullet biçimi - yerine * olursa FAIL üretir',
+    expectFragment: 'web block does not equal the canonical block',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('docs/operations/deployment.md', (t) =>
+          t.replace('- Referrer-Policy: `strict', '* Referrer-Policy: `strict')
+        ),
+      };
+    },
+  },
+  {
+    name: 'deployment.md web bloğunda iç boşluk değişirse FAIL üretir',
+    expectFragment: 'web block does not equal the canonical block',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('docs/operations/deployment.md', (t) =>
+          t.replace('- Header source:', '-  Header source:')
+        ),
+      };
+    },
+  },
+  {
+    name: 'deployment.md web bloğuna satır eklenirse FAIL üretir',
+    expectFragment: 'web block does not equal the canonical block',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('docs/operations/deployment.md', (t) =>
+          t.replace(
+            '<!-- web-security-contract:end -->',
+            '- X-Extra-Header: `whatever`\n<!-- web-security-contract:end -->'
+          )
+        ),
+      };
+    },
+  },
+  {
+    name: 'deployment.md web bloğu marker\'ı çoğaltılırsa FAIL üretir',
+    expectFragment: 'web block is missing or duplicated',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('docs/operations/deployment.md', (t) =>
+          t.replace(
+            '## Edge / TLS',
+            '<!-- web-security-contract:start -->\n\n## Edge / TLS'
+          )
+        ),
+      };
+    },
+  },
+  {
+    name: 'deployment.md web bloğu kapanış marker\'ı silinirse FAIL üretir',
+    expectFragment: 'web block is missing or duplicated',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('docs/operations/deployment.md', (t) =>
+          t.replace('<!-- web-security-contract:end -->', '')
+        ),
+      };
+    },
+  },
+  {
+    name: 'deployment.md admin bloğunda değer sürüklenirse FAIL üretir',
+    expectFragment: 'admin block does not equal the canonical block',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('docs/operations/deployment.md', (t) =>
+          t.replace('- X-Robots-Tag: `noindex, nofollow`', '- X-Robots-Tag: `all`')
+        ),
+      };
+    },
+  },
+  {
+    name: 'deployment.md blok DIŞINDA CSP direktifi geçerse FAIL üretir',
+    expectFragment: 'CSP directives outside the bounded blocks',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('docs/operations/deployment.md', (t) =>
+          `${t}\nNot: ornek politika default-src yok sayilir.\n`
+        ),
+      };
+    },
+  },
+  {
+    name: 'deployment.md admin sahiplik ibaresi blok dışından silinirse FAIL üretir',
+    expectFragment: 'admin ownership disclaimer outside the bounded blocks',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('docs/operations/deployment.md', (t) =>
+          t.replace('iddiası **taşımaz**', 'iddiasını karşılar')
+        ),
+      };
+    },
+  },
+  {
+    name: 'security-headers.ts production CSP literali sürüklenirse FAIL üretir',
+    expectFragment: 'CSP_PRODUCTION does not match the canonical value',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('apps/web/lib/security-headers.ts', (t) =>
+          t.replace("connect-src 'self'\"", "connect-src *\"")
+        ),
+      };
+    },
+  },
+  {
+    name: 'security-headers.ts image optimizer CSP sürüklenirse FAIL üretir',
+    expectFragment: 'IMAGE_OPTIMIZER_CSP does not match the canonical value',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('apps/web/lib/security-headers.ts', (t) =>
+          t.replace('script-src \'none\'; sandbox;', 'script-src \'self\'; sandbox;')
+        ),
+      };
+    },
+  },
+  {
+    name: 'security-headers.ts header source sürüklenirse FAIL üretir',
+    expectFragment: 'HEADER_SOURCE does not match the canonical value',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('apps/web/lib/security-headers.ts', (t) =>
+          t.replace('export const HEADER_SOURCE = "/(.*)";', 'export const HEADER_SOURCE = "/:path*";')
+        ),
+      };
+    },
+  },
+  {
+    name: 'security-headers.ts statik header literali sürüklenirse FAIL üretir',
+    expectFragment: 'lost the exact literal for X-Frame-Options',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('apps/web/lib/security-headers.ts', (t) =>
+          t.replace('{ key: "X-Frame-Options", value: "DENY" }', '{ key: "X-Frame-Options", value: "SAMEORIGIN" }')
+        ),
+      };
+    },
+  },
+  {
+    name: 'security-headers.ts HSTS emit ederse FAIL üretir (edge sahipliği)',
+    expectFragment: 'must not emit HSTS',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('apps/web/lib/security-headers.ts', (t) =>
+          t.replace(
+            '  { key: "X-Frame-Options", value: "DENY" },',
+            '  { key: "Strict-Transport-Security", value: "max-age=31536000" },\n  { key: "X-Frame-Options", value: "DENY" },'
+          )
+        ),
+      };
+    },
+  },
+  {
+    name: 'next.config.ts statik export moduna geçerse FAIL üretir (headers() etkisiz)',
+    expectFragment: 'export mode would make headers() inert',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('apps/web/next.config.ts', (t) =>
+          t.replace('  poweredByHeader: false,', "  output: 'export',\n  poweredByHeader: false,")
+        ),
+      };
+    },
+  },
+  {
+    name: 'next.config.ts poweredByHeader pini kaybolursa FAIL üretir',
+    expectFragment: 'must set poweredByHeader false',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('apps/web/next.config.ts', (t) =>
+          t.replace('  poweredByHeader: false,\n', '')
+        ),
+      };
+    },
+  },
+  {
+    name: 'next.config.ts image CSP pini kaybolursa FAIL üretir',
+    expectFragment: 'must pin the image optimizer policy',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('apps/web/next.config.ts', (t) =>
+          t.replace('  images: { contentSecurityPolicy: IMAGE_OPTIMIZER_CSP },\n', '')
+        ),
+      };
+    },
+  },
+  {
+    name: 'next.config.ts header değerlerini tekrar literal yazarsa FAIL üretir',
+    expectFragment: 'must import header values, not restate them',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('apps/web/next.config.ts', (t) =>
+          t.replace('const headerMode', "const inlineCsp = \"default-src 'self'\";\nconst headerMode")
+        ),
+      };
+    },
+  },
+  {
+    name: 'apps/admin/README.md sahiplik ifadesini kaybederse FAIL üretir',
+    expectFragment: 'must mention "repository runtime"',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('apps/admin/README.md', (t) =>
+          t.replace('repository runtime', 'proje runtime')
+        ),
+      };
+    },
+  },
+  {
+    name: 'apps/admin/README.md exact header bloğunu kopyalarsa FAIL üretir',
+    expectFragment: 'must not duplicate the exact header block',
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('apps/admin/README.md', (t) =>
+          `${t}\n- Content-Security-Policy: \`default-src 'self'\`\n`
+        ),
+      };
+    },
+  },
+  {
+    name: '7l mode=project altında da bağlayıcıdır (mode-agnostik)',
+    expectFragment: 'web block does not equal the canonical block',
+    setup() {
+      const dir = plantMemoryProject(NEG_SLUG);
+      const restoreDoc = patchTextFile('docs/operations/deployment.md', (t) =>
+        t.replace('- X-Frame-Options: `DENY`', '- X-Frame-Options: `SAMEORIGIN`')
+      );
+      const restoreManifest = patchManifest((m) => {
+        m.mode = 'project';
+        m.projectSlug = NEG_SLUG;
+      });
+      return {
+        paths: [dir],
+        restore: () => {
+          restoreManifest();
+          restoreDoc();
+        },
+      };
+    },
+  },
+  {
+    name: 'blok DIŞINDAKİ serbest proza FAIL üretmez (pozitif kontrol)',
+    expectOk: true,
+    setup() {
+      return {
+        paths: [],
+        restore: patchTextFile('docs/operations/deployment.md', (t) =>
+          `${t}\nNot: bu satir bounded blok disinda serbest prozadir.\n`
+        ),
+      };
+    },
+  },
 ];
 
 const snapshotBefore = worktreeSnapshot();
