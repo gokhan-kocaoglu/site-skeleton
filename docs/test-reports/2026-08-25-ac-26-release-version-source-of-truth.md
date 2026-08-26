@@ -14,10 +14,15 @@ C2:        1f39fa9e684850edd269ba41736971379c8bc966
            feat(quality): add release version contract oracle
 C3:        9be728f742a0d01ec7f38013e37cfc317abbb73d
            feat(structure): bind release version policy to manifest and release procedure
+C4:        e36c75a529ba109239a7712d3292c67504b4526f
+           docs(test): record AC-26 remediation evidence
+C5:        96a5337095ed0c3e4ec3f5029f5b63cc3b4ac92e
+           fix(quality): enforce exact non-authoritative version sources
+           (bağımsız review düzeltmesi — R1)
 ```
 
-Bu rapor C4'te doğar; kendi commit SHA'sını, branch head'ini, PR numarasını veya
-CI kimliğini taşımaz.
+Bu rapor C4'te doğdu ve C6'da düzeltildi; kendi commit SHA'sını, branch head'ini,
+PR numarasını veya CI kimliğini taşımaz.
 
 ## 2. Canonical audit bulgusu
 
@@ -225,18 +230,24 @@ devam ediyor. Tarihsel tag'ler `TAG_ALREADY_AUDITED` üretmez.
 
 | Ölçüm | Önce | Sonra |
 |---|---|---|
-| `verify-structure` checks | 1316 | **1337** |
+| `verify-structure` checks | 1316 | **1340** |
 | `verify-structure-negative` tanımlı | 119 | **130** |
 | `verify-structure-negative` koşan (skeleton-dev) | 116 | **127** |
 | `verify-structure-negative` project-only | 3 | **3 (değişmedi)** |
-| `release-version-contract-negative` | yok | **55** |
+| `release-version-contract-negative` | yok | **60** |
 | `scripts/verify-structure.mjs` satır | 1390 | **1401 (+11)** |
 | `docs/operations/release-attestation.md` satır | 164 | **164 (+0)** |
 | `docs/releases/README.md` satır | 69 | **97** |
 | hook harness | 302 / 94 | **302 / 94 (değişmedi)** |
 | bootstrap transaction | 7/7 | **7/7 (değişmedi)** |
 
-Ara adımlar: C1 sonrası 1320 · C2 sonrası 1330 · C3 sonrası 1337.
+Ara adımlar: base 1316 · C1 sonrası 1320 · C2 sonrası 1330 · **C3 sonrası 1337** ·
+C4 sonrası 1340 · C5 sonrası 1340 (final).
+
+C4, kanıt raporunu manifest'e üç kayıtla (`requiredFiles` + `maxLines` + `noBom`)
+tescil ettiği için structure check sayısını **+3** artırdı: 1337 → 1340. İlk
+yazımda final tablo C3 ara değerini (1337) taşıyordu; bu, C6 review düzeltmesiyle
+gerçek final değere çekildi.
 
 ## 15. Gate sonuçları
 
@@ -246,7 +257,7 @@ gerçek `mvn verify` + Testcontainers çalıştırdı (`SKIP_API` kullanılmadı
 ```text
 toolchain PASS · build PASS · web-headers PASS · typecheck PASS · lint PASS
 test PASS · audit PASS · structure PASS · contract-drift PASS
-All gates PASS (9/9) — C1, C2, C3
+All gates PASS (9/9) — C1, C2, C3, C4, C5
 ```
 
 Diğerleri: `bootstrap-transaction` 7/7 · `bootstrap-e2e` tüm assertion'lar PASS ·
@@ -289,6 +300,45 @@ generated CLI --tag v1.1.0-rc.1       exit 1
 ```
 
 `canonicalVersion` üretilen projenin hiçbir sürüm alanına sızmadı.
+
+## 17b. Bağımsız review düzeltmesi (R1) — exact source set
+
+İlk implementasyonda `nonAuthoritativeVersionSources` yalnız *şekil* olarak
+doğrulanıyordu (dizi mi, boş değil mi, yollar var mı). Bağımsız review bunun
+approved contract'ı karşılamadığını tespit etti ve üretilebilir olduğu ölçüldü:
+liste tek yola (`["package.json"]`) daraltıldığında contract **sıfır failure**
+veriyordu.
+
+C5 ile helper artık altı yollu exact kümeyi fail-closed doğruluyor:
+
+```text
+tam altı yol         eksik yok · fazla yok · duplicate yok
+sıra                 anlamlı DEĞİL (duplicate-free set equality)
+reason code          POLICY_SCHEMA (yeni kod icat edilmedi)
+```
+
+Beklenen küme helper içinde executable governance contract olarak tanımlıdır;
+manifest ile kod bilinçli bir enforcement pair'idir. Negatif harness beklenen
+listeyi helper'dan **import etmez**.
+
+İki failure sınıfı ayrı ayrı korunur ve ayrı ayrı test edilir:
+
+```text
+A. POLICY SET DRIFT           -> POLICY_SCHEMA
+   yol çıkarma · tek yola daraltma · duplicate ile kayıp · fazladan yol
+B. LISTED PATH DISAPPEARANCE  -> SOURCE_PATH_MISSING
+   küme exact kalır, fixture'da dosya fiziksel olarak silinir
+   veya npm manifesti version alanını kaybeder
+```
+
+`verify-structure-negative` tarafındaki eski "ghost path" senaryosu artık önce
+exact-set kontrolüne takıldığı için beklentisi dürüstçe `POLICY_SCHEMA` +
+`exact küme dışı` olarak düzeltildi; `SOURCE_PATH_MISSING` oracle'ı kaybolmadı,
+unit harness tarafında fiziksel dosya silme ile korunuyor.
+
+C5 mevcut satır bütçelerine sığdırıldı; hiçbir `maxLines` yükseltilmedi:
+`assert-release-version-contract.mjs` **399** (limit 400),
+`release-version-contract-negative.mjs` **357** (limit 360).
 
 ## 18. Kayıtlı riskler ve borçlar
 
