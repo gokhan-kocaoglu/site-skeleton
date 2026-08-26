@@ -62,10 +62,12 @@ değeri 1337 korundu (C4 manifest tescili +3 check ekledi).
 
 ## Aktif Görev
 
-AC-26 terminal memory closure. Branch: `chore/memory-close-2026-08-26-site-skeleton` ·
-base: `663fe6890fecb9f7de365b2bf45083fd57e5c091` (AC-26 merge SHA). Closure sonrasında
-formal acceptance criterion implementation'ı **YOKTUR** — AC-26 çerçevesinde
-herhangi bir ek remediation çalışması başlatılmayacaktır.
+Formal acceptance-criterion remediation zinciri **tamamlanmıştır** (AC-26 merged).
+Aktif teknik safha: **bilinen adjacent debt/risk disposition** —
+F4-MEDIUM-04 (`verify-structure` Markdown bullet collector) ve PostCSS CVE-2026-69153
+/ MODERATE riski için salt-okuma teşhis + kontrollü remediation zinciri.
+Durum: **`READ_ONLY_DIAGNOSIS_PENDING`**. Implementation, PostCSS remediation,
+yeni candidate/audit henüz başlamadı.
 
 ## Blocker
 
@@ -90,13 +92,16 @@ gereklidir.
 
 ## Sonraki 3 Adım
 
-1. AC-26 terminal memory closure PR'ını CI ile doğrula ve merge et.
-2. Closure tamamlandıktan sonra F4-MEDIUM-04 için salt-okuma teşhis ve tasarım
-   yapı. Gerekli remediation'ı ayrı kontrollü zincirde tamamla.
-3. PostCSS CVE-2026-69153 / MODERATE riskini bağımsız değerlendir; gerekli
-   disposition/remediation tamamlandıktan sonra clean-clone/full-gate
-   sertifikasyonu + yeni immutable candidate hazırlığına geç. **Yeni candidate
-   hemen yaratılmayacaktır.**
+1. **F4-MEDIUM-04** için salt-okuma teşhis/tasarım yap; gerçek etki alanını,
+   root cause'u, mevcut negatif test kapsamını ve minimal remediation package'ını
+   belirle.
+2. F4-MEDIUM-04 için gerekli disposition/remediation zincirini kontrollü
+   biçimde tamamla; ardından **PostCSS CVE-2026-69153 / MODERATE** riskini
+   bağımsız salt-okuma değerlendirmeye al.
+3. F4-MEDIUM-04 ve PostCSS risk disposition/remediation tamamlandıktan sonra
+   **clean-clone/full-gate sertifikasyonu** yap ve ancak bundan sonra yeni
+   immutable candidate hazırlığına geç. Yeni candidate bu adımlar
+   tamamlanmadan oluşturulmayacaktır.
 
 ## Son Uygulama Commiti
 
