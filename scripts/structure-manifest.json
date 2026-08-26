@@ -270,6 +270,7 @@
     "docs/adr/ADR-0017-activation-enforcement-scope.md",
     "docs/adr/ADR-0018-release-state-registry.md",
     "docs/adr/ADR-0019-web-security-headers.md",
+    "docs/adr/ADR-0020-release-version-source-of-truth.md",
     "scripts/bootstrap-project.mjs",
     "scripts/quality/gate-build.mjs",
     "scripts/quality/gate-typecheck.mjs",
@@ -278,6 +279,7 @@
     "scripts/quality/gate-audit.mjs",
     "scripts/quality/gate-structure.mjs",
     "scripts/quality/gate-web-headers.mjs",
+    "scripts/quality/assert-release-version-contract.mjs",
     "scripts/quality/assert-web-security-contract.mjs",
     "apps/admin/README.md",
     "scripts/quality/gate-contract-drift.mjs",
@@ -302,6 +304,7 @@
     "docs/test-reports/2026-07-27-faz8.3-pr-c-bootstrap-certification.md",
     "docs/test-reports/2026-07-27-faz8.3-pr-d-governance-seals.md",
     "docs/test-reports/2026-07-28-faz8.3-release-hardening.md",
+    "docs/test-reports/2026-08-25-ac-26-release-version-source-of-truth.md",
     "docs/audits/2026-07-03-baseline-security-review.md",
     "docs/audits/2026-07-03-recertification.md",
     "docs/audits/seo/2026-07-02-web-home.md",
@@ -312,7 +315,8 @@
     "scripts/tests/bootstrap-transaction.mjs",
     "scripts/tests/critical-domain-coverage-negative.mjs",
     "scripts/tests/toolchain-policy-negative.mjs",
-    "scripts/tests/web-headers-gate-negative.mjs"
+    "scripts/tests/web-headers-gate-negative.mjs",
+    "scripts/tests/release-version-contract-negative.mjs"
   ],
   "maxLines": {
     "CLAUDE.md": 80,
@@ -399,6 +403,7 @@
     "docs/adr/ADR-0017-activation-enforcement-scope.md": 170,
     "docs/adr/ADR-0018-release-state-registry.md": 170,
     "docs/adr/ADR-0019-web-security-headers.md": 170,
+    "docs/adr/ADR-0020-release-version-source-of-truth.md": 210,
     "scripts/quality/assert-sbom.mjs": 130,
     "scripts/quality/assert-toolchain-policy.mjs": 180,
     "scripts/quality/gate-toolchain.mjs": 80,
@@ -411,9 +416,12 @@
     "scripts/tests/toolchain-policy-negative.mjs": 170,
     "scripts/quality/gate-web-headers.mjs": 180,
     "scripts/quality/assert-web-security-contract.mjs": 230,
+    "scripts/quality/assert-release-version-contract.mjs": 400,
     "docs/operations/deployment.md": 130,
     "scripts/tests/web-headers-gate-negative.mjs": 290,
+    "scripts/tests/release-version-contract-negative.mjs": 360,
     "docs/test-reports/2026-07-28-faz8.3-release-hardening.md": 380,
+    "docs/test-reports/2026-08-25-ac-26-release-version-source-of-truth.md": 450,
     "docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md": 200,
     "docs/operations/release-attestation.md": 165,
     "docs/releases/README.md": 120,
@@ -454,6 +462,7 @@
     "docs/adr/ADR-0017-activation-enforcement-scope.md",
     "docs/adr/ADR-0018-release-state-registry.md",
     "docs/adr/ADR-0019-web-security-headers.md",
+    "docs/adr/ADR-0020-release-version-source-of-truth.md",
     "scripts/quality/run-gates.mjs",
     "scripts/quality/gate-audit.mjs",
     "scripts/quality/assert-sbom.mjs",
@@ -466,14 +475,17 @@
     "scripts/tests/critical-domain-coverage-negative.mjs",
     "scripts/tests/toolchain-policy-negative.mjs",
     "scripts/quality/gate-web-headers.mjs",
+    "scripts/quality/assert-release-version-contract.mjs",
     "scripts/quality/assert-web-security-contract.mjs",
     "scripts/tests/web-headers-gate-negative.mjs",
+    "scripts/tests/release-version-contract-negative.mjs",
     "docs/setup/local-setup-windows.md",
     "docs/adr/ADR-0001-model-routing.md",
     "docs/operations/authority-map.md",
     "docs/operations/release-attestation.md",
     "docs/releases/v1.0.0-rc.1.md",
     "docs/test-reports/2026-07-28-faz8.3-release-hardening.md",
+    "docs/test-reports/2026-08-25-ac-26-release-version-source-of-truth.md",
     "docs/audits/2026-07-03-recertification.md",
     "docs/source-briefs/faz-8-3-medium-1-provenance-addendum.md",
     "README.md"
@@ -661,6 +673,21 @@
         "repositorySnapshot": null
       }
     ]
+  },
+  "upstreamReleaseVersionPolicy": {
+    "authority": "manifest",
+    "canonicalVersion": "1.0.0",
+    "tagPrefix": "v",
+    "prereleaseChannels": ["rc"],
+    "nonAuthoritativeVersionSources": [
+      "package.json",
+      "apps/web/package.json",
+      "apps/admin/package.json",
+      "packages/api-types/package.json",
+      "packages/design-tokens/package.json",
+      "apps/api/pom.xml"
+    ],
+    "generatedProjectScope": "upstream-only"
   },
   "activationModules": [
     {

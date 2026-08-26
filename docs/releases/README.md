@@ -57,8 +57,36 @@ alan-alan doğrulamanın **kaydedilmediğini** söyler. RC1 için repository'de 
   bir projede upstream provenance olarak korunur; o projenin kendi release
   geçmişi değildir ve README/CLAUDE'daki audited-state özeti üretilen projeye
   taşınmaz.
-- **Sürüm politikası burada tanımlanmaz.** Tag ↔ manifest sürüm
-  source-of-truth politikası bu belgenin konusu değildir; AC-26 açıktır.
+- **Sürüm politikası burada özetlenir, tanımı ADR-0020'dedir.** Tag ↔ manifest
+  sürüm source-of-truth politikası aşağıdaki bölümdedir.
+
+## Release version policy
+
+Makine doğruluk kaynağı `scripts/structure-manifest.json` →
+`upstreamReleaseVersionPolicy`; aşağıdaki blok ona karşı `verify-structure` ile
+**birebir** karşılaştırılır. Karar kaydı:
+`docs/adr/ADR-0020-release-version-source-of-truth.md`.
+
+<!-- release-version-policy:start -->
+
+- authority: `manifest`
+- current release version: `1.0.0`
+- tag prefix: `v`
+- prerelease channels: `rc`
+- generated project scope: `upstream-only`
+
+<!-- release-version-policy:end -->
+
+Current upstream repository release version, npm/Maven application
+versions'ından ayrıdır; generated project'in kendi release version'ı
+değildir; historical audited provenance registry de değildir. Yukarıdaki
+tablodaki tarihsel tag'ler kendi hatlarını korur ve current release
+version'a eşitlenmez.
+
+Release tag'i `v<current release version>` biçimindedir; prerelease
+kanalı kullanılacaksa `-rc.<n>` eki alır. Tag oluşturmadan önce
+`node scripts/quality/assert-release-version-contract.mjs --tag <TAG>`
+PASS vermelidir (`docs/operations/release-attestation.md` adım 7).
 
 ## Güncelleme prosedürü
 

@@ -10,6 +10,8 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertWebSecurityContract } from './quality/assert-web-security-contract.mjs';
+import { assertReleaseVersionContract, validateHistoricalTag }
+  from './quality/assert-release-version-contract.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MANIFEST_PATH = path.join(ROOT, 'scripts', 'structure-manifest.json');
@@ -669,7 +671,11 @@ const SECTION_FORBIDDEN_PATTERNS = [
   [/attestationVerified|verified:\s*\d+|attestation[^\n]{0,24}(?:verified|doğrulan)/i,
     'olumlu attestation sinyali'],
 ];
-const RELEASE_TAG_RE = /^v\d+\.\d+\.\d+(?:-rc\.\d+)?$/;
+// AC-26 (ADR-0020): one grammar, derived from upstreamReleaseVersionPolicy.
+// Historical tags: grammar only, never compared to canonicalVersion.
+const releaseVersionPolicy = manifest.upstreamReleaseVersionPolicy;
+const historicalTagOk = (tag) =>
+  typeof tag === 'string' && validateHistoricalTag(tag, releaseVersionPolicy).ok;
 const SHA256_RE = /^[0-9a-f]{64}$/;
 const SHA40_RE = /^[0-9a-f]{40}$/;
 const ISO_UTC_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
@@ -741,7 +747,7 @@ check(
   'auditedState: verdict FAIL iken recommendation NO_GO_REMEDIATION_REQUIRED olmalı'
 );
 check(
-  RELEASE_TAG_RE.test(auditedState.auditedCandidateTag ?? ''),
+  historicalTagOk(auditedState.auditedCandidateTag),
   `auditedState.auditedCandidateTag tag biçiminde değil: ${JSON.stringify(auditedState.auditedCandidateTag)}`
 );
 
@@ -780,7 +786,7 @@ for (const [i, rel] of releaseHistory.entries()) {
     `auditedImmutableReleases[${label}]: zorunlu alan eksik: ${missing.join(', ')}`
   );
   check(
-    typeof rel?.tag === 'string' && RELEASE_TAG_RE.test(rel.tag) && !seenTags.has(rel.tag),
+    historicalTagOk(rel?.tag) && !seenTags.has(rel.tag),
     `auditedImmutableReleases[${label}]: tag geçersiz veya yinelenmiş`
   );
   if (typeof rel?.tag === 'string') seenTags.add(rel.tag);
@@ -1379,6 +1385,11 @@ for (const rule of manifest.forbiddenPatterns ?? []) {
 const webSecurity = assertWebSecurityContract(ROOT);
 checks += webSecurity.checks;
 failures.push(...webSecurity.failures);
+
+// 7m. AC-26 release version contract (ADR-0020); domain logic in the helper.
+const releaseVersion = assertReleaseVersionContract(ROOT);
+checks += releaseVersion.checks;
+failures.push(...releaseVersion.failures.map((f) => `${f.code}: ${f.detail}`));
 
 // Report
 if (failures.length) {
