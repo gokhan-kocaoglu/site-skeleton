@@ -1692,6 +1692,227 @@ const scenarios = [
       };
     },
   },
+  // --- F4-MEDIUM-04: stage-1 list-marker blindness -------------------------
+  // The canonical rows stay intact; one extra list-like line is added with a
+  // NON-hyphen marker. A hyphen-only stage 1 collected none of these, so the
+  // gate reported PASS while a human reader saw a live claim.
+  {
+    name: "release-state: fazladan `*` bullet FAIL üretir (F4-MEDIUM-04)",
+    modes: ['skeleton-dev'],
+    expectFragments: [
+      'README.md: release-state bölümünde canonical metadata grameri dışı bullet var',
+      "current release",
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text.replace('<!-- release-state:end -->', "* current release: `example`" + '\n\n<!-- release-state:end -->')
+      ),
+    }),
+  },
+
+  {
+    name: "release-state: fazladan `+` bullet FAIL üretir (F4-MEDIUM-04)",
+    modes: ['skeleton-dev'],
+    expectFragments: [
+      'README.md: release-state bölümünde canonical metadata grameri dışı bullet var',
+      "current release",
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text.replace('<!-- release-state:end -->', "+ current release: `example`" + '\n\n<!-- release-state:end -->')
+      ),
+    }),
+  },
+
+  {
+    name: "release-state: fazladan `1.` bullet FAIL üretir (F4-MEDIUM-04)",
+    modes: ['skeleton-dev'],
+    expectFragments: [
+      'README.md: release-state bölümünde canonical metadata grameri dışı bullet var',
+      "current release",
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text.replace('<!-- release-state:end -->', "1. current release: `example`" + '\n\n<!-- release-state:end -->')
+      ),
+    }),
+  },
+
+  {
+    name: "release-state: fazladan `1)` bullet FAIL üretir (F4-MEDIUM-04)",
+    modes: ['skeleton-dev'],
+    expectFragments: [
+      'README.md: release-state bölümünde canonical metadata grameri dışı bullet var',
+      "current release",
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text.replace('<!-- release-state:end -->', "1) current release: `example`" + '\n\n<!-- release-state:end -->')
+      ),
+    }),
+  },
+
+  {
+    name: "historical-note: fazladan `> *` bullet FAIL üretir (F4-MEDIUM-04)",
+    expectFragments: [
+      'historical-note içinde canonical metadata grameri dışı blockquote bullet var',
+      "current release",
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
+        text.replace('<!-- historical-note:end -->', "> * current release: `example`" + '\n\n<!-- historical-note:end -->')
+      ),
+    }),
+  },
+
+  {
+    name: "historical-note: fazladan `> +` bullet FAIL üretir (F4-MEDIUM-04)",
+    expectFragments: [
+      'historical-note içinde canonical metadata grameri dışı blockquote bullet var',
+      "current release",
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
+        text.replace('<!-- historical-note:end -->', "> + current release: `example`" + '\n\n<!-- historical-note:end -->')
+      ),
+    }),
+  },
+
+  {
+    name: "historical-note: fazladan `> 1.` bullet FAIL üretir (F4-MEDIUM-04)",
+    expectFragments: [
+      'historical-note içinde canonical metadata grameri dışı blockquote bullet var',
+      "current release",
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
+        text.replace('<!-- historical-note:end -->', "> 1. current release: `example`" + '\n\n<!-- historical-note:end -->')
+      ),
+    }),
+  },
+
+  {
+    name: "historical-note: fazladan `> 1)` bullet FAIL üretir (F4-MEDIUM-04)",
+    expectFragments: [
+      'historical-note içinde canonical metadata grameri dışı blockquote bullet var',
+      "current release",
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
+        text.replace('<!-- historical-note:end -->', "> 1) current release: `example`" + '\n\n<!-- historical-note:end -->')
+      ),
+    }),
+  },
+
+  // Bare marker + end-of-line: still a list item, still not canonical.
+  {
+    name: "release-state: içeriksiz `*` marker FAIL üretir (F4-MEDIUM-04)",
+    modes: ['skeleton-dev'],
+    expectFragments: [
+      'README.md: release-state bölümünde canonical metadata grameri dışı bullet var',
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text.replace('<!-- release-state:end -->', "*" + '\n\n<!-- release-state:end -->')
+      ),
+    }),
+  },
+
+  {
+    name: "release-state: içeriksiz `2.` marker FAIL üretir (F4-MEDIUM-04)",
+    modes: ['skeleton-dev'],
+    expectFragments: [
+      'README.md: release-state bölümünde canonical metadata grameri dışı bullet var',
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text.replace('<!-- release-state:end -->', "2." + '\n\n<!-- release-state:end -->')
+      ),
+    }),
+  },
+
+  {
+    name: "historical-note: içeriksiz `> *` marker FAIL üretir (F4-MEDIUM-04)",
+    expectFragments: [
+      'historical-note içinde canonical metadata grameri dışı blockquote bullet var',
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
+        text.replace('<!-- historical-note:end -->', "> *" + '\n\n<!-- historical-note:end -->')
+      ),
+    }),
+  },
+
+  {
+    name: "historical-note: içeriksiz `> 2.` marker FAIL üretir (F4-MEDIUM-04)",
+    expectFragments: [
+      'historical-note içinde canonical metadata grameri dışı blockquote bullet var',
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
+        text.replace('<!-- historical-note:end -->', "> 2." + '\n\n<!-- historical-note:end -->')
+      ),
+    }),
+  },
+
+  // Quoting must not hide a row, at any blockquote depth.
+  {
+    name: "historical-note: iç içe `> > *` bullet FAIL üretir (F4-MEDIUM-04)",
+    expectFragments: [
+      'historical-note içinde canonical metadata grameri dışı blockquote bullet var',
+      "current release",
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('docs/releases/v1.0.0-rc.1.md', (text) =>
+        text.replace('<!-- historical-note:end -->', "> > * current release: `example`" + '\n\n<!-- historical-note:end -->')
+      ),
+    }),
+  },
+
+  {
+    name: "release-state: blockquote'lu `> *` bullet FAIL üretir (F4-MEDIUM-04)",
+    modes: ['skeleton-dev'],
+    expectFragments: [
+      'README.md: release-state bölümünde canonical metadata grameri dışı bullet var',
+      "current release",
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text.replace('<!-- release-state:end -->', "> * current release: `example`" + '\n\n<!-- release-state:end -->')
+      ),
+    }),
+  },
+
+  // Regression guard: whitespace-indented hyphens were collected BEFORE this
+  // fix and must still be collected after it.
+  {
+    name: "release-state: girintili `-` bullet coverage korunur (F4-MEDIUM-04 regression)",
+    modes: ['skeleton-dev'],
+    expectFragments: [
+      'README.md: release-state bölümünde canonical metadata grameri dışı bullet var',
+      "current release",
+    ],
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        text.replace('<!-- release-state:end -->', "    - current release: `example`" + '\n\n<!-- release-state:end -->')
+      ),
+    }),
+  },
   {
     name: 'blok DIŞINDAKİ serbest proza FAIL üretmez (pozitif kontrol)',
     expectOk: true,
