@@ -12,8 +12,7 @@ ve post-merge main CI ile doğrulandı. Açık formal acceptance criterion:
 **YOKTUR**. 
 
 Genel karar aynen korunur: **FAIL / CORE_SKELETON_NOT_PRODUCTION_READY /
-NO_GO_REMEDIATION_REQUIRED**. `v1.0.0-rc.2` son canonical audited immutable
-candidate olmaya devam eder; yeni immutable candidate henüz oluşturulmamıştır.
+NO_GO_REMEDIATION_REQUIRED**. Son canonical audited immutable candidate `v1.0.0-rc.2` olmaya devam eder. Yeni immutable candidate henüz oluşturulmamıştır.
 Bu teknik sonuç canonical RC2 audit'ini geriye dönük değiştirmez.
 
 ADR-0018, kayıtlı durumun audited upstream release provenance'ı olduğunu
@@ -33,7 +32,7 @@ Commit zinciri (C1–C6):
 - C2: `1f39fa9e684850edd269ba41736971379c8bc966` — feat(quality): add release version contract oracle
 - C3: `9be728f742a0d01ec7f38013e37cfc317abbb73d` — feat(structure): bind release version policy to manifest and release procedure
 - C4: `e36c75a529ba109239a7712d3292c67504b4526f` — docs(test): record AC-26 remediation evidence
-- C5: `96a5337095ed0c3e4ec7f38013e37cfc317abbb73d` — fix(quality): enforce exact non-authoritative version sources
+- C5: `96a5337095ed0c3e4ec3f5029f5b63cc3b4ac92e` — fix(quality): enforce exact non-authoritative version sources
 - C6: `b389e5d2c502d47f6ad3108b55380f4907fa7b05` — docs(test): correct AC-26 final evidence measurements
 
 Binding PR CI `32948242747` — pull_request — success 7/7 · merge
@@ -45,8 +44,7 @@ merge parent1 `b58273ecdce97f1d8bcce5c214c89422e57c642d` · merge parent2
 Kanıt işaretçisi: `docs/test-reports/2026-08-25-ac-26-release-version-source-of-truth.md` +
 `docs/adr/ADR-0020-release-version-source-of-truth.md`.
 
-Sayısal özet: verify-structure 1316 → 1340 (+24 senaryo) · negatif suite 119 tanımlı / 116
-skeleton-dev koşan · release-version negative 60 senaryo · scripts/verify-structure.mjs
+Sayısal özet: verify-structure 1316 → 1340 (+24 check) · negatif suite 130 tanımlı / 127 koşan · release-version negative 60 senaryo · scripts/verify-structure.mjs
 1390 → 1401 satır (+11) · release-attestation.md 164 satır / +0 delta ·
 docs/releases/README.md 69 → 97 satır · hook harness 302/94 · bootstrap transaction 7/7 ·
 full pnpm gate 9/9 PASS (gerçek Testcontainers).
@@ -78,8 +76,8 @@ Ancak production-ready gate'i **kapalıdır** şu nedenlerle:
 
 - Yeni immutable candidate **henüz oluşturulmamıştır**
 - Yeni bağımsız audit **henüz yürütülmemiştir**
-- Son canonical audited candidate `v1.0.0-rc.2` kalın korunan kişi olarak
-  kalmaya devam eder
+- Son canonical audited immutable candidate `v1.0.0-rc.2` olmaya devam eder;
+  yeni immutable candidate henüz oluşturulmamıştır
 
 Açık adjacent debt/risk:
 
