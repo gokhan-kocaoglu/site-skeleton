@@ -108,4 +108,4 @@ gereklidir.
 
 ## Memory Closure Commiti
 
-PENDING — closure commit henüz oluşturulmadı
+chore(memory): close session 2026-08-26 · 71e1af634cfd3372da19db6671753bdc5b1c8303
