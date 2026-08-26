@@ -1,17 +1,10 @@
 // AC-26 / F4-LOW-02 negative harness for the release-version contract.
 //
-// Adversarial oracle for scripts/quality/assert-release-version-contract.mjs.
-// Every expected value below is authored independently of the helper: this file
-// imports FUNCTIONS only, never the helper's literals or field lists. A test
-// that imported the same constant it verifies would pass by tautology.
+// Adversarial oracle for the release-version contract. Expected values are
+// authored here: this file imports FUNCTIONS only, never the helper literals.
 //
-// Three scenario families:
-//   1. static contract  - a synthetic repository root is built in a temp dir and
-//      mutated one field at a time; assertReleaseVersionContract must fail with
-//      the expected reason code.
-//   2. release-time     - validateProposedReleaseTag against a hand-written policy.
-//   3. CLI              - the real binary is spawned; exit codes are contractual
-//                         (0 valid, 1 mismatch, 2 invocation error).
+// Families: (1) static contract over a synthetic temp repo, (2) release-time
+// validateProposedReleaseTag, (3) the real CLI (exit 0 / 1 / 2).
 //
 // FE-1/FE-2/FE-3 are the regression oracles for the binding amendment that
 // historical provenance tags are NOT bound to the current canonicalVersion.
@@ -103,10 +96,9 @@ function buildFixture(mutate) {
     upstreamReleaseProvenance: baselineProvenance(),
     upstreamReleaseVersionPolicy: baselinePolicy(),
   };
-  // The ledger is rendered AFTER the manifest mutation so that a policy change
-  // does not leak a stale DOC_BLOCK_MISMATCH into unrelated scenarios (that
-  // would mask FE-1). Doc-targeting scenarios set docs.patch instead.
-  const docs = { patch: null };
+  // Ledger rendered AFTER the manifest mutation so a policy change cannot leak
+  // a stale DOC_BLOCK_MISMATCH and mask FE-1; doc scenarios use docs.patch.
+  const docs = { patch: null, removeFiles: null, blankVersion: null };
   mutate?.(manifest, docs);
   let ledger;
   try {
@@ -140,6 +132,13 @@ function buildFixture(mutate) {
       '      <artifactId>x</artifactId>', '      <version>9.9.9</version>', '    </dependency>',
       '  </dependencies>', '</project>'].join('\n'),
   );
+  for (const rel of docs.removeFiles ?? []) rmSync(path.join(dir, rel), { force: true });
+  for (const rel of docs.blankVersion ?? []) {
+    const abs = path.join(dir, rel);
+    const parsed = JSON.parse(readFileSync(abs, 'utf8'));
+    delete parsed.version;
+    writeFileSync(abs, JSON.stringify(parsed, null, 2));
+  }
   return dir;
 }
 
@@ -221,9 +220,31 @@ staticCase('doc blok yoksa DOC_BLOCK_MISMATCH üretir',
 staticCase('ledger ayrım prozası silinirse DOC_BLOCK_MISMATCH üretir',
   (m, d) => { d.patch = (x) => x.replace(LEDGER_PROSE, 'ayrım yok'); }, 'DOC_BLOCK_MISMATCH');
 
-staticCase('non-authoritative kaynak yolu yoksa SOURCE_PATH_MISSING üretir',
+// A. policy SET drift - the six-path contract itself is violated.
+staticCase('kaynak listesinden bir yol çıkarılırsa POLICY_SCHEMA üretir',
+  (m) => {
+    m.upstreamReleaseVersionPolicy.nonAuthoritativeVersionSources =
+      m.upstreamReleaseVersionPolicy.nonAuthoritativeVersionSources.filter(
+        (s) => s !== 'apps/api/pom.xml',
+      );
+  }, 'POLICY_SCHEMA');
+staticCase('kaynak listesi tek yola daraltılırsa POLICY_SCHEMA üretir',
+  (m) => { m.upstreamReleaseVersionPolicy.nonAuthoritativeVersionSources = ['package.json']; },
+  'POLICY_SCHEMA');
+staticCase('bir yol duplicate edilip başkası kaybedilirse POLICY_SCHEMA üretir',
+  (m) => {
+    const list = m.upstreamReleaseVersionPolicy.nonAuthoritativeVersionSources;
+    list[list.indexOf('apps/api/pom.xml')] = 'package.json';
+  }, 'POLICY_SCHEMA');
+staticCase('listeye fazladan yol eklenirse POLICY_SCHEMA üretir',
   (m) => { m.upstreamReleaseVersionPolicy.nonAuthoritativeVersionSources.push('apps/ghost/package.json'); },
-  'SOURCE_PATH_MISSING');
+  'POLICY_SCHEMA');
+
+// B. the set stays exact, but a listed file physically disappears.
+staticCase('listelenen dosya fiziksel olarak yoksa SOURCE_PATH_MISSING üretir',
+  (m, d) => { d.removeFiles = ['apps/api/pom.xml']; }, 'SOURCE_PATH_MISSING');
+staticCase('listelenen npm manifesti version alanı taşımazsa SOURCE_PATH_MISSING üretir',
+  (m, d) => { d.blankVersion = ['apps/web/package.json']; }, 'SOURCE_PATH_MISSING');
 staticCase('boş nonAuthoritativeVersionSources POLICY_SCHEMA üretir',
   (m) => { m.upstreamReleaseVersionPolicy.nonAuthoritativeVersionSources = []; }, 'POLICY_SCHEMA');
 
@@ -294,10 +315,8 @@ function cli(args) {
   return { status: r.status, out: `${r.stdout ?? ''}${r.stderr ?? ''}` };
 }
 
-// The policy-dependent CLI cases need the real manifest to carry the policy.
-// It is introduced in the commit that wires the contract in; until then these
-// are reported as SKIPPED rather than silently dropped, and they activate
-// automatically once the key exists. They are never weakened.
+// CLI cases need the real manifest to carry the policy; before the wiring
+// commit they report as SKIPPED rather than being silently dropped.
 const realManifest = JSON.parse(
   readFileSync(path.join(ROOT, 'scripts', 'structure-manifest.json'), 'utf8'),
 );

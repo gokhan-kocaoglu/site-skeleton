@@ -1633,14 +1633,15 @@ const scenarios = [
     },
   },
   {
-    name: 'non-authoritative kaynak yolu yoksa FAIL üretir (releaseVersionPolicy)',
-    expectFragments: ['SOURCE_PATH_MISSING'],
+    name: 'zorunlu non-authoritative kaynak çıkarılırsa FAIL üretir (releaseVersionPolicy)',
+    expectFragments: ['POLICY_SCHEMA', 'exact küme dışı'],
     setup() {
       return {
         paths: [],
         restore: patchManifest((m) => {
-          m.upstreamReleaseVersionPolicy.nonAuthoritativeVersionSources.push(
-            'apps/ghost/package.json'
+          const p = m.upstreamReleaseVersionPolicy;
+          p.nonAuthoritativeVersionSources = p.nonAuthoritativeVersionSources.filter(
+            (s) => s !== 'apps/api/pom.xml'
           );
         }),
       };

@@ -12,9 +12,8 @@
 //   current release line   canonicalVersion, validated as a bare core version.
 //   proposed release       release-time only: core must equal canonicalVersion.
 //
-// The grammar is a narrow, anchored subset of SemVer and is documented as such;
-// it is not a full SemVer implementation and does not claim to be. No new
-// dependency is introduced for it (ADR-0020 section 3).
+// The grammar is a narrow, anchored subset of SemVer, documented as such; it
+// is not full SemVer and adds no dependency (ADR-0020 section 3).
 //
 // Direct run is the release-time validator invoked by the canonical procedure
 // in docs/operations/release-attestation.md before a tag is created:
@@ -42,8 +41,18 @@ const BLOCK_START = '<!-- release-version-policy:start -->';
 const BLOCK_END = '<!-- release-version-policy:end -->';
 const LEDGER_REL = 'docs/releases/README.md';
 
-// The ledger must state, in prose next to the machine-compared block, that the
-// release version is none of the three neighbouring concepts.
+// Executable governance contract: exact (order-free) set of non-authoritative
+// version fields, so a narrowed manifest list cannot shrink the covered surface.
+const EXPECTED_NON_AUTHORITATIVE_SOURCES = [
+  'package.json',
+  'apps/web/package.json',
+  'apps/admin/package.json',
+  'packages/api-types/package.json',
+  'packages/design-tokens/package.json',
+  'apps/api/pom.xml',
+];
+
+// Prose next to the machine-compared block must state the three distinctions.
 const LEDGER_REQUIRED_PHRASES = [
   'npm/Maven application',
   "generated project'in kendi release version'ı",
@@ -191,8 +200,16 @@ function policySchemaFailures(policy) {
     out.push(fail('POLICY_SCHEMA', `prereleaseChannels geçersiz: ${JSON.stringify(channels)}`));
   }
   const sources = policy.nonAuthoritativeVersionSources;
-  if (!Array.isArray(sources) || sources.length === 0 || !sources.every((s) => typeof s === 'string' && s.length > 0)) {
+  if (!Array.isArray(sources) || !sources.every((s) => typeof s === 'string' && s.length > 0)) {
     out.push(fail('POLICY_SCHEMA', 'nonAuthoritativeVersionSources boş olmayan yol dizisi olmalı'));
+  } else {
+    const seen = new Set(sources);
+    const missing = EXPECTED_NON_AUTHORITATIVE_SOURCES.filter((s) => !seen.has(s));
+    const extra = sources.filter((s) => !EXPECTED_NON_AUTHORITATIVE_SOURCES.includes(s));
+    if (seen.size !== sources.length || missing.length > 0 || extra.length > 0) {
+      out.push(fail('POLICY_SCHEMA', 'nonAuthoritativeVersionSources exact küme dışı — eksik: '
+        + `[${missing.join(', ')}] · fazla: [${extra.join(', ')}] · yinelenen: ${sources.length - seen.size}`));
+    }
   }
   if (policy.generatedProjectScope !== 'upstream-only') {
     out.push(fail('POLICY_SCHEMA',
