@@ -9,8 +9,9 @@
 RC2 NO-GO remediation acceptance-criterion zinciri **teknik olarak tamamlandı**.
 **AC-29**, **AC-32**, **AC-33** ve **AC-26** implementation'ları merge edildi
 ve post-merge main CI ile doğrulandı. **F4-MEDIUM-04** markdown list-marker false-pass
-remediation tamamlandı ve merge edildi. Açık formal acceptance criterion:
-**YOKTUR**. 
+remediation tamamlandı ve merge edildi. **R9 ACTIVATION_REGISTRY_MARKER_BLINDNESS** 
+remediation (MODEL A + declaration-candidate dedektörü) tamamlandı ve merge edildi. 
+Açık formal acceptance criterion: **YOKTUR**. 
 
 Genel karar aynen korunur: **FAIL / CORE_SKELETON_NOT_PRODUCTION_READY /
 NO_GO_REMEDIATION_REQUIRED**. Son canonical audited immutable candidate `v1.0.0-rc.2` olmaya devam eder. Yeni immutable candidate henüz oluşturulmamıştır.
@@ -19,81 +20,75 @@ Bu teknik sonuç canonical RC2 audit'ini geriye dönük değiştirmez.
 ADR-0018, kayıtlı durumun audited upstream release provenance'ı olduğunu
 tanımlar — bu, üretilen projenin kendi release durumu değildir.
 
-Açık adjacent debt/risk (formal AC değildir; **F4-MEDIUM-04 artık CLOSED**):
-**R9 ACTIVATION_REGISTRY_MARKER_BLINDNESS** OPEN_ADJACENT_OBSERVATION (salt-okuma disposition bekleniyor),
+Açık adjacent debt/risk (formal AC değildir; **F4-MEDIUM-04 CLOSED**, **R9 CLOSED**):
 **PostCSS 8.5.18 / CVE-2026-69153 / MODERATE** OPEN_ADJACENT_RISK.
 
 ## Son Tamamlanan Görev
 
-**F4-MEDIUM-04 / AC-32 extension — Markdown List-Marker False-Pass Remediation:**
-`PR #50` (`fix(structure): close markdown list-marker false-pass`)
-merge edildi. 
+**R9 ACTIVATION_REGISTRY_MARKER_BLINDNESS — Non-Canonical Declaration Invisibility Remediation:**
+`PR #53` (`fix(structure): collect non-canonical activation declaration rows`)
+merge edildi.
 
 Ana kayıt:
-- Implementation commit: `7bbae942a2adaf47e92ad20c11c4476c5f0530e5` — fix(structure): close markdown list-marker false-pass
+- Implementation commit: `9aaeb8649536e1a8448d1076188facd446276fbf` — fix(structure): collect non-canonical activation declaration rows
 - Değişen dosyalar: `scripts/verify-structure.mjs` · `scripts/tests/verify-structure-negative.mjs`
-- Binding PR CI: `32976852156` — pull_request — completed / success — 7/7
-- Merge: `14c95498b6c402c3acb8af1e98500e0263651de5` · merged `2026-08-28T06:55:39Z`
-- Merge parent1: `13e2c26f9c749d29567587728c65101a348d8c91` (AC-26 terminal closure merge / F4 implementation base)
-- Merge parent2: `7bbae942a2adaf47e92ad20c11c4476c5f0530e5`
-- Post-merge main CI: `33149603475` — push / main — completed / success (altı aktif job success, dependency-review skipped)
+- Binding PR CI: `33161668765` — pull_request — completed / success — 7/7
+- Merge: `e22c5291f596cb6a520fb0aa09967c9afbdfdc9b` · merged `2026-08-28T10:12:35Z`
+- Merge parent1: `46d11c41848e2bfce7fd448d2ee1a0d7d55898fe` (PR #51 F4-MEDIUM-04 terminal closure merge)
+- Merge parent2: `9aaeb8649536e1a8448d1076188facd446276fbf`
+- Post-merge main CI: `33162476974` — push / main — completed / success (altı aktif job success, dependency-review skipped — main push için beklenen)
 
-Teknik root-cause: Stage 1 yalnız hyphen (`-`) marker topluyordu; canonical satırlar korunurken `*`, `+`, ordered (1–9 + `.`/`)`), bare, quoted ve nested list-like metadata satırları görünmez false-PASS üretebiliyordu. Governance list-like detector marker ailesini genişletti (`-` `+` `*` 1-9 + `.`/`)`). Permissive whitespace coverage (`\s*` girinti, blockquote derinliği) **korundu**; Stage 2 canonical grammar **değiştirilmedi**. Yeni reason code yok; mevcut AC-32 senaryoları sıfır beklenti düzenlemesiyle geçti.
+Teknik root-class: `NON_CANONICAL_DECLARATION_ROW_INVISIBILITY` (gözlem adı `ACTIVATION_REGISTRY_MARKER_BLINDNESS`). Severity: governance / structural false-PASS; runtime security gate bypass DEĞİL. Fix: MODEL A + declaration-candidate dedektörü — canonical row pattern'lerinin göremediği, ancak hem dokümana uygun yapısal şekil (CLAUDE: list-style; README: table-style veya list-style) hem de activation-registry sinyali (templates/<modül>/, automatic-gate, manual-hardening) taşıyan satırlar artık toplanıp stray declaration olarak FAIL üretir. Bare marker'lar (`*`, `+`, `1.` vb.) declaration değildir, defect contract dışında kaldı, disposable probe statüsü korundu. ADR-0017 serbest metin sınırı korundu. Stage 2 (`ACTIVATION_SECTION_RE`, iki `format.row`, README regex, expected/actual equality, AUTOMATIC_GATE_MODULES, checklist, çeşitli registry şema kuralları) değiştirilmedi. 7f runtime activation gate (signalRoots, markerRoots, resolveMarkerRoot, checklist eşitliği, EXPECTED_GATE_SIGNALS) değiştirilmedi.
 
-Sayısal özet: verify-structure 1340 (sabit) · verify-structure-negative 145 tanımlı / 142 koşan / 3 project-only · 15 yeni kalıcı regression senaryo eklendi · scripts/verify-structure.mjs 1401 → 1416 satır (+15) · hook harness 302/94 · bootstrap transaction 7/7 · full pnpm gate 9/9 PASS (Docker mevcut, gerçek Testcontainers).
+Sayısal özet: verify-structure 1340 → 1342 check · verify-structure-negative 145 tanımlı / 142 koşan / 3 project-only → 159 tanımlı / 156 koşan / 3 project-only · yeni kalıcı senaryo +14 (12 negative declaration-like + 2 positive serbest metin kontrol) · scripts/verify-structure.mjs 1416 → 1440 satır (+24) · hook harness 302 assertion / 94 fixture · bootstrap transaction 7/7 · bootstrap E2E tüm assertion PASS · full pnpm gate 9/9 PASS (Docker mevcut, gerçek Testcontainers). Mevcut CASE-A senaryoları (README/CLAUDE satır silme, enforcement drift, kolon/başlık sırası, registry şema testleri, activationGates testleri) sıfır beklenti düzenlemesiyle geçti. Manifest/README/CLAUDE/ADR/bootstrap DEĞİŞMEDİ.
 
-Teknik sonuç: **F4-MEDIUM-04 `MERGED_AND_POST_MERGE_CI_VERIFIED`** · Operational durum **`CLOSED`**. Bu remediation zinciri tamamlanmıştır.
+Teknik sonuç: **R9 `MERGED_AND_POST_MERGE_CI_VERIFIED`** · Operational durum **`CLOSED`**. Bu defect remediation zinciri tamamlanmıştır.
 
 ## Aktif Görev
 
-Formal acceptance-criterion remediation zinciri **tamamlanmıştır**. F4-MEDIUM-04 remediation
-zinciri tamamlandı ve merge edildi.
+Formal acceptance-criterion remediation zinciri **tamamlanmıştır**. F4-MEDIUM-04 ve R9 
+remediation zincirleri tamamlandı ve merge edildi.
 
-Aktif teknik safha: **`ACTIVATION_REGISTRY_MARKER_BLINDNESS_READ_ONLY_DISPOSITION`** —
-R9 observation'ının salt-okuma executable reproduction ve disposition. Durum:
-**`READ_ONLY_DISPOSITION_PENDING`**. Şüphe: activation registry exact canonical-row extractor'ın
-fazladan non-canonical marker satırını görünmez bırakabileceği ihtimali (source-level şüphe;
-executable disposition sonraki turdur). Reproduction henüz yapılmadı, `REAL_DEFECT` / `NOT_APPLICABLE`
-kararı henüz verilmedi, implementation yetkilendirilmedi. PostCSS CVE-2026-69153 assessment
-başlamadı.
+Aktif teknik safha: **`POSTCSS_CVE_2026_69153_READ_ONLY_SECURITY_DEPENDENCY_ASSESSMENT`** —
+PostCSS 8.5.18 / CVE-2026-69153 / MODERATE risk'i salt-okuma değerlendirmesi. Durum:
+**`READ_ONLY_ASSESSMENT_PENDING`**. Paket kurulu, lockfile kilitli; upgrade kararı yok,
+remediation başlamadı. Assessment'in sonucu: direct/transitive exposure, runtime/build maruziyeti,
+Next.js uyumu, gerekirse minimum güvenli remediation'ın package/lockfile etkisi.
 
 ## Blocker
 
 Formal acceptance criterion blocker: **YOKTUR**. AC-29, AC-32, AC-33 ve AC-26
-tümü karşılanmıştır. F4-MEDIUM-04 remediation zinciri tamamlanmıştır.
+tümü karşılanmıştır. F4-MEDIUM-04 ve R9 remediation zincirleri tamamlanmıştır.
 
 Ancak production-ready gate'i **kapalıdır** şu nedenlerle:
 
-- **R9 ACTIVATION_REGISTRY_MARKER_BLINDNESS** salt-okuma disposition bekleniyor (READ_ONLY_DISPOSITION_PENDING)
-- **PostCSS 8.5.18 / CVE-2026-69153 / MODERATE** açık risk (bağımsız assessment bekleniyor)
+- **PostCSS 8.5.18 / CVE-2026-69153 / MODERATE** açık risk (salt-okuma assessment bekleniyor, READ_ONLY_ASSESSMENT_PENDING)
 - Yeni immutable candidate **henüz oluşturulmamıştır**
 - Yeni bağımsız audit **henüz yürütülmemiştir**
-- Son canonical audited immutable candidate `v1.0.0-rc.2` olmaya devam eder;
-  yeni immutable candidate henüz oluşturulmamıştır
+- Son canonical audited immutable candidate `v1.0.0-rc.2` olmaya devam eder
 
-R9 ve PostCSS risk/observation'ları formal acceptance criterion değildir; toplam
-`FAIL` verdict'ini değiştirmez ama release ve deployment sertifikasyonu öncesi
-ele alınması gereklidir.
+PostCSS riski formal acceptance criterion değildir; toplam `FAIL` verdict'ini değiştirmez 
+ama release ve deployment sertifikasyonu öncesi ele alınması gereklidir.
 
 ## Sonraki 3 Adım
 
-1. **R9 ACTIVATION_REGISTRY_MARKER_BLINDNESS** için salt-okuma executable reproduction
-   ve disposition yap; sonuç yalnız `REAL_DEFECT` veya `NOT_APPLICABLE` olmalı.
-   `REAL_DEFECT` ise ayrı minimal remediation package tasarla; o adımda
-   implementation başlatma.
-2. R9 disposition/remediation zinciri tamamen kapandıktan sonra **PostCSS CVE-2026-69153
-   / MODERATE** riskini bağımsız salt-okuma değerlendir ve gerekli disposition/remediation'ı
-   ayrı kontrollü zincirde tamamla.
-3. R9 + PostCSS tamamen disposition/remediation edildiğinde **clean-clone/full-gate
-   sertifikasyonu** yap; ancak bundan sonra yeni immutable candidate hazırlığına ve
-   yeni bağımsız audit sequence'ına geç. Yeni candidate önce oluşturulmayacaktır.
+1. **PostCSS CVE-2026-69153 / MODERATE** riskini salt-okuma bağımsız değerlendir:
+   kurulu/kilitli sürüm ve override otoritesi, dependency path, etkilenen aralık,
+   yamalı aralık, direct/transitive exposure, runtime/build maruziyeti, Next.js uyumu,
+   gerekirse minimum güvenli remediation'ın package/lockfile etkisi. Implementation başlatılmaz.
+2. Gerekiyorsa PostCSS için ayrı kontrollü implementation → merge → post-main CI → 
+   terminal memory closure zinciri; `NOT_APPLICABLE` veya zaten-güvenli sonucu yalnız
+   executable/source/advisory kanıtla mümkündür.
+3. PostCSS tamamen kapandığında **clean-clone/full-gate sertifikasyonu** yap; 
+   ancak bundan sonra yeni immutable candidate hazırlığına ve yeni bağımsız audit 
+   sequence'ına geç. Yeni candidate daha önce oluşturulmaz.
 
 ## Son Uygulama Commiti
 
-`PR #50` · `Merge SHA: 14c95498b6c402c3acb8af1e98500e0263651de5` ·
-`Post-merge main CI: 33149603475` · `Sonuç: completed / success` ·
+`PR #53` · `Merge SHA: e22c5291f596cb6a520fb0aa09967c9afbdfdc9b` ·
+`Post-merge main CI: 33162476974` · `Sonuç: completed / success` ·
 `dependency-review: skipped — main push için beklenen`.
 
 ## Memory Closure Commiti
 
-chore(memory): close F4-MEDIUM-04 session · fba075a6e644cf6489dfc0d61830be1175f1e49e
+chore(memory): close R9 remediation session · 1be959faa6d6981e261a7dd4cb3ec008cfc59cd9
