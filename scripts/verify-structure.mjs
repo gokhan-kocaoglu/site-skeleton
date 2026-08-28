@@ -606,7 +606,19 @@ const RELEASE_STATE_SECTION_RE =
 // collected — so `- current release: v1.0.0` could sit among six perfect rows
 // and be invisible to the gate while reading as a live claim to a human. Stage 1
 // collects EVERY bullet, stage 2 requires each of them to be canonical.
-const ANY_BULLET_RE = /^\s*-\s+/;
+//
+// Stage 1 is a GOVERNANCE LIST-LIKE DETECTOR, not a CommonMark parser: a
+// hyphen-only pattern let `* current release: v1.0.0` sit among six perfect
+// rows completely unseen (F4-MEDIUM-04). The marker family follows CommonMark
+// list markers, indentation stays as permissive as the hyphen-only detector it
+// replaces, a bare marker with no content still counts, and any blockquote
+// depth is seen so quoting cannot hide a row. Over-collecting is safe here:
+// stage 2 rejects everything that is not canonical.
+const LIST_MARKER_SOURCE = String.raw`(?:[-+*]|\d{1,9}[.)])`;
+const QUOTE_PREFIX_SOURCE = String.raw`(?:>\s*)`;
+const ANY_BULLET_RE = new RegExp(
+  String.raw`^\s*${QUOTE_PREFIX_SOURCE}*${LIST_MARKER_SOURCE}(?:\s|$)`
+);
 const STATE_BULLET_RE = /^- ([^:`\n]+): `([^`\n]+)`\s*$/;
 // Exact lowercase English labels, in canonical order. No case normalisation:
 // the label set IS the contract, so `Verdict` is a different label than
@@ -626,7 +638,10 @@ const LEDGER_SEPARATOR = '|---|---|---|---|---|---|---|---|';
 // RC1 historical-note metadata rows: same label+value discipline, same
 // two-stage fail-closed grammar (free prose paragraphs stay unconstrained;
 // every blockquote BULLET must be canonical).
-const ANY_NOTE_BULLET_RE = /^>\s*-\s+/;
+// One or more blockquote prefixes: `> > *` and `>>*` must not slip past.
+const ANY_NOTE_BULLET_RE = new RegExp(
+  String.raw`^\s*${QUOTE_PREFIX_SOURCE}+${LIST_MARKER_SOURCE}(?:\s|$)`
+);
 const RC1_NOTE_ROW_RE = /^>\s*-\s*([^:`\n]+):\s*`([^`\n]+)`\s*$/;
 const RC1_NOTE_FIELDS = [
   ['tag', (rel) => rel?.tag],
