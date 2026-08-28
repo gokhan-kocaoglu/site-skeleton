@@ -367,6 +367,19 @@ const CANONICAL_MANUAL_PHRASES = [
   'no automatic activation gate',
   'outside the core production-ready claim until project-specific hardening',
 ];
+// R9: the canonical row patterns above were the ONLY collector, so a row they
+// miss is never counted, compared or reported — the five canonical rows plus a
+// `*`-marked or `:`-separated declaration passed. This is a DECLARATION
+// candidate detector, not a Markdown collector: the shape alone is not enough,
+// the line must also carry a registry token. ADR-0017 deliberately leaves free
+// prose in the section unchecked; that stays true, and a bare marker is not a
+// declaration.
+const DECLARATION_SIGNAL_RE = /templates\/[a-z0-9][a-z0-9-]*\/|automatic-gate|manual-hardening/;
+const DECLARATION_LIST_SHAPE_RE = /^\s*(?:[-+*]|\d{1,9}[.)])\s/;
+const DECLARATION_SHAPES = {
+  'README.md': [DECLARATION_LIST_SHAPE_RE, /^\s*\|/],
+  'CLAUDE.md': [DECLARATION_LIST_SHAPE_RE],
+};
 
 const activationModules = manifest.activationModules;
 check(
@@ -541,6 +554,17 @@ for (const [docFile, format] of Object.entries(ACTIVATION_DOC_FORMATS)) {
     rows === expectedRows,
     `${docFile}: activation-modules bölümü registry ile uyuşmuyor` +
       ` — bölüm: [${rows}] · registry: [${expectedRows}]`
+  );
+  // One canonical grammar authority: format.row is reused, statelessly.
+  const canonical = new RegExp(format.row.source);
+  const stray = body
+    .split(/\r?\n/)
+    .filter((line) => DECLARATION_SHAPES[docFile].some((shape) => shape.test(line)))
+    .filter((line) => DECLARATION_SIGNAL_RE.test(line) && !canonical.test(line));
+  check(
+    stray.length === 0,
+    `${docFile}: activation-modules bölümünde canonical grammar dışı declaration satırı` +
+      ` — [${stray.map((line) => line.trim()).join(' | ')}]`
   );
 }
 // Whitespace-normalised: the sentence stays valid across a reflow/rewrap.
