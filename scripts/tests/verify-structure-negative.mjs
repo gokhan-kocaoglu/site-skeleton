@@ -82,6 +82,37 @@ function dropActivationRow(text, templatePath) {
     .join('\n');
 }
 
+/**
+ * Adds ONE extra line after a module's row inside the activation-modules
+ * section. The canonical rows stay intact — that is the CASE-B shape R9 needs;
+ * deleting or editing a row is already covered above and proves less.
+ */
+function addActivationRow(text, injected, anchorPrefix) {
+  const lines = text.split('\n');
+  let idx = -1;
+  for (let i = 0; i < lines.length; i += 1) if (lines[i].startsWith(anchorPrefix)) idx = i;
+  if (idx < 0) throw new Error(`activation anchor missing: ${anchorPrefix}`);
+  return [...lines.slice(0, idx + 1), injected, ...lines.slice(idx + 1)].join('\n');
+}
+
+// Fixture rows are written LITERALLY here: the harness must never derive its
+// markers or separators from the detector constants it is testing.
+const R9_STRAY = 'activation-modules bölümünde canonical grammar dışı declaration satırı';
+const R9_CLAUDE_ANCHOR = '- `templates/payments/` · `manual-hardening`';
+const R9_README_ANCHOR = '| `templates/payments/` | `manual-hardening` |';
+
+/** R9 CASE-B: five canonical rows kept, one non-canonical declaration added. */
+const r9Stray = (doc, name, injected) => ({
+  name,
+  expectFragments: [`${doc}: ${R9_STRAY}`, injected],
+  setup: () => ({
+    paths: [],
+    restore: patchTextFile(doc, (text) =>
+      addActivationRow(text, injected, doc === 'README.md' ? R9_README_ANCHOR : R9_CLAUDE_ANCHOR)
+    ),
+  }),
+});
+
 const tickedList = (n) => Array.from({ length: n }, (_, i) => `- [x] item ${i + 1}`).join('\n');
 
 /**
@@ -448,6 +479,47 @@ const scenarios = [
       writeFileSync(path.join(dir, 'ACTIVATION.md'), `# checklist\n\n${tickedList(13)}\n`);
       return [dir];
     },
+  },
+  // --- R9: non-canonical declaration row invisibility ------------------------
+  // Every row below was a measured FALSE PASS: the canonical row patterns were
+  // the only collector, so a declaration they missed was never counted,
+  // compared or reported. Bare markers are deliberately NOT here — they carry
+  // no registry token and are not declarations (see the two controls below).
+  r9Stray('CLAUDE.md', 'CLAUDE: fazladan `*` declaration FAIL üretir (R9)', '* `templates/payments/` · `automatic-gate`'),
+  r9Stray('CLAUDE.md', 'CLAUDE: fazladan `+` declaration FAIL üretir (R9)', '+ `templates/payments/` · `automatic-gate`'),
+  r9Stray('CLAUDE.md', 'CLAUDE: fazladan `1.` declaration FAIL üretir (R9)', '1. `templates/payments/` · `automatic-gate`'),
+  r9Stray('CLAUDE.md', 'CLAUDE: fazladan `1)` declaration FAIL üretir (R9)', '1) `templates/payments/` · `automatic-gate`'),
+  r9Stray('CLAUDE.md', 'CLAUDE: aynı modlu fazladan `*` declaration FAIL üretir (R9)', '* `templates/payments/` · `manual-hardening`'),
+  r9Stray('CLAUDE.md', 'CLAUDE: `:` ayırıcılı declaration FAIL üretir (R9)', '- `templates/payments/`: `automatic-gate`'),
+  r9Stray('CLAUDE.md', 'CLAUDE: em dash ayırıcılı declaration FAIL üretir (R9)', '- `templates/payments/` — `automatic-gate`'),
+  r9Stray('CLAUDE.md', 'CLAUDE: tırnaksız templatePath declaration FAIL üretir (R9)', '- templates/payments/ · `automatic-gate`'),
+  r9Stray('CLAUDE.md', 'CLAUDE: modsuz kısmi declaration FAIL üretir (R9)', '* `templates/payments/`'),
+  r9Stray('README.md', 'README: tırnaksız enforcement declaration FAIL üretir (R9)', '| `templates/payments/` | automatic-gate | extra |'),
+  r9Stray('README.md', 'README: liste biçimli declaration FAIL üretir (R9)', '* `templates/payments/` · `automatic-gate`'),
+  r9Stray('README.md', 'README: geçersiz enforcement token declaration FAIL üretir (R9)', '| `templates/payments/` | `automatic-gate-wrong` | x | y |'),
+  {
+    // ADR-0017 leaves free prose inside the section unchecked on purpose. These
+    // two controls bind stage 1 to DECLARATION candidates: a list-like line
+    // without a registry token must stay green, or the fix quietly widened the
+    // contract into a Markdown style rule.
+    name: 'CLAUDE: declaration olmayan liste prozası FAIL ÜRETMEZ (R9 pozitif kontrol)',
+    expectOk: true,
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('CLAUDE.md', (text) =>
+        addActivationRow(text, '* This paragraph is explanatory prose only.', R9_CLAUDE_ANCHOR)
+      ),
+    }),
+  },
+  {
+    name: 'README: declaration olmayan liste prozası FAIL ÜRETMEZ (R9 pozitif kontrol)',
+    expectOk: true,
+    setup: () => ({
+      paths: [],
+      restore: patchTextFile('README.md', (text) =>
+        addActivationRow(text, '* Explanatory prose for contributors.', R9_README_ANCHOR)
+      ),
+    }),
   },
   {
     // Baseline control: the shipped tree (pristine templates/, five registered
