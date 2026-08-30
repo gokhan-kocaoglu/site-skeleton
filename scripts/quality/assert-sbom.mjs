@@ -76,7 +76,7 @@ if (npm.length === 0) fail('hiç pkg:npm/ bileşeni yok (npm ekosistemi taranmam
 if (maven.length === 0) fail('hiç pkg:maven/ bileşeni yok (Maven ekosistemi taranmamış)');
 
 const REQUIRED_NPM = [
-  ['postcss@8.5.18', 'PostCSS 8.5.18 (güvenli override sürümü)'],
+  ['postcss@8.5.26', 'PostCSS 8.5.26 (güvenli override sürümü)'],
   ['sharp@0.35.0', 'Sharp 0.35.0 (güvenli override sürümü)'],
 ];
 for (const [needle, label] of REQUIRED_NPM) {
@@ -89,6 +89,26 @@ const FORBIDDEN_NPM = [
 ];
 for (const [needle, label] of FORBIDDEN_NPM) {
   if (hasPkg(npm, `/${needle}`)) fail(`yasak bileşen SBOM'da var: ${label}`);
+}
+
+// A presence check is not enough: one vulnerable copy anywhere in the graph
+// reopens CVE-2026-69153, so the contract is the resolved PostCSS version SET.
+// Anchored on `pkg:npm/postcss@` so the scoped `@tailwindcss/postcss` plugin is
+// not mistaken for the library itself.
+const POSTCSS_PINNED = '8.5.26';
+const postcssVersions = [
+  ...new Set(
+    npm
+      .map((p) => /^pkg:npm\/postcss@([^?#/]+)/.exec(p))
+      .filter(Boolean)
+      .map((m) => decodeURIComponent(m[1]))
+  ),
+].sort();
+if (postcssVersions.length !== 1 || postcssVersions[0] !== POSTCSS_PINNED) {
+  fail(
+    `PostCSS SBOM sürüm kümesi [${postcssVersions.join(', ') || 'yok'}];` +
+      ` beklenen yalnız [${POSTCSS_PINNED}]`
+  );
 }
 
 if (!hasNamespace(maven, 'pkg:maven/org.postgresql/postgresql@')) {
